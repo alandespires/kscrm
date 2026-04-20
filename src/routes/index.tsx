@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { AppShell, PrimaryButton, StatusPill } from "@/components/app-shell";
+import { AppShell, StatusPill } from "@/components/app-shell";
 import { LeadFormDialog } from "@/components/lead-form-dialog";
 import {
   ArrowUpRight, TrendingUp, TrendingDown, Users, Target, DollarSign,
@@ -93,7 +93,6 @@ function timeAgo(iso: string) {
 }
 
 function DashboardPage() {
-  const [openLead, setOpenLead] = useState(false);
   const leads = useLeads();
   const deals = useDeals();
   const activities = useActivities(8);
@@ -140,8 +139,13 @@ function DashboardPage() {
           <button className="inline-flex h-10 items-center gap-1.5 rounded-lg border border-border bg-surface-1 px-3 text-sm text-muted-foreground hover:text-foreground">
             Esta semana <ArrowRight className="h-3.5 w-3.5" />
           </button>
-          <PrimaryButton icon={Plus} onClick={() => setOpenLead(true)}>Novo lead</PrimaryButton>
-          <LeadFormDialog open={openLead} onOpenChange={setOpenLead} />
+          <LeadFormDialog
+            trigger={
+              <button className="inline-flex h-10 items-center gap-2 rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-glow transition hover:brightness-110">
+                <Plus className="h-4 w-4" /> Novo lead
+              </button>
+            }
+          />
         </div>
       }
     >
