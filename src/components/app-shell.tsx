@@ -15,7 +15,7 @@ const NAV = [
   { to: "/clientes", label: "Clientes", icon: Building2 },
   { to: "/tarefas", label: "Tarefas", icon: ListChecks },
   { to: "/automacao", label: "Automação", icon: Zap },
-  { to: "/insights", label: "IA Insights", icon: Sparkles },
+  { to: "/insights", label: "Assistente IA", icon: Sparkles },
   { to: "/relatorios", label: "Relatórios", icon: BarChart3 },
   { to: "/configuracoes", label: "Configurações", icon: Settings },
 ] as const;
@@ -145,7 +145,7 @@ function SidebarCoachCard() {
     <div className="m-3 rounded-xl border border-border bg-gradient-to-br from-surface-2 to-surface-1 p-4 shadow-card">
       <div className="mb-2 flex items-center gap-2">
         <Sparkles className="h-3.5 w-3.5 text-primary" />
-        <span className="text-xs font-semibold">IA Coach</span>
+        <span className="text-xs font-semibold">Assistente IA</span>
       </div>
       <p className="text-xs leading-relaxed text-muted-foreground">
         Você tem <span className="font-semibold text-foreground">{quentes} {quentes === 1 ? "lead quente" : "leads quentes"}</span> aguardando ação hoje.
