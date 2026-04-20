@@ -52,8 +52,8 @@ export function AppShell({ children, title, subtitle, action }: {
             <Sparkles className="h-4 w-4 text-primary-foreground" />
           </div>
           <div className="leading-tight">
-            <div className="text-sm font-semibold tracking-tight">Nexus CRM</div>
-            <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Inteligência comercial</div>
+            <div className="text-sm font-semibold tracking-tight">KS CRM</div>
+            <div className="text-[10px] uppercase tracking-widest text-muted-foreground">CRM Inteligente com ia</div>
           </div>
         </div>
 
