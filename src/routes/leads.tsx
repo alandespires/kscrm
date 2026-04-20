@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import { AppShell, StatusPill } from "@/components/app-shell";
 import { LeadFormDialog } from "@/components/lead-form-dialog";
-import { useLeads, useDeleteLead, type LeadStatus } from "@/hooks/use-leads";
+import { LeadDetailDrawer } from "@/components/lead-detail-drawer";
+import { useLeads, useDeleteLead, type LeadRow, type LeadStatus } from "@/hooks/use-leads";
 import { useScoreLead } from "@/hooks/use-score-lead";
 import { Download, Filter, Trash2, Mail, Phone, Loader2, Inbox, Sparkles } from "lucide-react";
 
@@ -41,7 +43,11 @@ function LeadsPage() {
   const { data: leads = [], isLoading } = useLeads();
   const del = useDeleteLead();
   const score = useScoreLead();
+  const [selected, setSelected] = useState<LeadRow | null>(null);
   const novosSemana = leads.filter((l) => Date.now() - new Date(l.created_at).getTime() < 7 * 864e5).length;
+
+  // Keep selected synced with latest data
+  const selectedLive = selected ? leads.find((l) => l.id === selected.id) ?? null : null;
 
   return (
     <AppShell
@@ -88,7 +94,7 @@ function LeadsPage() {
               {leads.map((l) => {
                 const isScoring = score.isPending && score.variables === l.id;
                 return (
-                <tr key={l.id} className="transition hover:bg-surface-1/50">
+                <tr key={l.id} onClick={() => setSelected(l)} className="cursor-pointer transition hover:bg-surface-1/50">
                   <td className="px-5 py-3.5">
                     <div className="flex items-center gap-3">
                       <div className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-primary/70 to-[oklch(0.55_0.16_35)] text-xs font-bold text-primary-foreground">
@@ -101,7 +107,7 @@ function LeadsPage() {
                     </div>
                   </td>
                   <td className="px-5 py-3.5 text-muted-foreground">{l.empresa ?? "—"}</td>
-                  <td className="px-5 py-3.5">
+                  <td className="px-5 py-3.5" onClick={(e) => e.stopPropagation()}>
                     <div className="flex items-center gap-3 text-muted-foreground">
                       {l.email && <a href={`mailto:${l.email}`} className="hover:text-primary"><Mail className="h-3.5 w-3.5" /></a>}
                       {l.whatsapp && <a href={`https://wa.me/${l.whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noreferrer" className="hover:text-success"><Phone className="h-3.5 w-3.5" /></a>}
@@ -118,7 +124,7 @@ function LeadsPage() {
                     ) : <span className="text-xs text-muted-foreground">—</span>}
                   </td>
                   <td className="px-5 py-3.5 text-muted-foreground tabular-nums">{fmtDate(l.created_at)}</td>
-                  <td className="px-5 py-3.5">
+                  <td className="px-5 py-3.5" onClick={(e) => e.stopPropagation()}>
                     <div className="flex items-center justify-end gap-1">
                       <button
                         onClick={() => score.mutate(l.id)}
@@ -139,6 +145,8 @@ function LeadsPage() {
         </div>
       </div>
       )}
+
+      <LeadDetailDrawer lead={selectedLive} onClose={() => setSelected(null)} />
     </AppShell>
   );
 }
