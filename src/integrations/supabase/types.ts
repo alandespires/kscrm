@@ -103,6 +103,87 @@ export type Database = {
           },
         ]
       }
+      automation_runs: {
+        Row: {
+          automation_id: string
+          created_at: string
+          id: string
+          lead_id: string | null
+          resultado: Json | null
+        }
+        Insert: {
+          automation_id: string
+          created_at?: string
+          id?: string
+          lead_id?: string | null
+          resultado?: Json | null
+        }
+        Update: {
+          automation_id?: string
+          created_at?: string
+          id?: string
+          lead_id?: string | null
+          resultado?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "automation_runs_automation_id_fkey"
+            columns: ["automation_id"]
+            isOneToOne: false
+            referencedRelation: "automations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "automation_runs_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      automations: {
+        Row: {
+          acoes: Json
+          ativo: boolean
+          created_at: string
+          created_by: string
+          descricao: string | null
+          execucoes: number
+          id: string
+          nome: string
+          trigger_tipo: Database["public"]["Enums"]["automation_trigger"]
+          trigger_valor: string | null
+          updated_at: string
+        }
+        Insert: {
+          acoes?: Json
+          ativo?: boolean
+          created_at?: string
+          created_by: string
+          descricao?: string | null
+          execucoes?: number
+          id?: string
+          nome: string
+          trigger_tipo: Database["public"]["Enums"]["automation_trigger"]
+          trigger_valor?: string | null
+          updated_at?: string
+        }
+        Update: {
+          acoes?: Json
+          ativo?: boolean
+          created_at?: string
+          created_by?: string
+          descricao?: string | null
+          execucoes?: number
+          id?: string
+          nome?: string
+          trigger_tipo?: Database["public"]["Enums"]["automation_trigger"]
+          trigger_valor?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       clients: {
         Row: {
           contrato_inicio: string | null
@@ -391,6 +472,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      execute_automations: {
+        Args: {
+          _lead: Database["public"]["Tables"]["leads"]["Row"]
+          _trigger: Database["public"]["Enums"]["automation_trigger"]
+        }
+        Returns: undefined
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -409,6 +497,11 @@ export type Database = {
         | "movimentacao"
         | "tarefa"
       app_role: "admin" | "gerente" | "vendedor"
+      automation_trigger:
+        | "lead_criado"
+        | "status_mudou"
+        | "score_alto"
+        | "score_baixou"
       lead_status:
         | "novo"
         | "contato_inicial"
@@ -556,6 +649,12 @@ export const Constants = {
         "tarefa",
       ],
       app_role: ["admin", "gerente", "vendedor"],
+      automation_trigger: [
+        "lead_criado",
+        "status_mudou",
+        "score_alto",
+        "score_baixou",
+      ],
       lead_status: [
         "novo",
         "contato_inicial",
