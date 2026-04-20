@@ -138,6 +138,23 @@ export function AppShell({ children, title, subtitle, action }: {
   );
 }
 
+function SidebarCoachCard() {
+  const { data: leads = [] } = useLeads();
+  const quentes = leads.filter((l) => (l.ai_score ?? 0) >= 70 && l.status !== "fechado" && l.status !== "perdido").length;
+  return (
+    <div className="m-3 rounded-xl border border-border bg-gradient-to-br from-surface-2 to-surface-1 p-4 shadow-card">
+      <div className="mb-2 flex items-center gap-2">
+        <Sparkles className="h-3.5 w-3.5 text-primary" />
+        <span className="text-xs font-semibold">IA Coach</span>
+      </div>
+      <p className="text-xs leading-relaxed text-muted-foreground">
+        Você tem <span className="font-semibold text-foreground">{quentes} {quentes === 1 ? "lead quente" : "leads quentes"}</span> aguardando ação hoje.
+      </p>
+      <AiCoachButton />
+    </div>
+  );
+}
+
 export function PrimaryButton({ children, icon: Icon, ...rest }: { children: ReactNode; icon?: any } & React.ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
     <button {...rest} className="inline-flex h-10 items-center gap-2 rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-glow transition hover:brightness-110">
