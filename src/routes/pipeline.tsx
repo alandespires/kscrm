@@ -8,6 +8,7 @@ import { AppShell } from "@/components/app-shell";
 import { LeadFormDialog } from "@/components/lead-form-dialog";
 import { formatBRL } from "@/lib/mock-data";
 import { useLeads, useUpdateLeadStatus, type LeadRow, type LeadStatus } from "@/hooks/use-leads";
+import { useScoreLead } from "@/hooks/use-score-lead";
 import { Plus, Filter, Sparkles, Loader2 } from "lucide-react";
 
 const STAGES: { id: LeadStatus; label: string; color: string }[] = [
@@ -39,6 +40,8 @@ function initialsOf(name: string) {
 }
 
 function LeadCard({ lead, dragging }: { lead: LeadRow; dragging?: boolean }) {
+  const score = useScoreLead();
+  const isScoring = score.isPending && score.variables === lead.id;
   return (
     <div className={[
       "group cursor-grab rounded-xl border border-border bg-surface-2 p-3.5 shadow-card transition active:cursor-grabbing",
@@ -49,11 +52,30 @@ function LeadCard({ lead, dragging }: { lead: LeadRow; dragging?: boolean }) {
         <ScoreBadge score={lead.ai_score ?? 0} />
       </div>
       <p className="text-xs text-muted-foreground">{lead.nome}{lead.interesse ? ` · ${lead.interesse}` : ""}</p>
+
+      {lead.ai_sugestao && (
+        <div className="mt-2 rounded-md border border-primary/20 bg-primary/5 px-2 py-1.5">
+          <div className="flex items-center gap-1 text-[9px] font-semibold uppercase tracking-wider text-primary">
+            <Sparkles className="h-2.5 w-2.5" /> Próxima ação
+          </div>
+          <p className="mt-0.5 line-clamp-2 text-[11px] leading-snug text-foreground/90">{lead.ai_sugestao}</p>
+        </div>
+      )}
+
       <div className="mt-3 flex items-center justify-between">
         <span className="text-sm font-semibold text-foreground tabular-nums">
           {lead.valor_estimado && lead.valor_estimado > 0 ? formatBRL(Number(lead.valor_estimado)) : "—"}
         </span>
         <div className="flex items-center gap-1.5">
+          <button
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={(e) => { e.stopPropagation(); score.mutate(lead.id); }}
+            disabled={isScoring}
+            title="Analisar com IA"
+            className="grid h-6 w-6 place-items-center rounded-md border border-border bg-surface-1 text-muted-foreground transition hover:border-primary/50 hover:text-primary disabled:opacity-50"
+          >
+            {isScoring ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
+          </button>
           <div className="grid h-6 w-6 place-items-center rounded-md bg-gradient-to-br from-primary/80 to-[oklch(0.55_0.16_35)] text-[10px] font-bold text-primary-foreground">
             {initialsOf(lead.nome)}
           </div>

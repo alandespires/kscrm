@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AppShell, StatusPill } from "@/components/app-shell";
 import { LeadFormDialog } from "@/components/lead-form-dialog";
 import { useLeads, useDeleteLead, type LeadStatus } from "@/hooks/use-leads";
-import { Download, Filter, Trash2, Mail, Phone, Loader2, Inbox } from "lucide-react";
+import { useScoreLead } from "@/hooks/use-score-lead";
+import { Download, Filter, Trash2, Mail, Phone, Loader2, Inbox, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/leads")({
   head: () => ({ meta: [{ title: "Leads — Nexus CRM" }] }),
@@ -26,13 +27,21 @@ function fmtDate(s: string) {
   return new Date(s).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
 }
 
+function ScorePill({ score }: { score: number | null | undefined }) {
+  if (score == null || score === 0) return <span className="text-xs text-muted-foreground">—</span>;
+  const tone = score >= 80 ? "text-success bg-success/15" : score >= 50 ? "text-warning bg-warning/15" : "text-muted-foreground bg-surface-3";
+  return (
+    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-bold tabular-nums ${tone}`}>
+      <Sparkles className="h-3 w-3" /> {score}
+    </span>
+  );
+}
+
 function LeadsPage() {
   const { data: leads = [], isLoading } = useLeads();
   const del = useDeleteLead();
-  const novosSemana = leads.filter((l) => {
-    const d = new Date(l.created_at);
-    return Date.now() - d.getTime() < 7 * 24 * 60 * 60 * 1000;
-  }).length;
+  const score = useScoreLead();
+  const novosSemana = leads.filter((l) => Date.now() - new Date(l.created_at).getTime() < 7 * 864e5).length;
 
   return (
     <AppShell
@@ -68,21 +77,27 @@ function LeadsPage() {
                 <th className="px-5 py-3 font-medium">Lead</th>
                 <th className="px-5 py-3 font-medium">Empresa</th>
                 <th className="px-5 py-3 font-medium">Contato</th>
-                <th className="px-5 py-3 font-medium">Origem</th>
                 <th className="px-5 py-3 font-medium">Status</th>
+                <th className="px-5 py-3 font-medium">Score IA</th>
+                <th className="px-5 py-3 font-medium">Próxima ação (IA)</th>
                 <th className="px-5 py-3 font-medium">Criado</th>
                 <th />
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {leads.map((l) => (
+              {leads.map((l) => {
+                const isScoring = score.isPending && score.variables === l.id;
+                return (
                 <tr key={l.id} className="transition hover:bg-surface-1/50">
                   <td className="px-5 py-3.5">
                     <div className="flex items-center gap-3">
                       <div className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-primary/70 to-[oklch(0.55_0.16_35)] text-xs font-bold text-primary-foreground">
                         {initialsOf(l.nome)}
                       </div>
-                      <span className="font-medium">{l.nome}</span>
+                      <div className="leading-tight">
+                        <div className="font-medium">{l.nome}</div>
+                        {l.ai_resumo && <div className="mt-0.5 max-w-[260px] truncate text-[11px] text-muted-foreground" title={l.ai_resumo}>{l.ai_resumo}</div>}
+                      </div>
                     </div>
                   </td>
                   <td className="px-5 py-3.5 text-muted-foreground">{l.empresa ?? "—"}</td>
@@ -93,16 +108,32 @@ function LeadsPage() {
                       {!l.email && !l.whatsapp && <span className="text-xs">—</span>}
                     </div>
                   </td>
-                  <td className="px-5 py-3.5 text-muted-foreground">{l.origem ?? "—"}</td>
                   <td className="px-5 py-3.5">
                     <StatusPill tone={statusTone(l.status) as any}>{STATUS_LABEL[l.status]}</StatusPill>
                   </td>
+                  <td className="px-5 py-3.5"><ScorePill score={l.ai_score} /></td>
+                  <td className="px-5 py-3.5">
+                    {l.ai_sugestao ? (
+                      <span className="block max-w-[280px] truncate text-xs text-foreground/90" title={l.ai_sugestao}>{l.ai_sugestao}</span>
+                    ) : <span className="text-xs text-muted-foreground">—</span>}
+                  </td>
                   <td className="px-5 py-3.5 text-muted-foreground tabular-nums">{fmtDate(l.created_at)}</td>
-                  <td className="px-5 py-3.5 text-right">
-                    <button onClick={() => { if (confirm(`Remover ${l.nome}?`)) del.mutate(l.id); }} className="text-muted-foreground transition hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
+                  <td className="px-5 py-3.5">
+                    <div className="flex items-center justify-end gap-1">
+                      <button
+                        onClick={() => score.mutate(l.id)}
+                        disabled={isScoring}
+                        title="Analisar com IA"
+                        className="inline-flex h-7 items-center gap-1 rounded-md border border-border bg-surface-1 px-2 text-[11px] font-medium text-muted-foreground transition hover:border-primary/50 hover:text-primary disabled:opacity-50"
+                      >
+                        {isScoring ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
+                        IA
+                      </button>
+                      <button onClick={() => { if (confirm(`Remover ${l.nome}?`)) del.mutate(l.id); }} className="grid h-7 w-7 place-items-center rounded-md text-muted-foreground transition hover:text-destructive"><Trash2 className="h-3.5 w-3.5" /></button>
+                    </div>
                   </td>
                 </tr>
-              ))}
+              );})}
             </tbody>
           </table>
         </div>
