@@ -5,6 +5,8 @@ import {
 } from "lucide-react";
 import { useEffect, type ReactNode } from "react";
 import { useAuth } from "@/contexts/auth-context";
+import { useLeads } from "@/hooks/use-leads";
+import { AiCoachButton } from "@/components/ai-coach-panel";
 
 const NAV = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -77,18 +79,7 @@ export function AppShell({ children, title, subtitle, action }: {
           })}
         </nav>
 
-        <div className="m-3 rounded-xl border border-border bg-gradient-to-br from-surface-2 to-surface-1 p-4 shadow-card">
-          <div className="mb-2 flex items-center gap-2">
-            <Sparkles className="h-3.5 w-3.5 text-primary" />
-            <span className="text-xs font-semibold">IA Coach</span>
-          </div>
-          <p className="text-xs leading-relaxed text-muted-foreground">
-            Você tem <span className="font-semibold text-foreground">3 leads quentes</span> aguardando ação hoje.
-          </p>
-          <button className="mt-3 w-full rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground transition hover:opacity-90">
-            Ver sugestões
-          </button>
-        </div>
+        <SidebarCoachCard />
       </aside>
 
       {/* Header + content */}
