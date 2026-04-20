@@ -4,9 +4,21 @@ import {
   DndContext, DragOverlay, PointerSensor, useSensor, useSensors,
   type DragEndEvent, type DragStartEvent, useDraggable, useDroppable,
 } from "@dnd-kit/core";
-import { AppShell, PrimaryButton } from "@/components/app-shell";
-import { DEALS, STAGES, formatBRL, type Deal, type DealStage } from "@/lib/mock-data";
-import { Plus, Filter, Sparkles, Clock, MoreHorizontal } from "lucide-react";
+import { AppShell } from "@/components/app-shell";
+import { LeadFormDialog } from "@/components/lead-form-dialog";
+import { formatBRL } from "@/lib/mock-data";
+import { useLeads, useUpdateLeadStatus, type LeadRow, type LeadStatus } from "@/hooks/use-leads";
+import { Plus, Filter, Sparkles, Loader2 } from "lucide-react";
+
+const STAGES: { id: LeadStatus; label: string; color: string }[] = [
+  { id: "novo", label: "Novo Lead", color: "oklch(0.65 0.02 250)" },
+  { id: "contato_inicial", label: "Contato Inicial", color: "oklch(0.7 0.12 220)" },
+  { id: "qualificacao", label: "Qualificação", color: "oklch(0.72 0.14 180)" },
+  { id: "proposta", label: "Proposta", color: "oklch(0.78 0.16 80)" },
+  { id: "negociacao", label: "Negociação", color: "oklch(0.685 0.175 45)" },
+  { id: "fechado", label: "Fechado", color: "oklch(0.72 0.21 142)" },
+  { id: "perdido", label: "Perdido", color: "oklch(0.55 0.18 25)" },
+];
 
 export const Route = createFileRoute("/pipeline")({
   head: () => ({ meta: [{ title: "Pipeline — Nexus CRM" }] }),
@@ -22,33 +34,34 @@ function ScoreBadge({ score }: { score: number }) {
   );
 }
 
-function DealCard({ deal, dragging }: { deal: Deal; dragging?: boolean }) {
+function initialsOf(name: string) {
+  return name.split(" ").map((s) => s[0]).filter(Boolean).slice(0, 2).join("").toUpperCase() || "?";
+}
+
+function LeadCard({ lead, dragging }: { lead: LeadRow; dragging?: boolean }) {
   return (
     <div className={[
       "group cursor-grab rounded-xl border border-border bg-surface-2 p-3.5 shadow-card transition active:cursor-grabbing",
       dragging ? "opacity-40" : "hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-elevated",
     ].join(" ")}>
       <div className="mb-2 flex items-start justify-between gap-2">
-        <h4 className="text-sm font-semibold leading-snug">{deal.title}</h4>
-        <ScoreBadge score={deal.aiScore} />
+        <h4 className="text-sm font-semibold leading-snug">{lead.empresa || lead.nome}</h4>
+        <ScoreBadge score={lead.ai_score ?? 0} />
       </div>
-      <p className="text-xs text-muted-foreground">{deal.company} · {deal.contact}</p>
+      <p className="text-xs text-muted-foreground">{lead.nome}{lead.interesse ? ` · ${lead.interesse}` : ""}</p>
       <div className="mt-3 flex items-center justify-between">
         <span className="text-sm font-semibold text-foreground tabular-nums">
-          {deal.value > 0 ? formatBRL(deal.value) : "—"}
+          {lead.valor_estimado && lead.valor_estimado > 0 ? formatBRL(Number(lead.valor_estimado)) : "—"}
         </span>
         <div className="flex items-center gap-1.5">
-          <span className="inline-flex items-center gap-0.5 text-[10px] text-muted-foreground">
-            <Clock className="h-2.5 w-2.5" />{deal.daysInStage}d
-          </span>
           <div className="grid h-6 w-6 place-items-center rounded-md bg-gradient-to-br from-primary/80 to-[oklch(0.55_0.16_35)] text-[10px] font-bold text-primary-foreground">
-            {deal.ownerInitials}
+            {initialsOf(lead.nome)}
           </div>
         </div>
       </div>
-      {deal.tags.length > 0 && (
+      {lead.tags && lead.tags.length > 0 && (
         <div className="mt-2.5 flex flex-wrap gap-1">
-          {deal.tags.map((t) => (
+          {lead.tags.map((t) => (
             <span key={t} className="rounded-md bg-surface-3 px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">{t}</span>
           ))}
         </div>
@@ -57,18 +70,18 @@ function DealCard({ deal, dragging }: { deal: Deal; dragging?: boolean }) {
   );
 }
 
-function DraggableDeal({ deal }: { deal: Deal }) {
-  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: deal.id });
+function DraggableLead({ lead }: { lead: LeadRow }) {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: lead.id });
   return (
     <div ref={setNodeRef} {...listeners} {...attributes}>
-      <DealCard deal={deal} dragging={isDragging} />
+      <LeadCard lead={lead} dragging={isDragging} />
     </div>
   );
 }
 
-function Column({ stage, deals }: { stage: typeof STAGES[number]; deals: Deal[] }) {
+function Column({ stage, leads }: { stage: typeof STAGES[number]; leads: LeadRow[] }) {
   const { setNodeRef, isOver } = useDroppable({ id: stage.id });
-  const total = deals.reduce((a, d) => a + d.value, 0);
+  const total = leads.reduce((a, l) => a + Number(l.valor_estimado || 0), 0);
   return (
     <div
       ref={setNodeRef}
@@ -81,58 +94,77 @@ function Column({ stage, deals }: { stage: typeof STAGES[number]; deals: Deal[] 
         <div className="flex items-center gap-2">
           <span className="h-2 w-2 rounded-full" style={{ background: stage.color, boxShadow: `0 0 8px ${stage.color}` }} />
           <span className="text-sm font-semibold">{stage.label}</span>
-          <span className="rounded-md bg-surface-3 px-1.5 py-0.5 text-[10px] font-bold text-muted-foreground tabular-nums">{deals.length}</span>
+          <span className="rounded-md bg-surface-3 px-1.5 py-0.5 text-[10px] font-bold text-muted-foreground tabular-nums">{leads.length}</span>
         </div>
-        <button className="grid h-6 w-6 place-items-center rounded-md text-muted-foreground hover:bg-surface-3 hover:text-foreground">
-          <Plus className="h-3.5 w-3.5" />
-        </button>
+        <LeadFormDialog
+          defaultStatus={stage.id}
+          trigger={
+            <button className="grid h-6 w-6 place-items-center rounded-md text-muted-foreground hover:bg-surface-3 hover:text-foreground">
+              <Plus className="h-3.5 w-3.5" />
+            </button>
+          }
+        />
       </div>
       <div className="border-b border-border px-3 py-2 text-[11px] text-muted-foreground tabular-nums">{formatBRL(total)}</div>
       <div className="flex flex-1 flex-col gap-2 overflow-y-auto p-2.5" style={{ minHeight: 200 }}>
-        {deals.map((d) => <DraggableDeal key={d.id} deal={d} />)}
+        {leads.map((l) => <DraggableLead key={l.id} lead={l} />)}
+        {leads.length === 0 && (
+          <div className="grid place-items-center rounded-lg border border-dashed border-border/50 p-4 text-center text-[11px] text-muted-foreground">
+            Arraste um lead aqui
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
 function PipelinePage() {
-  const [deals, setDeals] = useState<Deal[]>(DEALS);
+  const { data: leads = [], isLoading } = useLeads();
+  const updateStatus = useUpdateLeadStatus();
   const [activeId, setActiveId] = useState<string | null>(null);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
 
   function onDragStart(e: DragStartEvent) { setActiveId(String(e.active.id)); }
   function onDragEnd(e: DragEndEvent) {
     setActiveId(null);
-    const overId = e.over?.id as DealStage | undefined;
+    const overId = e.over?.id as LeadStatus | undefined;
     if (!overId) return;
-    setDeals((prev) => prev.map((d) => d.id === e.active.id ? { ...d, stage: overId, daysInStage: 0 } : d));
+    const id = String(e.active.id);
+    const lead = leads.find((l) => l.id === id);
+    if (!lead || lead.status === overId) return;
+    updateStatus.mutate({ id, status: overId });
   }
 
-  const activeDeal = deals.find((d) => d.id === activeId);
+  const activeLead = leads.find((l) => l.id === activeId);
+  const totalValue = leads.reduce((a, l) => a + Number(l.valor_estimado || 0), 0);
 
   return (
     <AppShell
       title="Pipeline"
-      subtitle="Arraste negócios entre etapas. A IA recalcula scores automaticamente."
+      subtitle={`${leads.length} leads no funil · ${formatBRL(totalValue)} em pipeline`}
       action={
         <div className="flex gap-2">
           <button className="inline-flex h-10 items-center gap-1.5 rounded-lg border border-border bg-surface-1 px-3 text-sm text-muted-foreground hover:text-foreground">
             <Filter className="h-3.5 w-3.5" /> Filtros
           </button>
-          <PrimaryButton icon={Plus}>Novo negócio</PrimaryButton>
+          <LeadFormDialog />
         </div>
       }
     >
-      <DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd}>
-        <div className="-mx-5 overflow-x-auto px-5 pb-4 md:-mx-8 md:px-8">
-          <div className="flex gap-4">
-            {STAGES.map((s) => (
-              <Column key={s.id} stage={s} deals={deals.filter((d) => d.stage === s.id)} />
-            ))}
+      {isLoading ? (
+        <div className="grid place-items-center py-20"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+      ) : (
+        <DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd}>
+          <div className="-mx-5 overflow-x-auto px-5 pb-4 md:-mx-8 md:px-8">
+            <div className="flex gap-4">
+              {STAGES.map((s) => (
+                <Column key={s.id} stage={s} leads={leads.filter((l) => l.status === s.id)} />
+              ))}
+            </div>
           </div>
-        </div>
-        <DragOverlay>{activeDeal ? <div className="w-72"><DealCard deal={activeDeal} /></div> : null}</DragOverlay>
-      </DndContext>
+          <DragOverlay>{activeLead ? <div className="w-72"><LeadCard lead={activeLead} /></div> : null}</DragOverlay>
+        </DndContext>
+      )}
     </AppShell>
   );
 }
