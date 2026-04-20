@@ -144,9 +144,9 @@ export function AppShell({ children, title, subtitle, action }: {
   );
 }
 
-export function PrimaryButton({ children, icon: Icon }: { children: ReactNode; icon?: any }) {
+export function PrimaryButton({ children, icon: Icon, ...rest }: { children: ReactNode; icon?: any } & React.ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
-    <button className="inline-flex h-10 items-center gap-2 rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-glow transition hover:brightness-110">
+    <button {...rest} className="inline-flex h-10 items-center gap-2 rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-glow transition hover:brightness-110">
       {Icon && <Icon className="h-4 w-4" />}
       {children}
     </button>
