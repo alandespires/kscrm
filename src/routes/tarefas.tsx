@@ -1,21 +1,82 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState, type FormEvent } from "react";
 import { AppShell, PrimaryButton, StatusPill } from "@/components/app-shell";
-import { TASKS } from "@/lib/mock-data";
-import { Plus, Calendar, CheckCircle2, Circle } from "lucide-react";
+import { useTasks, useToggleTask, useDeleteTask, useCreateTask, type TaskPriority, type TaskRow } from "@/hooks/use-tasks";
+import { useLeads } from "@/hooks/use-leads";
+import { Plus, Calendar, CheckCircle2, Circle, Loader2, Trash2, Inbox, X } from "lucide-react";
 
 export const Route = createFileRoute("/tarefas")({
   head: () => ({ meta: [{ title: "Tarefas — Nexus CRM" }] }),
   component: TarefasPage,
 });
 
+function tone(p: TaskPriority): "danger" | "warn" | "info" | "neutral" {
+  return p === "urgente" || p === "alta" ? "danger" : p === "media" ? "warn" : "neutral";
+}
+
+function fmtDue(s: string | null) {
+  if (!s) return "Sem prazo";
+  const d = new Date(s);
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const dd = new Date(d); dd.setHours(0, 0, 0, 0);
+  const diff = Math.round((dd.getTime() - today.getTime()) / 864e5);
+  if (diff === 0) return "Hoje";
+  if (diff === 1) return "Amanhã";
+  if (diff === -1) return "Ontem";
+  if (diff < 0) return `Atrasada (${Math.abs(diff)}d)`;
+  return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" });
+}
+
+function isToday(s: string | null) {
+  if (!s) return false;
+  const d = new Date(s); const t = new Date();
+  return d.toDateString() === t.toDateString();
+}
+
 function TarefasPage() {
-  const groups = [
-    { label: "Hoje", items: TASKS.filter((t) => t.due.startsWith("Hoje")) },
-    { label: "Próximas", items: TASKS.filter((t) => !t.due.startsWith("Hoje")) },
+  const { data: tasks = [], isLoading } = useTasks();
+  const { data: leads = [] } = useLeads();
+  const toggle = useToggleTask();
+  const del = useDeleteTask();
+  const create = useCreateTask();
+
+  const [open, setOpen] = useState(false);
+  const [titulo, setTitulo] = useState("");
+  const [prioridade, setPrioridade] = useState<TaskPriority>("media");
+  const [prazo, setPrazo] = useState("");
+  const [leadId, setLeadId] = useState<string>("");
+
+  async function submit(e: FormEvent) {
+    e.preventDefault();
+    await create.mutateAsync({
+      titulo,
+      prioridade,
+      prazo: prazo ? new Date(prazo).toISOString() : null,
+      lead_id: leadId || null,
+    });
+    setTitulo(""); setPrazo(""); setLeadId(""); setPrioridade("media"); setOpen(false);
+  }
+
+  const ativas = tasks.filter((t) => t.status !== "concluida" && t.status !== "cancelada");
+  const concluidas = tasks.filter((t) => t.status === "concluida");
+  const groups: { label: string; items: TaskRow[] }[] = [
+    { label: "Hoje & Atrasadas", items: ativas.filter((t) => t.prazo && new Date(t.prazo) <= new Date(new Date().setHours(23, 59, 59))) },
+    { label: "Próximas", items: ativas.filter((t) => !t.prazo || new Date(t.prazo) > new Date(new Date().setHours(23, 59, 59))) },
   ];
+  if (concluidas.length > 0) groups.push({ label: "Concluídas", items: concluidas.slice(0, 20) });
+
   return (
-    <AppShell title="Tarefas" subtitle="Follow-ups e ações comerciais priorizadas"
-      action={<PrimaryButton icon={Plus}>Nova tarefa</PrimaryButton>}>
+    <AppShell title="Tarefas" subtitle={`${ativas.length} ativas · ${concluidas.length} concluídas`}
+      action={<PrimaryButton icon={Plus} onClick={() => setOpen(true)}>Nova tarefa</PrimaryButton>}>
+      {isLoading ? (
+        <div className="grid place-items-center py-20"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+      ) : tasks.length === 0 ? (
+        <div className="grid place-items-center rounded-2xl border border-dashed border-border bg-surface-1/40 py-20 text-center">
+          <Inbox className="mb-3 h-10 w-10 text-muted-foreground" />
+          <h3 className="text-lg font-semibold">Nenhuma tarefa</h3>
+          <p className="mt-1 max-w-sm text-sm text-muted-foreground">Crie tarefas para organizar follow-ups e ações comerciais.</p>
+        </div>
+      ) : (
       <div className="grid gap-5 lg:grid-cols-2">
         {groups.map((g) => (
           <div key={g.label} className="overflow-hidden rounded-2xl border border-border bg-surface-2 shadow-card">
@@ -27,21 +88,76 @@ function TarefasPage() {
               </div>
             </div>
             <ul className="divide-y divide-border">
-              {g.items.map((t) => (
-                <li key={t.id} className="flex items-center gap-3 px-5 py-3.5 transition hover:bg-surface-1/50">
-                  <button>{t.done ? <CheckCircle2 className="h-5 w-5 text-success" /> : <Circle className="h-5 w-5 text-muted-foreground hover:text-primary" />}</button>
-                  <div className="flex-1 min-w-0">
-                    <div className={`text-sm font-medium ${t.done ? "line-through text-muted-foreground" : ""}`}>{t.title}</div>
-                    <div className="text-[11px] text-muted-foreground">{t.due}</div>
-                  </div>
-                  <StatusPill tone={t.priority === "Alta" ? "danger" : "warn"}>{t.priority}</StatusPill>
-                  <div className="grid h-7 w-7 place-items-center rounded-md bg-surface-3 text-[10px] font-bold">{t.owner}</div>
-                </li>
-              ))}
+              {g.items.map((t) => {
+                const done = t.status === "concluida";
+                const lead = leads.find((l) => l.id === t.lead_id);
+                return (
+                  <li key={t.id} className="flex items-center gap-3 px-5 py-3.5 transition hover:bg-surface-1/50">
+                    <button onClick={() => toggle.mutate({ id: t.id, done: !done })}>
+                      {done ? <CheckCircle2 className="h-5 w-5 text-success" /> : <Circle className="h-5 w-5 text-muted-foreground hover:text-primary" />}
+                    </button>
+                    <div className="min-w-0 flex-1">
+                      <div className={`text-sm font-medium ${done ? "line-through text-muted-foreground" : ""}`}>{t.titulo}</div>
+                      <div className="text-[11px] text-muted-foreground">
+                        {fmtDue(t.prazo)}{lead ? ` · ${lead.empresa || lead.nome}` : ""}
+                      </div>
+                    </div>
+                    {!done && <StatusPill tone={tone(t.prioridade)}>{t.prioridade}</StatusPill>}
+                    <button onClick={() => del.mutate(t.id)} className="grid h-7 w-7 place-items-center rounded-md text-muted-foreground hover:text-destructive">
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </li>
+                );
+              })}
+              {g.items.length === 0 && <li className="px-5 py-6 text-center text-xs text-muted-foreground">Nada por aqui.</li>}
             </ul>
           </div>
         ))}
       </div>
+      )}
+
+      {open && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4 backdrop-blur-sm" onClick={() => setOpen(false)}>
+          <form onClick={(e) => e.stopPropagation()} onSubmit={submit} className="w-full max-w-md rounded-2xl border border-border bg-surface-2 shadow-elevated">
+            <div className="flex items-center justify-between border-b border-border p-5">
+              <h3 className="text-lg font-semibold">Nova tarefa</h3>
+              <button type="button" onClick={() => setOpen(false)} className="grid h-8 w-8 place-items-center rounded-md text-muted-foreground hover:bg-surface-3"><X className="h-4 w-4" /></button>
+            </div>
+            <div className="space-y-3 p-5">
+              <label className="block">
+                <span className="text-xs font-medium text-muted-foreground">Título *</span>
+                <input required value={titulo} onChange={(e) => setTitulo(e.target.value)} className="mt-1.5 h-10 w-full rounded-lg border border-border bg-surface-1 px-3 text-sm focus:border-primary/60 focus:outline-none" />
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                <label className="block">
+                  <span className="text-xs font-medium text-muted-foreground">Prioridade</span>
+                  <select value={prioridade} onChange={(e) => setPrioridade(e.target.value as TaskPriority)} className="mt-1.5 h-10 w-full rounded-lg border border-border bg-surface-1 px-3 text-sm">
+                    <option value="baixa">Baixa</option><option value="media">Média</option>
+                    <option value="alta">Alta</option><option value="urgente">Urgente</option>
+                  </select>
+                </label>
+                <label className="block">
+                  <span className="text-xs font-medium text-muted-foreground">Prazo</span>
+                  <input type="datetime-local" value={prazo} onChange={(e) => setPrazo(e.target.value)} className="mt-1.5 h-10 w-full rounded-lg border border-border bg-surface-1 px-3 text-sm" />
+                </label>
+              </div>
+              <label className="block">
+                <span className="text-xs font-medium text-muted-foreground">Lead vinculado</span>
+                <select value={leadId} onChange={(e) => setLeadId(e.target.value)} className="mt-1.5 h-10 w-full rounded-lg border border-border bg-surface-1 px-3 text-sm">
+                  <option value="">— Sem vínculo —</option>
+                  {leads.map((l) => <option key={l.id} value={l.id}>{l.empresa ? `${l.empresa} (${l.nome})` : l.nome}</option>)}
+                </select>
+              </label>
+            </div>
+            <div className="flex justify-end gap-2 border-t border-border p-4">
+              <button type="button" onClick={() => setOpen(false)} className="h-10 rounded-lg border border-border bg-surface-1 px-4 text-sm text-muted-foreground">Cancelar</button>
+              <button type="submit" disabled={create.isPending} className="inline-flex h-10 items-center gap-2 rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-glow disabled:opacity-60">
+                {create.isPending && <Loader2 className="h-4 w-4 animate-spin" />} Criar
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </AppShell>
   );
 }

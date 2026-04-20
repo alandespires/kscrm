@@ -1,45 +1,133 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState, type FormEvent } from "react";
 import { AppShell, PrimaryButton, StatusPill } from "@/components/app-shell";
-import { LEADS, formatBRL } from "@/lib/mock-data";
-import { Plus, Building2, ArrowUpRight } from "lucide-react";
+import { useClients, useCreateClient, useDeleteClient, type ClientRow } from "@/hooks/use-clients";
+import { Plus, Building2, Mail, Phone, Loader2, Inbox, Trash2, X } from "lucide-react";
 
 export const Route = createFileRoute("/clientes")({
   head: () => ({ meta: [{ title: "Clientes — Nexus CRM" }] }),
   component: ClientesPage,
 });
 
+function formatBRL(v: number) {
+  return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
+}
+
 function ClientesPage() {
-  const clients = LEADS.filter((l) => l.status === "Convertido").concat(
-    LEADS.filter((l) => l.status === "Qualificado").slice(0, 3)
-  );
+  const { data: clients = [], isLoading } = useClients();
+  const create = useCreateClient();
+  const del = useDeleteClient();
+
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState({ nome: "", empresa: "", email: "", whatsapp: "", contrato_valor: "", observacoes: "" });
+
+  function set<K extends keyof typeof form>(k: K, v: string) { setForm((p) => ({ ...p, [k]: v })); }
+
+  async function submit(e: FormEvent) {
+    e.preventDefault();
+    await create.mutateAsync({
+      nome: form.nome,
+      empresa: form.empresa || undefined,
+      email: form.email || undefined,
+      whatsapp: form.whatsapp || undefined,
+      contrato_valor: form.contrato_valor ? Number(form.contrato_valor) : undefined,
+      observacoes: form.observacoes || undefined,
+    });
+    setForm({ nome: "", empresa: "", email: "", whatsapp: "", contrato_valor: "", observacoes: "" });
+    setOpen(false);
+  }
+
+  const totalMRR = clients.reduce((a, c) => a + Number(c.contrato_valor ?? 0), 0);
+
   return (
-    <AppShell title="Clientes" subtitle="Contas ativas e histórico comercial completo"
-      action={<PrimaryButton icon={Plus}>Novo cliente</PrimaryButton>}>
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {clients.map((c, i) => (
-          <div key={c.id} className="group rounded-2xl border border-border bg-surface-2 p-5 shadow-card transition hover:border-primary/40 hover:shadow-elevated">
-            <div className="flex items-start justify-between">
-              <div className="grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br from-primary/20 to-surface-3 text-primary">
-                <Building2 className="h-5 w-5" />
+    <AppShell
+      title="Clientes"
+      subtitle={`${clients.length} contas ativas · ${formatBRL(totalMRR)} em contratos`}
+      action={<PrimaryButton icon={Plus} onClick={() => setOpen(true)}>Novo cliente</PrimaryButton>}
+    >
+      {isLoading ? (
+        <div className="grid place-items-center py-20"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+      ) : clients.length === 0 ? (
+        <div className="grid place-items-center rounded-2xl border border-dashed border-border bg-surface-1/40 py-20 text-center">
+          <Inbox className="mb-3 h-10 w-10 text-muted-foreground" />
+          <h3 className="text-lg font-semibold">Sem clientes ainda</h3>
+          <p className="mt-1 max-w-sm text-sm text-muted-foreground">Cadastre seu primeiro cliente ou converta um lead fechado em cliente.</p>
+        </div>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {clients.map((c: ClientRow) => (
+            <div key={c.id} className="group rounded-2xl border border-border bg-surface-2 p-5 shadow-card transition hover:border-primary/40 hover:shadow-elevated">
+              <div className="flex items-start justify-between">
+                <div className="grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br from-primary/20 to-surface-3 text-primary">
+                  <Building2 className="h-5 w-5" />
+                </div>
+                <button onClick={() => { if (confirm(`Remover ${c.nome}?`)) del.mutate(c.id); }} className="grid h-8 w-8 place-items-center rounded-md text-muted-foreground hover:bg-surface-3 hover:text-destructive">
+                  <Trash2 className="h-4 w-4" />
+                </button>
               </div>
-              <button className="grid h-8 w-8 place-items-center rounded-md text-muted-foreground hover:bg-surface-3"><ArrowUpRight className="h-4 w-4" /></button>
+              <h3 className="mt-4 text-base font-semibold">{c.empresa || c.nome}</h3>
+              <p className="text-xs text-muted-foreground">{c.nome}{c.email ? ` · ${c.email}` : ""}</p>
+
+              <div className="mt-3 flex items-center gap-3 text-muted-foreground">
+                {c.email && <a href={`mailto:${c.email}`} className="hover:text-primary"><Mail className="h-3.5 w-3.5" /></a>}
+                {c.whatsapp && <a href={`https://wa.me/${c.whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noreferrer" className="hover:text-success"><Phone className="h-3.5 w-3.5" /></a>}
+              </div>
+
+              <div className="mt-4 grid grid-cols-2 gap-3 border-t border-border pt-4 text-xs">
+                <div>
+                  <div className="text-muted-foreground">Contrato</div>
+                  <div className="mt-0.5 font-semibold tabular-nums">{c.contrato_valor ? formatBRL(Number(c.contrato_valor)) : "—"}</div>
+                </div>
+                <div>
+                  <div className="text-muted-foreground">Início</div>
+                  <div className="mt-0.5 font-semibold">{c.contrato_inicio ? new Date(c.contrato_inicio).toLocaleDateString("pt-BR") : "—"}</div>
+                </div>
+              </div>
+              <div className="mt-3"><StatusPill tone="success">Ativo</StatusPill></div>
             </div>
-            <h3 className="mt-4 text-base font-semibold">{c.company}</h3>
-            <p className="text-xs text-muted-foreground">{c.name} · {c.email}</p>
-            <div className="mt-4 grid grid-cols-2 gap-3 border-t border-border pt-4 text-xs">
-              <div>
-                <div className="text-muted-foreground">MRR</div>
-                <div className="mt-0.5 font-semibold tabular-nums">{formatBRL(2400 + i * 1100)}</div>
-              </div>
-              <div>
-                <div className="text-muted-foreground">Contratos</div>
-                <div className="mt-0.5 font-semibold">{1 + (i % 3)}</div>
-              </div>
+          ))}
+        </div>
+      )}
+
+      {open && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4 backdrop-blur-sm" onClick={() => setOpen(false)}>
+          <form onClick={(e) => e.stopPropagation()} onSubmit={submit} className="w-full max-w-lg rounded-2xl border border-border bg-surface-2 shadow-elevated">
+            <div className="flex items-center justify-between border-b border-border p-5">
+              <h3 className="text-lg font-semibold">Novo cliente</h3>
+              <button type="button" onClick={() => setOpen(false)} className="grid h-8 w-8 place-items-center rounded-md text-muted-foreground hover:bg-surface-3"><X className="h-4 w-4" /></button>
             </div>
-            <div className="mt-3"><StatusPill tone="success">Ativo</StatusPill></div>
-          </div>
-        ))}
-      </div>
+            <div className="grid grid-cols-2 gap-3 p-5">
+              <Field label="Nome do contato *"><input required value={form.nome} onChange={(e) => set("nome", e.target.value)} className={inp} /></Field>
+              <Field label="Empresa"><input value={form.empresa} onChange={(e) => set("empresa", e.target.value)} className={inp} /></Field>
+              <Field label="Email"><input type="email" value={form.email} onChange={(e) => set("email", e.target.value)} className={inp} /></Field>
+              <Field label="WhatsApp"><input value={form.whatsapp} onChange={(e) => set("whatsapp", e.target.value)} className={inp} /></Field>
+              <Field label="Valor do contrato (R$)" full>
+                <input type="number" min="0" step="100" value={form.contrato_valor} onChange={(e) => set("contrato_valor", e.target.value)} className={inp} />
+              </Field>
+              <Field label="Observações" full>
+                <textarea rows={3} value={form.observacoes} onChange={(e) => set("observacoes", e.target.value)} className={inp + " resize-none"} />
+              </Field>
+            </div>
+            <div className="flex justify-end gap-2 border-t border-border p-4">
+              <button type="button" onClick={() => setOpen(false)} className="h-10 rounded-lg border border-border bg-surface-1 px-4 text-sm text-muted-foreground">Cancelar</button>
+              <button type="submit" disabled={create.isPending} className="inline-flex h-10 items-center gap-2 rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-glow disabled:opacity-60">
+                {create.isPending && <Loader2 className="h-4 w-4 animate-spin" />} Criar cliente
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </AppShell>
+  );
+}
+
+const inp = "h-10 w-full rounded-lg border border-border bg-surface-1 px-3 text-sm focus:border-primary/60 focus:outline-none focus:ring-2 focus:ring-primary/20";
+
+function Field({ label, children, full }: { label: string; children: React.ReactNode; full?: boolean }) {
+  return (
+    <label className={["block", full ? "col-span-2" : ""].join(" ")}>
+      <span className="text-xs font-medium text-muted-foreground">{label}</span>
+      <div className="mt-1.5">{children}</div>
+    </label>
   );
 }
