@@ -9,11 +9,26 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TarefasRouteImport } from './routes/tarefas'
+import { Route as RelatoriosRouteImport } from './routes/relatorios'
 import { Route as PipelineRouteImport } from './routes/pipeline'
 import { Route as LeadsRouteImport } from './routes/leads'
+import { Route as InsightsRouteImport } from './routes/insights'
+import { Route as ConfiguracoesRouteImport } from './routes/configuracoes'
 import { Route as ClientesRouteImport } from './routes/clientes'
+import { Route as AutomacaoRouteImport } from './routes/automacao'
 import { Route as IndexRouteImport } from './routes/index'
 
+const TarefasRoute = TarefasRouteImport.update({
+  id: '/tarefas',
+  path: '/tarefas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RelatoriosRoute = RelatoriosRouteImport.update({
+  id: '/relatorios',
+  path: '/relatorios',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PipelineRoute = PipelineRouteImport.update({
   id: '/pipeline',
   path: '/pipeline',
@@ -24,9 +39,24 @@ const LeadsRoute = LeadsRouteImport.update({
   path: '/leads',
   getParentRoute: () => rootRouteImport,
 } as any)
+const InsightsRoute = InsightsRouteImport.update({
+  id: '/insights',
+  path: '/insights',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConfiguracoesRoute = ConfiguracoesRouteImport.update({
+  id: '/configuracoes',
+  path: '/configuracoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ClientesRoute = ClientesRouteImport.update({
   id: '/clientes',
   path: '/clientes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AutomacaoRoute = AutomacaoRouteImport.update({
+  id: '/automacao',
+  path: '/automacao',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -37,40 +67,102 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/automacao': typeof AutomacaoRoute
   '/clientes': typeof ClientesRoute
+  '/configuracoes': typeof ConfiguracoesRoute
+  '/insights': typeof InsightsRoute
   '/leads': typeof LeadsRoute
   '/pipeline': typeof PipelineRoute
+  '/relatorios': typeof RelatoriosRoute
+  '/tarefas': typeof TarefasRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/automacao': typeof AutomacaoRoute
   '/clientes': typeof ClientesRoute
+  '/configuracoes': typeof ConfiguracoesRoute
+  '/insights': typeof InsightsRoute
   '/leads': typeof LeadsRoute
   '/pipeline': typeof PipelineRoute
+  '/relatorios': typeof RelatoriosRoute
+  '/tarefas': typeof TarefasRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/automacao': typeof AutomacaoRoute
   '/clientes': typeof ClientesRoute
+  '/configuracoes': typeof ConfiguracoesRoute
+  '/insights': typeof InsightsRoute
   '/leads': typeof LeadsRoute
   '/pipeline': typeof PipelineRoute
+  '/relatorios': typeof RelatoriosRoute
+  '/tarefas': typeof TarefasRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/clientes' | '/leads' | '/pipeline'
+  fullPaths:
+    | '/'
+    | '/automacao'
+    | '/clientes'
+    | '/configuracoes'
+    | '/insights'
+    | '/leads'
+    | '/pipeline'
+    | '/relatorios'
+    | '/tarefas'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/clientes' | '/leads' | '/pipeline'
-  id: '__root__' | '/' | '/clientes' | '/leads' | '/pipeline'
+  to:
+    | '/'
+    | '/automacao'
+    | '/clientes'
+    | '/configuracoes'
+    | '/insights'
+    | '/leads'
+    | '/pipeline'
+    | '/relatorios'
+    | '/tarefas'
+  id:
+    | '__root__'
+    | '/'
+    | '/automacao'
+    | '/clientes'
+    | '/configuracoes'
+    | '/insights'
+    | '/leads'
+    | '/pipeline'
+    | '/relatorios'
+    | '/tarefas'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AutomacaoRoute: typeof AutomacaoRoute
   ClientesRoute: typeof ClientesRoute
+  ConfiguracoesRoute: typeof ConfiguracoesRoute
+  InsightsRoute: typeof InsightsRoute
   LeadsRoute: typeof LeadsRoute
   PipelineRoute: typeof PipelineRoute
+  RelatoriosRoute: typeof RelatoriosRoute
+  TarefasRoute: typeof TarefasRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/tarefas': {
+      id: '/tarefas'
+      path: '/tarefas'
+      fullPath: '/tarefas'
+      preLoaderRoute: typeof TarefasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/relatorios': {
+      id: '/relatorios'
+      path: '/relatorios'
+      fullPath: '/relatorios'
+      preLoaderRoute: typeof RelatoriosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/pipeline': {
       id: '/pipeline'
       path: '/pipeline'
@@ -85,11 +177,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LeadsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/insights': {
+      id: '/insights'
+      path: '/insights'
+      fullPath: '/insights'
+      preLoaderRoute: typeof InsightsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/configuracoes': {
+      id: '/configuracoes'
+      path: '/configuracoes'
+      fullPath: '/configuracoes'
+      preLoaderRoute: typeof ConfiguracoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/clientes': {
       id: '/clientes'
       path: '/clientes'
       fullPath: '/clientes'
       preLoaderRoute: typeof ClientesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/automacao': {
+      id: '/automacao'
+      path: '/automacao'
+      fullPath: '/automacao'
+      preLoaderRoute: typeof AutomacaoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -104,9 +217,14 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AutomacaoRoute: AutomacaoRoute,
   ClientesRoute: ClientesRoute,
+  ConfiguracoesRoute: ConfiguracoesRoute,
+  InsightsRoute: InsightsRoute,
   LeadsRoute: LeadsRoute,
   PipelineRoute: PipelineRoute,
+  RelatoriosRoute: RelatoriosRoute,
+  TarefasRoute: TarefasRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
