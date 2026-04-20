@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, type FormEvent } from "react";
+import { useMemo, useState, type FormEvent } from "react";
 import { AppShell, PrimaryButton, StatusPill } from "@/components/app-shell";
 import { useClients, useCreateClient, useDeleteClient, type ClientRow } from "@/hooks/use-clients";
-import { Plus, Building2, Mail, Phone, Loader2, Inbox, Trash2, X } from "lucide-react";
+import { Plus, Building2, Mail, Phone, Loader2, Inbox, Trash2, X, Search } from "lucide-react";
 
 export const Route = createFileRoute("/clientes")({
   head: () => ({ meta: [{ title: "Clientes — Nexus CRM" }] }),
@@ -13,10 +13,25 @@ function formatBRL(v: number) {
   return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
 }
 
+type ClientFilter = "todos" | "com_contrato" | "sem_contrato";
+
 function ClientesPage() {
   const { data: clients = [], isLoading } = useClients();
   const create = useCreateClient();
   const del = useDeleteClient();
+
+  const [query, setQuery] = useState("");
+  const [filter, setFilter] = useState<ClientFilter>("todos");
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return clients.filter((c) => {
+      if (filter === "com_contrato" && !(Number(c.contrato_valor ?? 0) > 0)) return false;
+      if (filter === "sem_contrato" && Number(c.contrato_valor ?? 0) > 0) return false;
+      if (!q) return true;
+      return [c.nome, c.empresa, c.email, c.whatsapp].some((v) => (v ?? "").toLowerCase().includes(q));
+    });
+  }, [clients, query, filter]);
 
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ nome: "", empresa: "", email: "", whatsapp: "", contrato_valor: "", observacoes: "" });
@@ -45,6 +60,27 @@ function ClientesPage() {
       subtitle={`${clients.length} contas ativas · ${formatBRL(totalMRR)} em contratos`}
       action={<PrimaryButton icon={Plus} onClick={() => setOpen(true)}>Novo cliente</PrimaryButton>}
     >
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <div className="relative min-w-[220px] max-w-md flex-1">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+          <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Buscar por nome, empresa, email..."
+            className="h-10 w-full rounded-lg border border-border bg-surface-1 pl-9 pr-3 text-sm focus:border-primary/60 focus:outline-none" />
+        </div>
+        <div className="flex rounded-lg border border-border bg-surface-1 p-0.5">
+          {([
+            { v: "todos", l: "Todos" },
+            { v: "com_contrato", l: "Com contrato" },
+            { v: "sem_contrato", l: "Sem contrato" },
+          ] as { v: ClientFilter; l: string }[]).map((opt) => (
+            <button key={opt.v} onClick={() => setFilter(opt.v)}
+              className={`h-9 rounded-md px-3 text-xs font-medium transition ${filter === opt.v ? "bg-primary text-primary-foreground shadow-glow" : "text-muted-foreground hover:text-foreground"}`}>
+              {opt.l}
+            </button>
+          ))}
+        </div>
+        <span className="ml-auto text-xs text-muted-foreground tabular-nums">{filtered.length} de {clients.length}</span>
+      </div>
+
       {isLoading ? (
         <div className="grid place-items-center py-20"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
       ) : clients.length === 0 ? (
@@ -53,9 +89,13 @@ function ClientesPage() {
           <h3 className="text-lg font-semibold">Sem clientes ainda</h3>
           <p className="mt-1 max-w-sm text-sm text-muted-foreground">Cadastre seu primeiro cliente ou converta um lead fechado em cliente.</p>
         </div>
+      ) : filtered.length === 0 ? (
+        <div className="grid place-items-center rounded-2xl border border-dashed border-border bg-surface-1/40 py-16 text-center">
+          <p className="text-sm text-muted-foreground">Nenhum cliente bate com os filtros.</p>
+        </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {clients.map((c: ClientRow) => (
+          {filtered.map((c: ClientRow) => (
             <div key={c.id} className="group rounded-2xl border border-border bg-surface-2 p-5 shadow-card transition hover:border-primary/40 hover:shadow-elevated">
               <div className="flex items-start justify-between">
                 <div className="grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br from-primary/20 to-surface-3 text-primary">

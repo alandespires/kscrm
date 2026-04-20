@@ -1,9 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, type FormEvent } from "react";
+import { useMemo, useState, type FormEvent } from "react";
 import { AppShell, PrimaryButton, StatusPill } from "@/components/app-shell";
 import { useTasks, useToggleTask, useDeleteTask, useCreateTask, type TaskPriority, type TaskRow } from "@/hooks/use-tasks";
 import { useLeads } from "@/hooks/use-leads";
-import { Plus, Calendar, CheckCircle2, Circle, Loader2, Trash2, Inbox, X } from "lucide-react";
+import { Plus, Calendar, CheckCircle2, Circle, Loader2, Trash2, Inbox, X, Search } from "lucide-react";
+
+type PrazoFilter = "todos" | "hoje" | "atrasadas" | "semana" | "sem_prazo";
 
 export const Route = createFileRoute("/tarefas")({
   head: () => ({ meta: [{ title: "Tarefas — Nexus CRM" }] }),
@@ -46,6 +48,12 @@ function TarefasPage() {
   const [prazo, setPrazo] = useState("");
   const [leadId, setLeadId] = useState<string>("");
 
+  // filtros
+  const [query, setQuery] = useState("");
+  const [fPrioridade, setFPrioridade] = useState<TaskPriority | "todas">("todas");
+  const [fPrazo, setFPrazo] = useState<PrazoFilter>("todos");
+  const [fLead, setFLead] = useState<string>("todos");
+
   async function submit(e: FormEvent) {
     e.preventDefault();
     await create.mutateAsync({
@@ -57,8 +65,30 @@ function TarefasPage() {
     setTitulo(""); setPrazo(""); setLeadId(""); setPrioridade("media"); setOpen(false);
   }
 
-  const ativas = tasks.filter((t) => t.status !== "concluida" && t.status !== "cancelada");
-  const concluidas = tasks.filter((t) => t.status === "concluida");
+  const filteredTasks = useMemo(() => {
+    const now = new Date();
+    const endToday = new Date(now); endToday.setHours(23, 59, 59, 999);
+    const endWeek = new Date(now); endWeek.setDate(endWeek.getDate() + 7);
+    const q = query.trim().toLowerCase();
+    return tasks.filter((t) => {
+      if (fPrioridade !== "todas" && t.prioridade !== fPrioridade) return false;
+      if (fLead !== "todos") {
+        if (fLead === "sem_lead" ? !!t.lead_id : t.lead_id !== fLead) return false;
+      }
+      if (fPrazo !== "todos") {
+        const d = t.prazo ? new Date(t.prazo) : null;
+        if (fPrazo === "sem_prazo" && d) return false;
+        if (fPrazo === "hoje" && (!d || d > endToday || d < new Date(now.toDateString()))) return false;
+        if (fPrazo === "atrasadas" && (!d || d >= now || t.status === "concluida")) return false;
+        if (fPrazo === "semana" && (!d || d > endWeek)) return false;
+      }
+      if (q && !t.titulo.toLowerCase().includes(q)) return false;
+      return true;
+    });
+  }, [tasks, query, fPrioridade, fPrazo, fLead]);
+
+  const ativas = filteredTasks.filter((t) => t.status !== "concluida" && t.status !== "cancelada");
+  const concluidas = filteredTasks.filter((t) => t.status === "concluida");
   const groups: { label: string; items: TaskRow[] }[] = [
     { label: "Hoje & Atrasadas", items: ativas.filter((t) => t.prazo && new Date(t.prazo) <= new Date(new Date().setHours(23, 59, 59))) },
     { label: "Próximas", items: ativas.filter((t) => !t.prazo || new Date(t.prazo) > new Date(new Date().setHours(23, 59, 59))) },
@@ -68,6 +98,32 @@ function TarefasPage() {
   return (
     <AppShell title="Tarefas" subtitle={`${ativas.length} ativas · ${concluidas.length} concluídas`}
       action={<PrimaryButton icon={Plus} onClick={() => setOpen(true)}>Nova tarefa</PrimaryButton>}>
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <div className="relative min-w-[200px] max-w-sm flex-1">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+          <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Buscar tarefa..."
+            className="h-10 w-full rounded-lg border border-border bg-surface-1 pl-9 pr-3 text-sm focus:border-primary/60 focus:outline-none" />
+        </div>
+        <select value={fPrioridade} onChange={(e) => setFPrioridade(e.target.value as any)} className={selectCls}>
+          <option value="todas">Toda prioridade</option>
+          <option value="urgente">Urgente</option><option value="alta">Alta</option>
+          <option value="media">Média</option><option value="baixa">Baixa</option>
+        </select>
+        <select value={fPrazo} onChange={(e) => setFPrazo(e.target.value as PrazoFilter)} className={selectCls}>
+          <option value="todos">Qualquer prazo</option>
+          <option value="atrasadas">Atrasadas</option>
+          <option value="hoje">Hoje</option>
+          <option value="semana">Próximos 7 dias</option>
+          <option value="sem_prazo">Sem prazo</option>
+        </select>
+        <select value={fLead} onChange={(e) => setFLead(e.target.value)} className={selectCls}>
+          <option value="todos">Todos os leads</option>
+          <option value="sem_lead">Sem lead</option>
+          {leads.map((l) => <option key={l.id} value={l.id}>{l.empresa || l.nome}</option>)}
+        </select>
+        <span className="ml-auto text-xs text-muted-foreground tabular-nums">{filteredTasks.length} de {tasks.length}</span>
+      </div>
+
       {isLoading ? (
         <div className="grid place-items-center py-20"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
       ) : tasks.length === 0 ? (
@@ -161,3 +217,6 @@ function TarefasPage() {
     </AppShell>
   );
 }
+
+const selectCls = "h-10 rounded-lg border border-border bg-surface-1 px-3 text-xs font-medium text-foreground focus:border-primary/60 focus:outline-none";
+
