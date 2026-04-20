@@ -1,6 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell, StatusPill } from "@/components/app-shell";
-import { AppShell, StatusPill } from "@/components/app-shell";
 import { LeadFormDialog } from "@/components/lead-form-dialog";
 import {
   ArrowUpRight, TrendingUp, TrendingDown, Users, Target, DollarSign,
