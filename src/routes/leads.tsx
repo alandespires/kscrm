@@ -5,6 +5,7 @@ import { LeadFormDialog } from "@/components/lead-form-dialog";
 import { LeadDetailDrawer } from "@/components/lead-detail-drawer";
 import { useLeads, useDeleteLead, type LeadRow, type LeadStatus } from "@/hooks/use-leads";
 import { useScoreLead } from "@/hooks/use-score-lead";
+import { useRealtimeSync } from "@/hooks/use-realtime";
 import { Download, Filter, Trash2, Mail, Phone, Loader2, Inbox, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/leads")({
@@ -40,6 +41,11 @@ function ScorePill({ score }: { score: number | null | undefined }) {
 }
 
 function LeadsPage() {
+  useRealtimeSync([
+    { table: "leads", queryKeys: [["leads"]] },
+    { table: "activities", queryKeys: [["activities"]] },
+    { table: "tasks", queryKeys: [["tasks"]] },
+  ]);
   const { data: leads = [], isLoading } = useLeads();
   const del = useDeleteLead();
   const score = useScoreLead();
