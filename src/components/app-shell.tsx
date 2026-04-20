@@ -103,9 +103,12 @@ export function AppShell({ children, title, subtitle, action }: {
             />
           </div>
           <div className="ml-auto flex items-center gap-2">
-            <button className="hidden h-9 items-center gap-1.5 rounded-lg border border-border bg-surface-1 px-3 text-xs font-medium text-muted-foreground transition hover:bg-surface-2 hover:text-foreground sm:flex">
+            <Link
+              to="/leads"
+              className="hidden h-9 items-center gap-1.5 rounded-lg border border-border bg-surface-1 px-3 text-xs font-medium text-muted-foreground transition hover:bg-surface-2 hover:text-foreground sm:flex"
+            >
               <Plus className="h-3.5 w-3.5" /> Novo lead
-            </button>
+            </Link>
             <button className="relative grid h-9 w-9 place-items-center rounded-lg border border-border bg-surface-1 text-muted-foreground transition hover:text-foreground">
               <Bell className="h-4 w-4" />
               <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-primary" />
