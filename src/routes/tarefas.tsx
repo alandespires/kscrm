@@ -98,6 +98,32 @@ function TarefasPage() {
   return (
     <AppShell title="Tarefas" subtitle={`${ativas.length} ativas · ${concluidas.length} concluídas`}
       action={<PrimaryButton icon={Plus} onClick={() => setOpen(true)}>Nova tarefa</PrimaryButton>}>
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <div className="relative min-w-[200px] max-w-sm flex-1">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+          <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Buscar tarefa..."
+            className="h-10 w-full rounded-lg border border-border bg-surface-1 pl-9 pr-3 text-sm focus:border-primary/60 focus:outline-none" />
+        </div>
+        <select value={fPrioridade} onChange={(e) => setFPrioridade(e.target.value as any)} className={selectCls}>
+          <option value="todas">Toda prioridade</option>
+          <option value="urgente">Urgente</option><option value="alta">Alta</option>
+          <option value="media">Média</option><option value="baixa">Baixa</option>
+        </select>
+        <select value={fPrazo} onChange={(e) => setFPrazo(e.target.value as PrazoFilter)} className={selectCls}>
+          <option value="todos">Qualquer prazo</option>
+          <option value="atrasadas">Atrasadas</option>
+          <option value="hoje">Hoje</option>
+          <option value="semana">Próximos 7 dias</option>
+          <option value="sem_prazo">Sem prazo</option>
+        </select>
+        <select value={fLead} onChange={(e) => setFLead(e.target.value)} className={selectCls}>
+          <option value="todos">Todos os leads</option>
+          <option value="sem_lead">Sem lead</option>
+          {leads.map((l) => <option key={l.id} value={l.id}>{l.empresa || l.nome}</option>)}
+        </select>
+        <span className="ml-auto text-xs text-muted-foreground tabular-nums">{filteredTasks.length} de {tasks.length}</span>
+      </div>
+
       {isLoading ? (
         <div className="grid place-items-center py-20"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
       ) : tasks.length === 0 ? (
