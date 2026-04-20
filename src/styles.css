@@ -4,7 +4,8 @@
 
 @custom-variant dark (&:is(.dark *));
 
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&display=swap');
+@import url('https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700,900&display=swap');
 
 /*
  * Design system definition.
@@ -28,8 +29,8 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
-  --font-sans: 'Instrument Sans', 'Manrope', system-ui, sans-serif;
-  --font-display: 'Instrument Sans', system-ui, sans-serif;
+  --font-sans: 'Instrument Sans', 'Satoshi', system-ui, sans-serif;
+  --font-display: 'Satoshi', 'Instrument Sans', system-ui, sans-serif;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);

@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, type FormEvent } from "react";
+import { useMemo, useState, type FormEvent } from "react";
 import { AppShell, PrimaryButton, StatusPill } from "@/components/app-shell";
 import { useClients, useCreateClient, useDeleteClient, type ClientRow } from "@/hooks/use-clients";
-import { Plus, Building2, Mail, Phone, Loader2, Inbox, Trash2, X } from "lucide-react";
+import { Plus, Building2, Mail, Phone, Loader2, Inbox, Trash2, X, Search } from "lucide-react";
 
 export const Route = createFileRoute("/clientes")({
   head: () => ({ meta: [{ title: "Clientes — Nexus CRM" }] }),
@@ -13,10 +13,25 @@ function formatBRL(v: number) {
   return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
 }
 
+type ClientFilter = "todos" | "com_contrato" | "sem_contrato";
+
 function ClientesPage() {
   const { data: clients = [], isLoading } = useClients();
   const create = useCreateClient();
   const del = useDeleteClient();
+
+  const [query, setQuery] = useState("");
+  const [filter, setFilter] = useState<ClientFilter>("todos");
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return clients.filter((c) => {
+      if (filter === "com_contrato" && !(Number(c.contrato_valor ?? 0) > 0)) return false;
+      if (filter === "sem_contrato" && Number(c.contrato_valor ?? 0) > 0) return false;
+      if (!q) return true;
+      return [c.nome, c.empresa, c.email, c.whatsapp].some((v) => (v ?? "").toLowerCase().includes(q));
+    });
+  }, [clients, query, filter]);
 
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ nome: "", empresa: "", email: "", whatsapp: "", contrato_valor: "", observacoes: "" });
