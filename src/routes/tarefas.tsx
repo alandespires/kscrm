@@ -1,9 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, type FormEvent } from "react";
+import { useMemo, useState, type FormEvent } from "react";
 import { AppShell, PrimaryButton, StatusPill } from "@/components/app-shell";
 import { useTasks, useToggleTask, useDeleteTask, useCreateTask, type TaskPriority, type TaskRow } from "@/hooks/use-tasks";
 import { useLeads } from "@/hooks/use-leads";
-import { Plus, Calendar, CheckCircle2, Circle, Loader2, Trash2, Inbox, X } from "lucide-react";
+import { Plus, Calendar, CheckCircle2, Circle, Loader2, Trash2, Inbox, X, Search } from "lucide-react";
+
+type PrazoFilter = "todos" | "hoje" | "atrasadas" | "semana" | "sem_prazo";
 
 export const Route = createFileRoute("/tarefas")({
   head: () => ({ meta: [{ title: "Tarefas — Nexus CRM" }] }),
