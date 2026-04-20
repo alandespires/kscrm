@@ -116,6 +116,12 @@ function DashboardPage() {
   const leadList = leads.data ?? [];
   const dealList = deals.data ?? [];
 
+  const periodDays = PERIODO_DAYS[periodo];
+  const cutoffMs = periodDays != null ? Date.now() - periodDays * 864e5 : 0;
+  const leadsPeriodo = periodDays == null
+    ? leadList
+    : leadList.filter((l) => new Date(l.created_at).getTime() >= cutoffMs);
+
   const stageCounts = STAGES.map((s) => {
     const count = leadList.filter((l) => l.status === s.id).length;
     const value = leadList.filter((l) => l.status === s.id).reduce((acc, l) => acc + Number(l.valor_estimado ?? 0), 0);
