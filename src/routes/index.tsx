@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
 import { AppShell, StatusPill } from "@/components/app-shell";
 import { LeadFormDialog } from "@/components/lead-form-dialog";
 import {
   ArrowUpRight, TrendingUp, TrendingDown, Users, Target, DollarSign,
-  CheckCircle2, Sparkles, Plus, ArrowRight, Phone, Mail, Zap, Loader2,
+  CheckCircle2, Sparkles, Plus, ArrowRight, Phone, Mail, Zap, Loader2, ChevronDown,
 } from "lucide-react";
 import {
   AreaChart, Area, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid,
@@ -12,6 +13,7 @@ import { formatBRL } from "@/lib/mock-data";
 import { useLeads, type LeadStatus } from "@/hooks/use-leads";
 import { useActivities, useDeals, useRevenueSeries } from "@/hooks/use-dashboard";
 import { useInsights } from "@/hooks/use-insights";
+import { useRealtimeSync } from "@/hooks/use-realtime";
 
 export const Route = createFileRoute("/")({
   head: () => ({ meta: [{ title: "Dashboard — Nexus CRM" }] }),
@@ -91,7 +93,20 @@ function timeAgo(iso: string) {
   return `há ${d}d`;
 }
 
+type Periodo = "hoje" | "semana" | "mes" | "tudo";
+const PERIODO_LABEL: Record<Periodo, string> = { hoje: "Hoje", semana: "Esta semana", mes: "Este mês", tudo: "Todo o período" };
+const PERIODO_DAYS: Record<Periodo, number | null> = { hoje: 1, semana: 7, mes: 30, tudo: null };
+
 function DashboardPage() {
+  useRealtimeSync([
+    { table: "leads", queryKeys: [["leads"]] },
+    { table: "deals", queryKeys: [["deals"], ["revenue_series"]] },
+    { table: "activities", queryKeys: [["activities"]] },
+    { table: "ai_insights", queryKeys: [["ai_insights"]] },
+  ]);
+  const [periodo, setPeriodo] = useState<Periodo>("semana");
+  const [periodoOpen, setPeriodoOpen] = useState(false);
+
   const leads = useLeads();
   const deals = useDeals();
   const activities = useActivities(8);
@@ -100,6 +115,12 @@ function DashboardPage() {
 
   const leadList = leads.data ?? [];
   const dealList = deals.data ?? [];
+
+  const periodDays = PERIODO_DAYS[periodo];
+  const cutoffMs = periodDays != null ? Date.now() - periodDays * 864e5 : 0;
+  const leadsPeriodo = periodDays == null
+    ? leadList
+    : leadList.filter((l) => new Date(l.created_at).getTime() >= cutoffMs);
 
   const stageCounts = STAGES.map((s) => {
     const count = leadList.filter((l) => l.status === s.id).length;
@@ -135,9 +156,31 @@ function DashboardPage() {
       subtitle="Aqui está o panorama da sua operação comercial hoje."
       action={
         <div className="flex gap-2">
-          <button className="inline-flex h-10 items-center gap-1.5 rounded-lg border border-border bg-surface-1 px-3 text-sm text-muted-foreground hover:text-foreground">
-            Esta semana <ArrowRight className="h-3.5 w-3.5" />
-          </button>
+          <div className="relative">
+            <button
+              onClick={() => setPeriodoOpen((v) => !v)}
+              className="inline-flex h-10 items-center gap-1.5 rounded-lg border border-border bg-surface-1 px-3 text-sm text-muted-foreground hover:text-foreground"
+            >
+              {PERIODO_LABEL[periodo]} <ChevronDown className="h-3.5 w-3.5" />
+            </button>
+            {periodoOpen && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setPeriodoOpen(false)} />
+                <div className="absolute right-0 top-11 z-20 w-44 overflow-hidden rounded-lg border border-border bg-surface-2 shadow-elevated">
+                  {(Object.keys(PERIODO_LABEL) as Periodo[]).map((p) => (
+                    <button
+                      key={p}
+                      onClick={() => { setPeriodo(p); setPeriodoOpen(false); }}
+                      className={`flex w-full items-center justify-between px-3 py-2 text-left text-sm transition hover:bg-surface-3 ${periodo === p ? "text-primary" : "text-foreground"}`}
+                    >
+                      {PERIODO_LABEL[p]}
+                      {periodo === p && <span className="h-1.5 w-1.5 rounded-full bg-primary" />}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
           <LeadFormDialog
             trigger={
               <button className="inline-flex h-10 items-center gap-2 rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-glow transition hover:brightness-110">
@@ -150,7 +193,7 @@ function DashboardPage() {
     >
       {/* KPI grid */}
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <KpiCard label="Total de Leads" value={String(leadList.length)} icon={Users} loading={isLoading} />
+        <KpiCard label={`Leads ${periodo === "tudo" ? "totais" : `(${PERIODO_LABEL[periodo].toLowerCase()})`}`} value={String(leadsPeriodo.length)} icon={Users} loading={isLoading} />
         <KpiCard label="Oportunidades abertas" value={String(oportunidadesAbertas)} icon={Target} accent loading={isLoading} />
         <KpiCard label="Receita prevista" value={formatBRL(totalPipeline)} icon={DollarSign} accent loading={isLoading} />
         <KpiCard label="Fechado no mês" value={formatBRL(wonMonth)} icon={CheckCircle2} loading={isLoading} />

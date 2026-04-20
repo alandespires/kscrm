@@ -1,9 +1,10 @@
 import { useState, type FormEvent } from "react";
-import { X, Sparkles, Loader2, Mail, Phone, MessageSquare, Calendar, Plus, Building2, RefreshCw, Trash2 } from "lucide-react";
+import { X, Sparkles, Loader2, Mail, Phone, MessageSquare, Calendar, Plus, Building2, RefreshCw, Trash2, UserCheck } from "lucide-react";
 import { useScoreLead } from "@/hooks/use-score-lead";
 import { useDeleteLead, type LeadRow, type LeadStatus } from "@/hooks/use-leads";
 import { useLeadActivities, useCreateActivity, type ActivityType } from "@/hooks/use-activities";
 import { useTasks, useCreateTask, useToggleTask } from "@/hooks/use-tasks";
+import { useConvertLeadToClient } from "@/hooks/use-convert-lead";
 import { formatBRL } from "@/lib/mock-data";
 
 const STATUS_LABEL: Record<LeadStatus, string> = {
@@ -24,6 +25,7 @@ export function LeadDetailDrawer({ lead, onClose }: { lead: LeadRow | null; onCl
   const open = !!lead;
   const score = useScoreLead();
   const del = useDeleteLead();
+  const convert = useConvertLeadToClient();
   const { data: acts = [] } = useLeadActivities(lead?.id ?? null);
   const { data: tasks = [] } = useTasks({ leadId: lead?.id });
   const createAct = useCreateActivity();
@@ -207,13 +209,22 @@ export function LeadDetailDrawer({ lead, onClose }: { lead: LeadRow | null; onCl
           </ol>
         </section>
 
-        {/* footer danger */}
-        <div className="border-t border-border p-4">
+        {/* footer actions */}
+        <div className="flex items-center justify-between gap-2 border-t border-border p-4">
           <button
             onClick={() => { if (confirm(`Remover ${lead.nome}?`)) { del.mutate(lead.id); onClose(); } }}
             className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-destructive"
           >
             <Trash2 className="h-3.5 w-3.5" /> Excluir lead
+          </button>
+          <button
+            onClick={() => convert.mutate(lead)}
+            disabled={convert.isPending || lead.status === "fechado"}
+            className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-success px-3 text-xs font-semibold text-success-foreground shadow-card transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+            title={lead.status === "fechado" ? "Lead já fechado" : "Cria cliente vinculado e marca como fechado"}
+          >
+            {convert.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <UserCheck className="h-3.5 w-3.5" />}
+            {lead.status === "fechado" ? "Já convertido" : "Converter em cliente"}
           </button>
         </div>
       </aside>

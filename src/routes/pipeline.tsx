@@ -9,6 +9,7 @@ import { LeadFormDialog } from "@/components/lead-form-dialog";
 import { formatBRL } from "@/lib/mock-data";
 import { useLeads, useUpdateLeadStatus, type LeadRow, type LeadStatus } from "@/hooks/use-leads";
 import { useScoreLead } from "@/hooks/use-score-lead";
+import { useRealtimeSync } from "@/hooks/use-realtime";
 import { Plus, Filter, Sparkles, Loader2 } from "lucide-react";
 
 const STAGES: { id: LeadStatus; label: string; color: string }[] = [
@@ -141,6 +142,10 @@ function Column({ stage, leads }: { stage: typeof STAGES[number]; leads: LeadRow
 }
 
 function PipelinePage() {
+  useRealtimeSync([
+    { table: "leads", queryKeys: [["leads"]] },
+    { table: "activities", queryKeys: [["activities"]] },
+  ]);
   const { data: leads = [], isLoading } = useLeads();
   const updateStatus = useUpdateLeadStatus();
   const [activeId, setActiveId] = useState<string | null>(null);
