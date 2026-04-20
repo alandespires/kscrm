@@ -6,6 +6,7 @@ import {
 } from "@dnd-kit/core";
 import { AppShell } from "@/components/app-shell";
 import { LeadFormDialog } from "@/components/lead-form-dialog";
+import { RealtimeBadge } from "@/components/realtime-badge";
 import { formatBRL } from "@/lib/mock-data";
 import { useLeads, useUpdateLeadStatus, type LeadRow, type LeadStatus } from "@/hooks/use-leads";
 import { useScoreLead } from "@/hooks/use-score-lead";
@@ -170,7 +171,8 @@ function PipelinePage() {
       title="Pipeline"
       subtitle={`${leads.length} leads no funil · ${formatBRL(totalValue)} em pipeline`}
       action={
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
+          <RealtimeBadge />
           <button className="inline-flex h-10 items-center gap-1.5 rounded-lg border border-border bg-surface-1 px-3 text-sm text-muted-foreground hover:text-foreground">
             <Filter className="h-3.5 w-3.5" /> Filtros
           </button>

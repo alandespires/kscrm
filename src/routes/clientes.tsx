@@ -1,6 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState, type FormEvent } from "react";
 import { AppShell, PrimaryButton, StatusPill } from "@/components/app-shell";
+import { RealtimeBadge } from "@/components/realtime-badge";
+import { useRealtimeSync } from "@/hooks/use-realtime";
+import { ClientDetailDrawer } from "@/components/client-detail-drawer";
 import { useClients, useCreateClient, useDeleteClient, type ClientRow } from "@/hooks/use-clients";
 import { Plus, Building2, Mail, Phone, Loader2, Inbox, Trash2, X, Search } from "lucide-react";
 
@@ -16,9 +19,15 @@ function formatBRL(v: number) {
 type ClientFilter = "todos" | "com_contrato" | "sem_contrato";
 
 function ClientesPage() {
+  useRealtimeSync([
+    { table: "clients", queryKeys: [["clients"]] },
+    { table: "activities", queryKeys: [["activities"], ["client-activities"]] },
+    { table: "deals", queryKeys: [["deals"], ["client-deals"]] },
+  ]);
   const { data: clients = [], isLoading } = useClients();
   const create = useCreateClient();
   const del = useDeleteClient();
+  const [selected, setSelected] = useState<ClientRow | null>(null);
 
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<ClientFilter>("todos");
@@ -58,7 +67,12 @@ function ClientesPage() {
     <AppShell
       title="Clientes"
       subtitle={`${clients.length} contas ativas · ${formatBRL(totalMRR)} em contratos`}
-      action={<PrimaryButton icon={Plus} onClick={() => setOpen(true)}>Novo cliente</PrimaryButton>}
+      action={
+        <div className="flex items-center gap-2">
+          <RealtimeBadge />
+          <PrimaryButton icon={Plus} onClick={() => setOpen(true)}>Novo cliente</PrimaryButton>
+        </div>
+      }
     >
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <div className="relative min-w-[220px] max-w-md flex-1">
@@ -96,12 +110,12 @@ function ClientesPage() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {filtered.map((c: ClientRow) => (
-            <div key={c.id} className="group rounded-2xl border border-border bg-surface-2 p-5 shadow-card transition hover:border-primary/40 hover:shadow-elevated">
+            <div key={c.id} onClick={() => setSelected(c)} className="group cursor-pointer rounded-2xl border border-border bg-surface-2 p-5 shadow-card transition hover:border-primary/40 hover:shadow-elevated">
               <div className="flex items-start justify-between">
                 <div className="grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br from-primary/20 to-surface-3 text-primary">
                   <Building2 className="h-5 w-5" />
                 </div>
-                <button onClick={() => { if (confirm(`Remover ${c.nome}?`)) del.mutate(c.id); }} className="grid h-8 w-8 place-items-center rounded-md text-muted-foreground hover:bg-surface-3 hover:text-destructive">
+                <button onClick={(e) => { e.stopPropagation(); if (confirm(`Remover ${c.nome}?`)) del.mutate(c.id); }} className="grid h-8 w-8 place-items-center rounded-md text-muted-foreground hover:bg-surface-3 hover:text-destructive">
                   <Trash2 className="h-4 w-4" />
                 </button>
               </div>
@@ -157,6 +171,8 @@ function ClientesPage() {
           </form>
         </div>
       )}
+
+      <ClientDetailDrawer client={selected} onClose={() => setSelected(null)} />
     </AppShell>
   );
 }
