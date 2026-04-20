@@ -217,3 +217,6 @@ function TarefasPage() {
     </AppShell>
   );
 }
+
+const selectCls = "h-10 rounded-lg border border-border bg-surface-1 px-3 text-xs font-medium text-foreground focus:border-primary/60 focus:outline-none";
+
