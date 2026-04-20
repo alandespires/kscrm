@@ -48,6 +48,12 @@ function TarefasPage() {
   const [prazo, setPrazo] = useState("");
   const [leadId, setLeadId] = useState<string>("");
 
+  // filtros
+  const [query, setQuery] = useState("");
+  const [fPrioridade, setFPrioridade] = useState<TaskPriority | "todas">("todas");
+  const [fPrazo, setFPrazo] = useState<PrazoFilter>("todos");
+  const [fLead, setFLead] = useState<string>("todos");
+
   async function submit(e: FormEvent) {
     e.preventDefault();
     await create.mutateAsync({
@@ -59,8 +65,30 @@ function TarefasPage() {
     setTitulo(""); setPrazo(""); setLeadId(""); setPrioridade("media"); setOpen(false);
   }
 
-  const ativas = tasks.filter((t) => t.status !== "concluida" && t.status !== "cancelada");
-  const concluidas = tasks.filter((t) => t.status === "concluida");
+  const filteredTasks = useMemo(() => {
+    const now = new Date();
+    const endToday = new Date(now); endToday.setHours(23, 59, 59, 999);
+    const endWeek = new Date(now); endWeek.setDate(endWeek.getDate() + 7);
+    const q = query.trim().toLowerCase();
+    return tasks.filter((t) => {
+      if (fPrioridade !== "todas" && t.prioridade !== fPrioridade) return false;
+      if (fLead !== "todos") {
+        if (fLead === "sem_lead" ? !!t.lead_id : t.lead_id !== fLead) return false;
+      }
+      if (fPrazo !== "todos") {
+        const d = t.prazo ? new Date(t.prazo) : null;
+        if (fPrazo === "sem_prazo" && d) return false;
+        if (fPrazo === "hoje" && (!d || d > endToday || d < new Date(now.toDateString()))) return false;
+        if (fPrazo === "atrasadas" && (!d || d >= now || t.status === "concluida")) return false;
+        if (fPrazo === "semana" && (!d || d > endWeek)) return false;
+      }
+      if (q && !t.titulo.toLowerCase().includes(q)) return false;
+      return true;
+    });
+  }, [tasks, query, fPrioridade, fPrazo, fLead]);
+
+  const ativas = filteredTasks.filter((t) => t.status !== "concluida" && t.status !== "cancelada");
+  const concluidas = filteredTasks.filter((t) => t.status === "concluida");
   const groups: { label: string; items: TaskRow[] }[] = [
     { label: "Hoje & Atrasadas", items: ativas.filter((t) => t.prazo && new Date(t.prazo) <= new Date(new Date().setHours(23, 59, 59))) },
     { label: "Próximas", items: ativas.filter((t) => !t.prazo || new Date(t.prazo) > new Date(new Date().setHours(23, 59, 59))) },
