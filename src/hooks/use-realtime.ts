@@ -11,8 +11,7 @@ export function useRealtimeSync(tables: { table: string; queryKeys: string[][] }
   useEffect(() => {
     const channel = supabase.channel(`realtime-${tables.map((t) => t.table).join("-")}`);
     tables.forEach(({ table, queryKeys }) => {
-      channel.on(
-        // @ts-expect-error - postgres_changes typing
+      (channel as any).on(
         "postgres_changes",
         { event: "*", schema: "public", table },
         () => {
