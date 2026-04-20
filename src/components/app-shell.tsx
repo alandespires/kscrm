@@ -1,9 +1,10 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import {
   LayoutDashboard, Users, Kanban, Building2, ListChecks,
-  Zap, Sparkles, BarChart3, Settings, Search, Bell, Plus,
+  Zap, Sparkles, BarChart3, Settings, Search, Bell, Plus, LogOut, Loader2,
 } from "lucide-react";
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
+import { useAuth } from "@/contexts/auth-context";
 
 const NAV = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -21,6 +22,24 @@ export function AppShell({ children, title, subtitle, action }: {
   children: ReactNode; title: string; subtitle?: string; action?: ReactNode;
 }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { user, loading, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!loading && !user) navigate({ to: "/auth" });
+  }, [user, loading, navigate]);
+
+  if (loading || !user) {
+    return (
+      <div className="grid min-h-screen place-items-center bg-background">
+        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  const initials = (user.user_metadata?.full_name || user.email || "U")
+    .split(" ").map((s: string) => s[0]).join("").slice(0, 2).toUpperCase();
+  const displayName = user.user_metadata?.full_name || user.email?.split("@")[0];
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -93,13 +112,20 @@ export function AppShell({ children, title, subtitle, action }: {
             </button>
             <div className="flex items-center gap-2.5 rounded-lg border border-border bg-surface-1 py-1 pl-1 pr-3">
               <div className="grid h-7 w-7 place-items-center rounded-md bg-gradient-to-br from-primary to-[oklch(0.55_0.16_35)] text-xs font-bold text-primary-foreground">
-                AD
+                {initials}
               </div>
               <div className="hidden leading-tight sm:block">
-                <div className="text-xs font-semibold">Anna D.</div>
-                <div className="text-[10px] text-muted-foreground">Sales Manager</div>
+                <div className="text-xs font-semibold">{displayName}</div>
+                <div className="text-[10px] text-muted-foreground">{user.email}</div>
               </div>
             </div>
+            <button
+              onClick={() => signOut()}
+              title="Sair"
+              className="grid h-9 w-9 place-items-center rounded-lg border border-border bg-surface-1 text-muted-foreground transition hover:text-foreground"
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
           </div>
         </header>
 

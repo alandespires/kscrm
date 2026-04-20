@@ -1,0 +1,111 @@
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+
+export type LeadStatus =
+  | "novo" | "contato_inicial" | "qualificacao" | "proposta" | "negociacao" | "fechado" | "perdido";
+
+export type LeadRow = {
+  id: string;
+  nome: string;
+  empresa: string | null;
+  email: string | null;
+  whatsapp: string | null;
+  origem: string | null;
+  interesse: string | null;
+  observacoes: string | null;
+  tags: string[] | null;
+  status: LeadStatus;
+  valor_estimado: number | null;
+  ai_score: number | null;
+  ai_resumo: string | null;
+  ai_sugestao: string | null;
+  owner_id: string | null;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+  ultimo_contato_em: string | null;
+};
+
+export function useLeads() {
+  return useQuery({
+    queryKey: ["leads"],
+    queryFn: async (): Promise<LeadRow[]> => {
+      const { data, error } = await supabase
+        .from("leads")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as LeadRow[];
+    },
+  });
+}
+
+export function useCreateLead() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: {
+      nome: string; empresa?: string; email?: string; whatsapp?: string;
+      origem?: string; interesse?: string; observacoes?: string;
+      valor_estimado?: number; status?: LeadStatus;
+    }) => {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) throw new Error("Não autenticado");
+      const { data, error } = await supabase
+        .from("leads")
+        .insert({
+          ...input,
+          created_by: u.user.id,
+          owner_id: u.user.id,
+          status: input.status ?? "novo",
+        })
+        .select()
+        .single();
+      if (error) throw error;
+      return data as LeadRow;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["leads"] });
+      toast.success("Lead criado");
+    },
+    onError: (e: any) => toast.error(e.message ?? "Erro ao criar lead"),
+  });
+}
+
+export function useUpdateLeadStatus() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: LeadStatus }) => {
+      const { error } = await supabase.from("leads").update({ status }).eq("id", id);
+      if (error) throw error;
+    },
+    onMutate: async ({ id, status }) => {
+      await qc.cancelQueries({ queryKey: ["leads"] });
+      const prev = qc.getQueryData<LeadRow[]>(["leads"]);
+      if (prev) {
+        qc.setQueryData<LeadRow[]>(["leads"], prev.map((l) => (l.id === id ? { ...l, status } : l)));
+      }
+      return { prev };
+    },
+    onError: (e: any, _v, ctx) => {
+      if (ctx?.prev) qc.setQueryData(["leads"], ctx.prev);
+      toast.error(e.message ?? "Erro ao mover lead");
+    },
+    onSettled: () => qc.invalidateQueries({ queryKey: ["leads"] }),
+  });
+}
+
+export function useDeleteLead() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("leads").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["leads"] });
+      toast.success("Lead removido");
+    },
+    onError: (e: any) => toast.error(e.message ?? "Erro ao remover"),
+  });
+}
