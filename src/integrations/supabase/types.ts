@@ -750,6 +750,37 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_tenant_with_owner: {
+        Args: {
+          _email_principal?: string
+          _nome: string
+          _responsavel?: string
+          _slug: string
+        }
+        Returns: {
+          created_at: string
+          created_by: string | null
+          email_principal: string | null
+          id: string
+          logo_url: string | null
+          nome: string
+          observacoes: string | null
+          plan_id: string | null
+          proximo_vencimento: string | null
+          responsavel: string | null
+          slug: string
+          status: Database["public"]["Enums"]["tenant_status"]
+          trial_ate: string | null
+          updated_at: string
+          whatsapp: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "tenants"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       execute_automations: {
         Args: {
           _lead: Database["public"]["Tables"]["leads"]["Row"]
