@@ -8,6 +8,7 @@ import {
   type AutomationAction, type AutomationTrigger,
 } from "@/hooks/use-automations";
 import { Plus, Zap, ArrowRight, Loader2, Trash2, X, Power, ListChecks, MessageSquare, Inbox } from "lucide-react";
+import { AutomationListSkeleton } from "@/components/skeletons";
 
 export const Route = createFileRoute("/automacao")({
   head: () => ({ meta: [{ title: "Automação — Nexus CRM" }] }),
@@ -54,7 +55,7 @@ function AutomacaoPage() {
       }
     >
       {isLoading ? (
-        <div className="grid place-items-center py-20"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+        <AutomationListSkeleton count={3} />
       ) : rules.length === 0 ? (
         <div className="grid place-items-center rounded-2xl border border-dashed border-border bg-surface-1/40 py-20 text-center">
           <Inbox className="mb-3 h-10 w-10 text-muted-foreground" />

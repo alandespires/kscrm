@@ -4,6 +4,7 @@ import { AppShell, PrimaryButton, StatusPill } from "@/components/app-shell";
 import { useTasks, useToggleTask, useDeleteTask, useCreateTask, type TaskPriority, type TaskRow } from "@/hooks/use-tasks";
 import { useLeads } from "@/hooks/use-leads";
 import { Plus, Calendar, CheckCircle2, Circle, Loader2, Trash2, Inbox, X, Search } from "lucide-react";
+import { TaskGroupsSkeleton } from "@/components/skeletons";
 
 type PrazoFilter = "todos" | "hoje" | "atrasadas" | "semana" | "sem_prazo";
 
@@ -125,7 +126,7 @@ function TarefasPage() {
       </div>
 
       {isLoading ? (
-        <div className="grid place-items-center py-20"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+        <TaskGroupsSkeleton />
       ) : tasks.length === 0 ? (
         <div className="grid place-items-center rounded-2xl border border-dashed border-border bg-surface-1/40 py-20 text-center">
           <Inbox className="mb-3 h-10 w-10 text-muted-foreground" />

@@ -4,7 +4,7 @@ import { AppShell, StatusPill } from "@/components/app-shell";
 import { LeadFormDialog } from "@/components/lead-form-dialog";
 import {
   ArrowUpRight, TrendingUp, TrendingDown, Users, Target, DollarSign,
-  CheckCircle2, Sparkles, Plus, ArrowRight, Phone, Mail, Zap, Loader2, ChevronDown,
+  CheckCircle2, Sparkles, Plus, ArrowRight, Phone, Mail, Zap, ChevronDown,
 } from "lucide-react";
 import {
   AreaChart, Area, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid,
@@ -14,6 +14,8 @@ import { useLeads, type LeadStatus } from "@/hooks/use-leads";
 import { useActivities, useDeals, useRevenueSeries } from "@/hooks/use-dashboard";
 import { useInsights } from "@/hooks/use-insights";
 import { useRealtimeSync } from "@/hooks/use-realtime";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ListSkeleton } from "@/components/skeletons";
 
 export const Route = createFileRoute("/")({
   head: () => ({ meta: [{ title: "Dashboard — Nexus CRM" }] }),
@@ -52,7 +54,7 @@ function KpiCard({ label, value, delta, trend, icon: Icon, accent, loading }: {
       <div className="mt-5 text-xs uppercase tracking-wider text-muted-foreground">{label}</div>
       <div className="mt-1 flex items-baseline gap-2">
         {loading ? (
-          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+          <Skeleton className="h-7 w-24" />
         ) : (
           <>
             <span className="text-2xl font-semibold tracking-tight">{value}</span>
@@ -215,7 +217,7 @@ export function DashboardPage() {
           </div>
           <div className="h-72 px-2 py-4">
             {revenue.isLoading ? (
-              <div className="grid h-full place-items-center text-muted-foreground"><Loader2 className="h-6 w-6 animate-spin" /></div>
+              <Skeleton className="h-full w-full rounded-lg" />
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={revenue.data ?? []} margin={{ top: 10, right: 24, left: 0, bottom: 0 }}>
@@ -258,7 +260,19 @@ export function DashboardPage() {
           </div>
           <div className="space-y-2 p-4">
             {insights.isLoading ? (
-              <div className="grid place-items-center py-8 text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin" /></div>
+              <div className="space-y-2">
+                {[0,1,2].map((i) => (
+                  <div key={i} className="rounded-xl border border-border bg-surface-2 p-4">
+                    <div className="mb-2 flex items-center justify-between">
+                      <Skeleton className="h-5 w-20 rounded-full" />
+                      <Skeleton className="h-3 w-3" />
+                    </div>
+                    <Skeleton className="h-3.5 w-3/4" />
+                    <Skeleton className="mt-2 h-2.5 w-full" />
+                    <Skeleton className="mt-1.5 h-2.5 w-2/3" />
+                  </div>
+                ))}
+              </div>
             ) : topInsights.length === 0 ? (
               <div className="rounded-xl border border-dashed border-border p-6 text-center text-xs text-muted-foreground">
                 Nenhum insight pendente. Gere análises na página de Leads.
@@ -325,7 +339,7 @@ export function DashboardPage() {
             <span className="text-xs text-muted-foreground">{topActivities.length}</span>
           </div>
           {activities.isLoading ? (
-            <div className="grid place-items-center py-10 text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin" /></div>
+            <ListSkeleton rows={5} />
           ) : topActivities.length === 0 ? (
             <div className="px-6 py-10 text-center text-xs text-muted-foreground">
               Nenhuma atividade registrada ainda.

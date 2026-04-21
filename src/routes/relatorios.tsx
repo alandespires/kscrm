@@ -6,6 +6,8 @@ import {
   AreaChart, Area, LineChart, Line,
 } from "recharts";
 import { Loader2, TrendingUp, Target, DollarSign, Trophy } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { KpiSkeleton } from "@/components/skeletons";
 import { useLeads } from "@/hooks/use-leads";
 import { useDeals, useRevenueSeries } from "@/hooks/use-dashboard";
 import { useQuery } from "@tanstack/react-query";
@@ -107,12 +109,16 @@ function RelatoriosPage() {
 
   return (
     <AppShell title="Relatórios" subtitle="Performance comercial em tempo real">
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <KpiTile label="Taxa de fechamento" value={`${taxa}%`} icon={Target} hint={`${fechados} fechados / ${perdidos} perdidos`} />
-        <KpiTile label="Receita fechada" value={formatBRL(receitaFechada)} icon={DollarSign} />
-        <KpiTile label="Pipeline em aberto" value={formatBRL(pipeline)} icon={TrendingUp} />
-        <KpiTile label="Ticket médio" value={formatBRL(ticket)} icon={Trophy} />
-      </div>
+      {isLoading ? (
+        <KpiSkeleton count={4} />
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <KpiTile label="Taxa de fechamento" value={`${taxa}%`} icon={Target} hint={`${fechados} fechados / ${perdidos} perdidos`} />
+          <KpiTile label="Receita fechada" value={formatBRL(receitaFechada)} icon={DollarSign} />
+          <KpiTile label="Pipeline em aberto" value={formatBRL(pipeline)} icon={TrendingUp} />
+          <KpiTile label="Ticket médio" value={formatBRL(ticket)} icon={Trophy} />
+        </div>
+      )}
 
       <div className="mt-5 grid gap-5 lg:grid-cols-2">
         {/* Funil */}
@@ -121,7 +127,7 @@ function RelatoriosPage() {
           <p className="text-xs text-muted-foreground">Volume de leads por estágio</p>
           <div className="mt-4 h-72">
             {isLoading ? (
-              <div className="grid h-full place-items-center"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
+              <Skeleton className="h-full w-full rounded-lg" />            
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={funnel} layout="vertical" margin={{ left: 10 }}>
@@ -146,7 +152,7 @@ function RelatoriosPage() {
           <p className="text-xs text-muted-foreground">Previsto vs. fechado (últimos 7 meses, R$ mil)</p>
           <div className="mt-4 h-72">
             {revenue.isLoading ? (
-              <div className="grid h-full place-items-center"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
+              <Skeleton className="h-full w-full rounded-lg" />            
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={revenue.data ?? []}>
@@ -178,7 +184,7 @@ function RelatoriosPage() {
           <p className="text-xs text-muted-foreground">Acompanhamento do desempenho mensal</p>
           <div className="mt-4 h-64">
             {revenue.isLoading ? (
-              <div className="grid h-full place-items-center"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
+              <Skeleton className="h-full w-full rounded-lg" />
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={(revenue.data ?? []).map((r) => ({
@@ -202,7 +208,18 @@ function RelatoriosPage() {
           <p className="text-xs text-muted-foreground">Top fechadores por receita</p>
           <div className="mt-4">
             {ranking.isLoading ? (
-              <div className="grid h-40 place-items-center"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
+              <ul className="space-y-2">
+                {[0,1,2,3].map((i) => (
+                  <li key={i} className="flex items-center gap-3 rounded-lg border border-border bg-surface-1 p-3">
+                    <Skeleton className="h-8 w-8 rounded-md" />
+                    <div className="flex-1 space-y-1.5">
+                      <Skeleton className="h-3 w-2/3" />
+                      <Skeleton className="h-2.5 w-1/3" />
+                    </div>
+                    <Skeleton className="h-3 w-20" />
+                  </li>
+                ))}
+              </ul>
             ) : (ranking.data ?? []).length === 0 ? (
               <div className="rounded-lg border border-dashed border-border p-8 text-center text-xs text-muted-foreground">
                 Nenhum negócio fechado ainda.

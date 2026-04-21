@@ -5,6 +5,7 @@ import { useInsights, useMarkInsightRead, type Priority } from "@/hooks/use-insi
 import { useLeads } from "@/hooks/use-leads";
 import { formatBRL } from "@/lib/mock-data";
 import { Sparkles, ArrowRight, TrendingUp, TrendingDown, Flame, Check, Loader2, Inbox } from "lucide-react";
+import { FeatureCardsSkeleton } from "@/components/skeletons";
 
 export const Route = createFileRoute("/insights")({
   head: () => ({ meta: [{ title: "IA Insights — Nexus CRM" }] }),
@@ -65,9 +66,7 @@ function InsightsPage() {
       </div>
 
       {insights.isLoading ? (
-        <div className="grid place-items-center py-20 text-muted-foreground">
-          <Loader2 className="h-6 w-6 animate-spin" />
-        </div>
+        <FeatureCardsSkeleton count={6} />
       ) : !insights.data || insights.data.length === 0 ? (
         <div className="grid place-items-center rounded-2xl border border-dashed border-border bg-surface-2 py-16 text-center">
           <Inbox className="mb-3 h-8 w-8 text-muted-foreground" />
