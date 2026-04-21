@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState, type FormEvent } from "react";
 import { Sparkles, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
+import { useTenant } from "@/contexts/tenant-context";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/auth")({
@@ -12,6 +13,7 @@ export const Route = createFileRoute("/auth")({
 function AuthPage() {
   const navigate = useNavigate();
   const { user, loading, signIn, signUp } = useAuth();
+  const { loading: tenantLoading, isSuperAdmin, memberships } = useTenant();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,8 +21,15 @@ function AuthPage() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    if (!loading && user) navigate({ to: "/" });
-  }, [user, loading, navigate]);
+    if (loading || !user || tenantLoading) return;
+    if (memberships.length > 0) {
+      navigate({ to: "/t/$tenantSlug", params: { tenantSlug: memberships[0].tenant.slug } });
+    } else if (isSuperAdmin) {
+      navigate({ to: "/super-admin" });
+    } else {
+      navigate({ to: "/onboarding" });
+    }
+  }, [user, loading, tenantLoading, memberships, isSuperAdmin, navigate]);
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
