@@ -7,6 +7,7 @@ import { useLeads, useDeleteLead, type LeadRow, type LeadStatus } from "@/hooks/
 import { useScoreLead } from "@/hooks/use-score-lead";
 import { useRealtimeSync } from "@/hooks/use-realtime";
 import { Download, Filter, Trash2, Mail, Phone, Loader2, Inbox, Sparkles } from "lucide-react";
+import { TableRowsSkeleton } from "@/components/skeletons";
 
 export const Route = createFileRoute("/leads")({
   head: () => ({ meta: [{ title: "Leads — Nexus CRM" }] }),
@@ -72,7 +73,22 @@ function LeadsPage() {
       }
     >
       {isLoading ? (
-        <div className="grid place-items-center py-20"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+        <div className="overflow-hidden rounded-2xl border border-border bg-surface-2 shadow-card">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="border-b border-border bg-surface-1/60">
+                <tr className="text-left text-[11px] uppercase tracking-wider text-muted-foreground">
+                  <th className="px-5 py-3 font-medium">Lead</th>
+                  <th className="px-5 py-3 font-medium">Empresa</th>
+                  <th className="px-5 py-3 font-medium">Contato</th>
+                  <th className="px-5 py-3 font-medium">Status</th>
+                  <th className="px-5 py-3 font-medium">Score</th>
+                </tr>
+              </thead>
+              <tbody><TableRowsSkeleton rows={6} cols={5} /></tbody>
+            </table>
+          </div>
+        </div>
       ) : leads.length === 0 ? (
         <div className="grid place-items-center rounded-2xl border border-dashed border-border bg-surface-1/40 py-20 text-center">
           <Inbox className="mb-3 h-10 w-10 text-muted-foreground" />

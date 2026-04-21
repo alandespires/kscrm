@@ -6,6 +6,7 @@ import { useRealtimeSync } from "@/hooks/use-realtime";
 import { ClientDetailDrawer } from "@/components/client-detail-drawer";
 import { useClients, useCreateClient, useDeleteClient, type ClientRow } from "@/hooks/use-clients";
 import { Plus, Building2, Mail, Phone, Loader2, Inbox, Trash2, X, Search } from "lucide-react";
+import { CardGridSkeleton } from "@/components/skeletons";
 
 export const Route = createFileRoute("/clientes")({
   head: () => ({ meta: [{ title: "Clientes — Nexus CRM" }] }),
@@ -96,7 +97,7 @@ function ClientesPage() {
       </div>
 
       {isLoading ? (
-        <div className="grid place-items-center py-20"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+        <CardGridSkeleton count={6} />
       ) : clients.length === 0 ? (
         <div className="grid place-items-center rounded-2xl border border-dashed border-border bg-surface-1/40 py-20 text-center">
           <Inbox className="mb-3 h-10 w-10 text-muted-foreground" />

@@ -6,6 +6,8 @@ import {
   AreaChart, Area, LineChart, Line,
 } from "recharts";
 import { Loader2, TrendingUp, Target, DollarSign, Trophy } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { KpiSkeleton } from "@/components/skeletons";
 import { useLeads } from "@/hooks/use-leads";
 import { useDeals, useRevenueSeries } from "@/hooks/use-dashboard";
 import { useQuery } from "@tanstack/react-query";

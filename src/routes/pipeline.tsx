@@ -12,6 +12,7 @@ import { useLeads, useUpdateLeadStatus, type LeadRow, type LeadStatus } from "@/
 import { useScoreLead } from "@/hooks/use-score-lead";
 import { useRealtimeSync } from "@/hooks/use-realtime";
 import { Plus, Filter, Sparkles, Loader2 } from "lucide-react";
+import { KanbanSkeleton } from "@/components/skeletons";
 
 const STAGES: { id: LeadStatus; label: string; color: string }[] = [
   { id: "novo", label: "Novo Lead", color: "oklch(0.65 0.02 250)" },
@@ -181,7 +182,7 @@ function PipelinePage() {
       }
     >
       {isLoading ? (
-        <div className="grid place-items-center py-20"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+        <KanbanSkeleton columns={6} />
       ) : (
         <DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd}>
           <div className="-mx-5 overflow-x-auto px-5 pb-4 md:-mx-8 md:px-8">
