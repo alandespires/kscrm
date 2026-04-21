@@ -22,6 +22,7 @@ export type Database = {
           id: string
           lead_id: string | null
           metadata: Json | null
+          tenant_id: string
           tipo: Database["public"]["Enums"]["activity_type"]
           user_id: string
         }
@@ -32,6 +33,7 @@ export type Database = {
           id?: string
           lead_id?: string | null
           metadata?: Json | null
+          tenant_id: string
           tipo: Database["public"]["Enums"]["activity_type"]
           user_id: string
         }
@@ -42,6 +44,7 @@ export type Database = {
           id?: string
           lead_id?: string | null
           metadata?: Json | null
+          tenant_id?: string
           tipo?: Database["public"]["Enums"]["activity_type"]
           user_id?: string
         }
@@ -60,6 +63,13 @@ export type Database = {
             referencedRelation: "leads"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "activities_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
         ]
       }
       ai_insights: {
@@ -70,6 +80,7 @@ export type Database = {
           lead_id: string | null
           lido: boolean | null
           prioridade: Database["public"]["Enums"]["task_priority"] | null
+          tenant_id: string
           tipo: string
           titulo: string
         }
@@ -80,6 +91,7 @@ export type Database = {
           lead_id?: string | null
           lido?: boolean | null
           prioridade?: Database["public"]["Enums"]["task_priority"] | null
+          tenant_id: string
           tipo: string
           titulo: string
         }
@@ -90,6 +102,7 @@ export type Database = {
           lead_id?: string | null
           lido?: boolean | null
           prioridade?: Database["public"]["Enums"]["task_priority"] | null
+          tenant_id?: string
           tipo?: string
           titulo?: string
         }
@@ -101,6 +114,13 @@ export type Database = {
             referencedRelation: "leads"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "ai_insights_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
         ]
       }
       automation_runs: {
@@ -110,6 +130,7 @@ export type Database = {
           id: string
           lead_id: string | null
           resultado: Json | null
+          tenant_id: string
         }
         Insert: {
           automation_id: string
@@ -117,6 +138,7 @@ export type Database = {
           id?: string
           lead_id?: string | null
           resultado?: Json | null
+          tenant_id: string
         }
         Update: {
           automation_id?: string
@@ -124,6 +146,7 @@ export type Database = {
           id?: string
           lead_id?: string | null
           resultado?: Json | null
+          tenant_id?: string
         }
         Relationships: [
           {
@@ -140,6 +163,13 @@ export type Database = {
             referencedRelation: "leads"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "automation_runs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
         ]
       }
       automations: {
@@ -152,6 +182,7 @@ export type Database = {
           execucoes: number
           id: string
           nome: string
+          tenant_id: string
           trigger_tipo: Database["public"]["Enums"]["automation_trigger"]
           trigger_valor: string | null
           updated_at: string
@@ -165,6 +196,7 @@ export type Database = {
           execucoes?: number
           id?: string
           nome: string
+          tenant_id: string
           trigger_tipo: Database["public"]["Enums"]["automation_trigger"]
           trigger_valor?: string | null
           updated_at?: string
@@ -178,11 +210,20 @@ export type Database = {
           execucoes?: number
           id?: string
           nome?: string
+          tenant_id?: string
           trigger_tipo?: Database["public"]["Enums"]["automation_trigger"]
           trigger_valor?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "automations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       clients: {
         Row: {
@@ -196,6 +237,7 @@ export type Database = {
           nome: string
           observacoes: string | null
           owner_id: string | null
+          tenant_id: string
           updated_at: string
           whatsapp: string | null
         }
@@ -210,6 +252,7 @@ export type Database = {
           nome: string
           observacoes?: string | null
           owner_id?: string | null
+          tenant_id: string
           updated_at?: string
           whatsapp?: string | null
         }
@@ -224,6 +267,7 @@ export type Database = {
           nome?: string
           observacoes?: string | null
           owner_id?: string | null
+          tenant_id?: string
           updated_at?: string
           whatsapp?: string | null
         }
@@ -233,6 +277,13 @@ export type Database = {
             columns: ["lead_id"]
             isOneToOne: false
             referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clients_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
         ]
@@ -247,6 +298,7 @@ export type Database = {
           owner_id: string | null
           probabilidade: number | null
           stage: Database["public"]["Enums"]["lead_status"]
+          tenant_id: string
           titulo: string
           updated_at: string
           valor: number
@@ -260,6 +312,7 @@ export type Database = {
           owner_id?: string | null
           probabilidade?: number | null
           stage?: Database["public"]["Enums"]["lead_status"]
+          tenant_id: string
           titulo: string
           updated_at?: string
           valor?: number
@@ -273,6 +326,7 @@ export type Database = {
           owner_id?: string | null
           probabilidade?: number | null
           stage?: Database["public"]["Enums"]["lead_status"]
+          tenant_id?: string
           titulo?: string
           updated_at?: string
           valor?: number
@@ -283,6 +337,13 @@ export type Database = {
             columns: ["lead_id"]
             isOneToOne: false
             referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deals_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
         ]
@@ -304,6 +365,7 @@ export type Database = {
           owner_id: string | null
           status: Database["public"]["Enums"]["lead_status"]
           tags: string[] | null
+          tenant_id: string
           ultimo_contato_em: string | null
           updated_at: string
           valor_estimado: number | null
@@ -325,6 +387,7 @@ export type Database = {
           owner_id?: string | null
           status?: Database["public"]["Enums"]["lead_status"]
           tags?: string[] | null
+          tenant_id: string
           ultimo_contato_em?: string | null
           updated_at?: string
           valor_estimado?: number | null
@@ -346,10 +409,61 @@ export type Database = {
           owner_id?: string | null
           status?: Database["public"]["Enums"]["lead_status"]
           tags?: string[] | null
+          tenant_id?: string
           ultimo_contato_em?: string | null
           updated_at?: string
           valor_estimado?: number | null
           whatsapp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leads_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plans: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          features: Json
+          id: string
+          max_leads: number | null
+          max_usuarios: number | null
+          nome: string
+          ordem: number
+          preco_mensal: number
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          features?: Json
+          id?: string
+          max_leads?: number | null
+          max_usuarios?: number | null
+          nome: string
+          ordem?: number
+          preco_mensal?: number
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          features?: Json
+          id?: string
+          max_leads?: number | null
+          max_usuarios?: number | null
+          nome?: string
+          ordem?: number
+          preco_mensal?: number
+          slug?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -383,6 +497,66 @@ export type Database = {
         }
         Relationships: []
       }
+      subscriptions: {
+        Row: {
+          cancelada_em: string | null
+          created_at: string
+          id: string
+          iniciada_em: string
+          metadata: Json
+          motivo_cancelamento: string | null
+          plan_id: string
+          proximo_vencimento: string | null
+          status: Database["public"]["Enums"]["tenant_status"]
+          tenant_id: string
+          updated_at: string
+          valor: number
+        }
+        Insert: {
+          cancelada_em?: string | null
+          created_at?: string
+          id?: string
+          iniciada_em?: string
+          metadata?: Json
+          motivo_cancelamento?: string | null
+          plan_id: string
+          proximo_vencimento?: string | null
+          status?: Database["public"]["Enums"]["tenant_status"]
+          tenant_id: string
+          updated_at?: string
+          valor?: number
+        }
+        Update: {
+          cancelada_em?: string | null
+          created_at?: string
+          id?: string
+          iniciada_em?: string
+          metadata?: Json
+          motivo_cancelamento?: string | null
+          plan_id?: string
+          proximo_vencimento?: string | null
+          status?: Database["public"]["Enums"]["tenant_status"]
+          tenant_id?: string
+          updated_at?: string
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscriptions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tasks: {
         Row: {
           assignee_id: string | null
@@ -396,6 +570,7 @@ export type Database = {
           prazo: string | null
           prioridade: Database["public"]["Enums"]["task_priority"]
           status: Database["public"]["Enums"]["task_status"]
+          tenant_id: string
           titulo: string
           updated_at: string
         }
@@ -411,6 +586,7 @@ export type Database = {
           prazo?: string | null
           prioridade?: Database["public"]["Enums"]["task_priority"]
           status?: Database["public"]["Enums"]["task_status"]
+          tenant_id: string
           titulo: string
           updated_at?: string
         }
@@ -426,6 +602,7 @@ export type Database = {
           prazo?: string | null
           prioridade?: Database["public"]["Enums"]["task_priority"]
           status?: Database["public"]["Enums"]["task_status"]
+          tenant_id?: string
           titulo?: string
           updated_at?: string
         }
@@ -442,6 +619,107 @@ export type Database = {
             columns: ["lead_id"]
             isOneToOne: false
             referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenant_users: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["tenant_role"]
+          tenant_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["tenant_role"]
+          tenant_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["tenant_role"]
+          tenant_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_users_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenants: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          email_principal: string | null
+          id: string
+          logo_url: string | null
+          nome: string
+          observacoes: string | null
+          plan_id: string | null
+          proximo_vencimento: string | null
+          responsavel: string | null
+          slug: string
+          status: Database["public"]["Enums"]["tenant_status"]
+          trial_ate: string | null
+          updated_at: string
+          whatsapp: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          email_principal?: string | null
+          id?: string
+          logo_url?: string | null
+          nome: string
+          observacoes?: string | null
+          plan_id?: string | null
+          proximo_vencimento?: string | null
+          responsavel?: string | null
+          slug: string
+          status?: Database["public"]["Enums"]["tenant_status"]
+          trial_ate?: string | null
+          updated_at?: string
+          whatsapp?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          email_principal?: string | null
+          id?: string
+          logo_url?: string | null
+          nome?: string
+          observacoes?: string | null
+          plan_id?: string | null
+          proximo_vencimento?: string | null
+          responsavel?: string | null
+          slug?: string
+          status?: Database["public"]["Enums"]["tenant_status"]
+          trial_ate?: string | null
+          updated_at?: string
+          whatsapp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenants_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
             referencedColumns: ["id"]
           },
         ]
@@ -486,6 +764,16 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_super_admin: { Args: { _user_id: string }; Returns: boolean }
+      is_tenant_admin: {
+        Args: { _tenant_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_tenant_member: {
+        Args: { _tenant_id: string; _user_id: string }
+        Returns: boolean
+      }
+      user_tenant_ids: { Args: { _user_id: string }; Returns: string[] }
     }
     Enums: {
       activity_type:
@@ -496,7 +784,7 @@ export type Database = {
         | "nota"
         | "movimentacao"
         | "tarefa"
-      app_role: "admin" | "gerente" | "vendedor"
+      app_role: "super_admin" | "tenant_admin" | "tenant_user"
       automation_trigger:
         | "lead_criado"
         | "status_mudou"
@@ -512,6 +800,8 @@ export type Database = {
         | "perdido"
       task_priority: "baixa" | "media" | "alta" | "urgente"
       task_status: "pendente" | "em_andamento" | "concluida" | "cancelada"
+      tenant_role: "tenant_admin" | "tenant_user"
+      tenant_status: "trial" | "ativo" | "suspenso" | "cancelado"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -648,7 +938,7 @@ export const Constants = {
         "movimentacao",
         "tarefa",
       ],
-      app_role: ["admin", "gerente", "vendedor"],
+      app_role: ["super_admin", "tenant_admin", "tenant_user"],
       automation_trigger: [
         "lead_criado",
         "status_mudou",
@@ -666,6 +956,8 @@ export const Constants = {
       ],
       task_priority: ["baixa", "media", "alta", "urgente"],
       task_status: ["pendente", "em_andamento", "concluida", "cancelada"],
+      tenant_role: ["tenant_admin", "tenant_user"],
+      tenant_status: ["trial", "ativo", "suspenso", "cancelado"],
     },
   },
 } as const
