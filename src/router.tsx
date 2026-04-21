@@ -57,12 +57,25 @@ function DefaultErrorComponent({ error, reset }: { error: Error; reset: () => vo
 
 export const getRouter = () => {
   const queryClient = new QueryClient({
-    defaultOptions: { queries: { staleTime: 30_000, refetchOnWindowFocus: false } },
+    defaultOptions: {
+      queries: {
+        // Cache agressivo — dados continuam frescos por 2 min, ficam em memória 10 min
+        staleTime: 2 * 60_000,
+        gcTime: 10 * 60_000,
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: false,
+        retry: 1,
+        // Mostra dados antigos enquanto busca novos (sem flicker de loading)
+        placeholderData: (prev: unknown) => prev,
+      },
+      mutations: { retry: 0 },
+    },
   });
   const router = createRouter({
     routeTree,
     context: { queryClient },
     scrollRestoration: true,
+    defaultPreload: "intent",
     defaultPreloadStaleTime: 0,
     defaultErrorComponent: DefaultErrorComponent,
   });
