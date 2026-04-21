@@ -97,7 +97,7 @@ type Periodo = "hoje" | "semana" | "mes" | "tudo";
 const PERIODO_LABEL: Record<Periodo, string> = { hoje: "Hoje", semana: "Esta semana", mes: "Este mês", tudo: "Todo o período" };
 const PERIODO_DAYS: Record<Periodo, number | null> = { hoje: 1, semana: 7, mes: 30, tudo: null };
 
-function DashboardPage() {
+export function DashboardPage() {
   useRealtimeSync([
     { table: "leads", queryKeys: [["leads"]] },
     { table: "deals", queryKeys: [["deals"], ["revenue_series"]] },
