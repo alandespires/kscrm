@@ -1,10 +1,11 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import {
   LayoutDashboard, Users, Kanban, Building2, ListChecks,
-  Zap, Sparkles, BarChart3, Settings, Search, Bell, Plus, LogOut, Loader2, Sun, Moon,
+  Zap, Sparkles, BarChart3, Settings, Search, Bell, Plus, LogOut, Loader2, Sun, Moon, Shield,
 } from "lucide-react";
 import { useEffect, type ReactNode } from "react";
 import { useAuth } from "@/contexts/auth-context";
+import { useTenant } from "@/contexts/tenant-context";
 import { useTheme } from "@/contexts/theme-context";
 import { useLeads } from "@/hooks/use-leads";
 import { AiCoachButton } from "@/components/ai-coach-panel";
@@ -26,14 +27,20 @@ export function AppShell({ children, title, subtitle, action }: {
 }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { user, loading, signOut } = useAuth();
+  const { loading: tenantLoading, memberships, isSuperAdmin } = useTenant();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loading && !user) navigate({ to: "/auth" });
-  }, [user, loading, navigate]);
+    if (loading) return;
+    if (!user) { navigate({ to: "/auth" }); return; }
+    if (tenantLoading) return;
+    if (memberships.length === 0 && !isSuperAdmin) {
+      navigate({ to: "/onboarding" });
+    }
+  }, [user, loading, tenantLoading, memberships, isSuperAdmin, navigate]);
 
-  if (loading || !user) {
+  if (loading || !user || tenantLoading || (memberships.length === 0 && !isSuperAdmin)) {
     return (
       <div className="grid min-h-screen place-items-center bg-background">
         <Loader2 className="h-6 w-6 animate-spin text-primary" />
@@ -80,6 +87,16 @@ export function AppShell({ children, title, subtitle, action }: {
             );
           })}
         </nav>
+
+        {isSuperAdmin && (
+          <Link
+            to="/super-admin"
+            className="mx-3 mb-2 flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/10 px-3 py-2 text-xs font-semibold text-primary transition hover:bg-primary/15"
+          >
+            <Shield className="h-3.5 w-3.5" />
+            Painel Super Admin
+          </Link>
+        )}
 
         <SidebarCoachCard />
       </aside>
