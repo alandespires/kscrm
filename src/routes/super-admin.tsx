@@ -9,6 +9,7 @@ import {
   CheckCircle2, XCircle, PauseCircle, Sparkles, ArrowLeft, Trash2, Edit3, X,
 } from "lucide-react";
 import { toast } from "sonner";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/super-admin")({
   component: SuperAdminPage,
