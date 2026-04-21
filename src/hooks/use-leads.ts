@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { requireTenantId, getActiveTenantId } from "@/contexts/tenant-context";
 import { toast } from "sonner";
 
 export type LeadStatus =
@@ -28,12 +29,15 @@ export type LeadRow = {
 };
 
 export function useLeads() {
+  const tenantId = getActiveTenantId();
   return useQuery({
-    queryKey: ["leads"],
+    queryKey: ["leads", tenantId],
+    enabled: !!tenantId,
     queryFn: async (): Promise<LeadRow[]> => {
       const { data, error } = await supabase
         .from("leads")
         .select("*")
+        .eq("tenant_id", tenantId!)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return (data ?? []) as LeadRow[];
@@ -51,10 +55,12 @@ export function useCreateLead() {
     }) => {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) throw new Error("Não autenticado");
+      const tenant_id = requireTenantId();
       const { data, error } = await supabase
         .from("leads")
         .insert({
           ...input,
+          tenant_id,
           created_by: u.user.id,
           owner_id: u.user.id,
           status: input.status ?? "novo",

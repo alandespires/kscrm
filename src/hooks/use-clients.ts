@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { requireTenantId, getActiveTenantId } from "@/contexts/tenant-context";
 import { toast } from "sonner";
 
 export type ClientRow = {
@@ -18,12 +19,15 @@ export type ClientRow = {
 };
 
 export function useClients() {
+  const tenantId = getActiveTenantId();
   return useQuery({
-    queryKey: ["clients"],
+    queryKey: ["clients", tenantId],
+    enabled: !!tenantId,
     queryFn: async (): Promise<ClientRow[]> => {
       const { data, error } = await supabase
         .from("clients")
         .select("*")
+        .eq("tenant_id", tenantId!)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return (data ?? []) as ClientRow[];
@@ -40,8 +44,10 @@ export function useCreateClient() {
     }) => {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) throw new Error("Não autenticado");
+      const tenant_id = requireTenantId();
       const { data, error } = await supabase.from("clients").insert({
         ...input,
+        tenant_id,
         owner_id: u.user.id,
       }).select().single();
       if (error) throw error;

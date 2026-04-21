@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { requireTenantId, getActiveTenantId } from "@/contexts/tenant-context";
 import { toast } from "sonner";
 
 export type ActivityType = "ligacao" | "email" | "whatsapp" | "reuniao" | "nota" | "movimentacao" | "tarefa";
@@ -16,13 +17,15 @@ export type ActivityRow = {
 };
 
 export function useLeadActivities(leadId: string | null) {
+  const tenantId = getActiveTenantId();
   return useQuery({
-    queryKey: ["activities", "lead", leadId],
-    enabled: !!leadId,
+    queryKey: ["activities", tenantId, "lead", leadId],
+    enabled: !!leadId && !!tenantId,
     queryFn: async (): Promise<ActivityRow[]> => {
       const { data, error } = await supabase
         .from("activities")
         .select("*")
+        .eq("tenant_id", tenantId!)
         .eq("lead_id", leadId!)
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -37,8 +40,10 @@ export function useCreateActivity() {
     mutationFn: async (input: { tipo: ActivityType; descricao: string; lead_id?: string; client_id?: string }) => {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) throw new Error("Não autenticado");
+      const tenant_id = requireTenantId();
       const { error } = await supabase.from("activities").insert({
         ...input,
+        tenant_id,
         user_id: u.user.id,
       });
       if (error) throw error;

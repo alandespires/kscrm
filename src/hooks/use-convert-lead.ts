@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { requireTenantId } from "@/contexts/tenant-context";
 import { toast } from "sonner";
 import type { LeadRow } from "@/hooks/use-leads";
 
@@ -9,8 +10,8 @@ export function useConvertLeadToClient() {
     mutationFn: async (lead: LeadRow) => {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) throw new Error("Não autenticado");
+      const tenant_id = requireTenantId();
 
-      // Já existe cliente vinculado?
       const { data: existing } = await supabase
         .from("clients")
         .select("id")
@@ -21,6 +22,7 @@ export function useConvertLeadToClient() {
       const { data: client, error } = await supabase
         .from("clients")
         .insert({
+          tenant_id,
           nome: lead.nome,
           empresa: lead.empresa,
           email: lead.email,
@@ -35,7 +37,6 @@ export function useConvertLeadToClient() {
         .single();
       if (error) throw error;
 
-      // Atualiza status para fechado (trigger registrará movimentacao)
       if (lead.status !== "fechado") {
         const { error: upErr } = await supabase
           .from("leads")
@@ -44,9 +45,9 @@ export function useConvertLeadToClient() {
         if (upErr) throw upErr;
       }
 
-      // Cria deal de fechamento se houver valor
       if (lead.valor_estimado && Number(lead.valor_estimado) > 0) {
         await supabase.from("deals").insert({
+          tenant_id,
           titulo: lead.empresa || lead.nome,
           valor: lead.valor_estimado,
           stage: "fechado",
@@ -57,8 +58,8 @@ export function useConvertLeadToClient() {
         });
       }
 
-      // Activity manual de conversão
       await supabase.from("activities").insert({
+        tenant_id,
         tipo: "movimentacao",
         descricao: `Lead convertido em cliente: ${lead.nome}`,
         lead_id: lead.id,
