@@ -41,36 +41,22 @@ function OnboardingPage() {
     setBusy(true);
     try {
       const baseSlug = slugify(nome);
-      // tenta slug único com sufixo se necessário
-      let slug = baseSlug;
-      for (let i = 0; i < 5; i++) {
-        const { data: exists } = await supabase.from("tenants").select("id").eq("slug", slug).maybeSingle();
-        if (!exists) break;
-        slug = `${baseSlug}-${Math.floor(Math.random() * 1000)}`;
-      }
-      const trial_ate = new Date(Date.now() + 14 * 864e5).toISOString().slice(0, 10);
-      const { data: tenant, error } = await supabase.from("tenants").insert({
-        nome: nome.trim(),
-        slug,
-        responsavel: user.user_metadata?.full_name || null,
-        email_principal: user.email!,
-        status: "trial",
-        trial_ate,
-        created_by: user.id,
-      }).select().single();
-      if (error) throw error;
-
-      const { error: tuErr } = await supabase.from("tenant_users").insert({
-        tenant_id: tenant.id,
-        user_id: user.id,
-        role: "tenant_admin",
+      // RPC SECURITY DEFINER: cria tenant + membership atomicamente,
+      // evitando qualquer problema de RLS no client.
+      const { data: tenant, error } = await supabase.rpc("create_tenant_with_owner", {
+        _nome: nome.trim(),
+        _slug: baseSlug,
+        _responsavel: user.user_metadata?.full_name || null,
+        _email_principal: user.email!,
       });
-      if (tuErr) throw tuErr;
+      if (error) throw error;
+      if (!tenant) throw new Error("Falha ao criar empresa");
 
       await refresh();
       toast.success("Empresa criada! Bem-vindo ao seu CRM.");
-      navigate({ to: "/t/$tenantSlug", params: { tenantSlug: tenant.slug } });
+      navigate({ to: "/t/$tenantSlug", params: { tenantSlug: (tenant as any).slug } });
     } catch (e: any) {
+      console.error("[onboarding] createTenant error:", e);
       toast.error(e.message ?? "Erro ao criar empresa");
     } finally {
       setBusy(false);
