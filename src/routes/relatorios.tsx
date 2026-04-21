@@ -109,12 +109,16 @@ function RelatoriosPage() {
 
   return (
     <AppShell title="Relatórios" subtitle="Performance comercial em tempo real">
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <KpiTile label="Taxa de fechamento" value={`${taxa}%`} icon={Target} hint={`${fechados} fechados / ${perdidos} perdidos`} />
-        <KpiTile label="Receita fechada" value={formatBRL(receitaFechada)} icon={DollarSign} />
-        <KpiTile label="Pipeline em aberto" value={formatBRL(pipeline)} icon={TrendingUp} />
-        <KpiTile label="Ticket médio" value={formatBRL(ticket)} icon={Trophy} />
-      </div>
+      {isLoading ? (
+        <KpiSkeleton count={4} />
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <KpiTile label="Taxa de fechamento" value={`${taxa}%`} icon={Target} hint={`${fechados} fechados / ${perdidos} perdidos`} />
+          <KpiTile label="Receita fechada" value={formatBRL(receitaFechada)} icon={DollarSign} />
+          <KpiTile label="Pipeline em aberto" value={formatBRL(pipeline)} icon={TrendingUp} />
+          <KpiTile label="Ticket médio" value={formatBRL(ticket)} icon={Trophy} />
+        </div>
+      )}
 
       <div className="mt-5 grid gap-5 lg:grid-cols-2">
         {/* Funil */}
