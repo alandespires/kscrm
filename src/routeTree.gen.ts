@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TarefasRouteImport } from './routes/tarefas'
+import { Route as SuperAdminRouteImport } from './routes/super-admin'
 import { Route as RelatoriosRouteImport } from './routes/relatorios'
 import { Route as PipelineRouteImport } from './routes/pipeline'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
@@ -26,6 +27,11 @@ import { Route as TTenantSlugIndexRouteImport } from './routes/t.$tenantSlug.ind
 const TarefasRoute = TarefasRouteImport.update({
   id: '/tarefas',
   path: '/tarefas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SuperAdminRoute = SuperAdminRouteImport.update({
+  id: '/super-admin',
+  path: '/super-admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RelatoriosRoute = RelatoriosRouteImport.update({
@@ -100,6 +106,7 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof OnboardingRoute
   '/pipeline': typeof PipelineRoute
   '/relatorios': typeof RelatoriosRoute
+  '/super-admin': typeof SuperAdminRoute
   '/tarefas': typeof TarefasRoute
   '/t/$tenantSlug': typeof TTenantSlugRouteWithChildren
   '/t/$tenantSlug/': typeof TTenantSlugIndexRoute
@@ -115,6 +122,7 @@ export interface FileRoutesByTo {
   '/onboarding': typeof OnboardingRoute
   '/pipeline': typeof PipelineRoute
   '/relatorios': typeof RelatoriosRoute
+  '/super-admin': typeof SuperAdminRoute
   '/tarefas': typeof TarefasRoute
   '/t/$tenantSlug': typeof TTenantSlugIndexRoute
 }
@@ -130,6 +138,7 @@ export interface FileRoutesById {
   '/onboarding': typeof OnboardingRoute
   '/pipeline': typeof PipelineRoute
   '/relatorios': typeof RelatoriosRoute
+  '/super-admin': typeof SuperAdminRoute
   '/tarefas': typeof TarefasRoute
   '/t/$tenantSlug': typeof TTenantSlugRouteWithChildren
   '/t/$tenantSlug/': typeof TTenantSlugIndexRoute
@@ -147,6 +156,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/pipeline'
     | '/relatorios'
+    | '/super-admin'
     | '/tarefas'
     | '/t/$tenantSlug'
     | '/t/$tenantSlug/'
@@ -162,6 +172,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/pipeline'
     | '/relatorios'
+    | '/super-admin'
     | '/tarefas'
     | '/t/$tenantSlug'
   id:
@@ -176,6 +187,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/pipeline'
     | '/relatorios'
+    | '/super-admin'
     | '/tarefas'
     | '/t/$tenantSlug'
     | '/t/$tenantSlug/'
@@ -192,6 +204,7 @@ export interface RootRouteChildren {
   OnboardingRoute: typeof OnboardingRoute
   PipelineRoute: typeof PipelineRoute
   RelatoriosRoute: typeof RelatoriosRoute
+  SuperAdminRoute: typeof SuperAdminRoute
   TarefasRoute: typeof TarefasRoute
   TTenantSlugRoute: typeof TTenantSlugRouteWithChildren
 }
@@ -203,6 +216,13 @@ declare module '@tanstack/react-router' {
       path: '/tarefas'
       fullPath: '/tarefas'
       preLoaderRoute: typeof TarefasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/super-admin': {
+      id: '/super-admin'
+      path: '/super-admin'
+      fullPath: '/super-admin'
+      preLoaderRoute: typeof SuperAdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/relatorios': {
@@ -315,18 +335,10 @@ const rootRouteChildren: RootRouteChildren = {
   OnboardingRoute: OnboardingRoute,
   PipelineRoute: PipelineRoute,
   RelatoriosRoute: RelatoriosRoute,
+  SuperAdminRoute: SuperAdminRoute,
   TarefasRoute: TarefasRoute,
   TTenantSlugRoute: TTenantSlugRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

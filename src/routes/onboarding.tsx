@@ -123,7 +123,7 @@ function OnboardingPage() {
 
         <div className="mt-8 flex items-center justify-between text-xs text-muted-foreground">
           {isSuperAdmin && (
-            <a href="/super-admin" className="font-semibold text-primary hover:underline">Painel Super Admin →</a>
+            <Link to="/super-admin" className="font-semibold text-primary hover:underline">Painel Super Admin →</Link>
           )}
           <button onClick={() => signOut()} className="ml-auto inline-flex items-center gap-1 hover:text-foreground">
             <LogOut className="h-3 w-3" /> Sair
