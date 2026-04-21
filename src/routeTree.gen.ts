@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TarefasRouteImport } from './routes/tarefas'
 import { Route as RelatoriosRouteImport } from './routes/relatorios'
 import { Route as PipelineRouteImport } from './routes/pipeline'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as LeadsRouteImport } from './routes/leads'
 import { Route as InsightsRouteImport } from './routes/insights'
 import { Route as ConfiguracoesRouteImport } from './routes/configuracoes'
@@ -19,6 +20,8 @@ import { Route as ClientesRouteImport } from './routes/clientes'
 import { Route as AutomacaoRouteImport } from './routes/automacao'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TTenantSlugRouteImport } from './routes/t.$tenantSlug'
+import { Route as TTenantSlugIndexRouteImport } from './routes/t.$tenantSlug.index'
 
 const TarefasRoute = TarefasRouteImport.update({
   id: '/tarefas',
@@ -33,6 +36,11 @@ const RelatoriosRoute = RelatoriosRouteImport.update({
 const PipelineRoute = PipelineRouteImport.update({
   id: '/pipeline',
   path: '/pipeline',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LeadsRoute = LeadsRouteImport.update({
@@ -70,6 +78,16 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TTenantSlugRoute = TTenantSlugRouteImport.update({
+  id: '/t/$tenantSlug',
+  path: '/t/$tenantSlug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TTenantSlugIndexRoute = TTenantSlugIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => TTenantSlugRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -79,9 +97,12 @@ export interface FileRoutesByFullPath {
   '/configuracoes': typeof ConfiguracoesRoute
   '/insights': typeof InsightsRoute
   '/leads': typeof LeadsRoute
+  '/onboarding': typeof OnboardingRoute
   '/pipeline': typeof PipelineRoute
   '/relatorios': typeof RelatoriosRoute
   '/tarefas': typeof TarefasRoute
+  '/t/$tenantSlug': typeof TTenantSlugRouteWithChildren
+  '/t/$tenantSlug/': typeof TTenantSlugIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -91,9 +112,11 @@ export interface FileRoutesByTo {
   '/configuracoes': typeof ConfiguracoesRoute
   '/insights': typeof InsightsRoute
   '/leads': typeof LeadsRoute
+  '/onboarding': typeof OnboardingRoute
   '/pipeline': typeof PipelineRoute
   '/relatorios': typeof RelatoriosRoute
   '/tarefas': typeof TarefasRoute
+  '/t/$tenantSlug': typeof TTenantSlugIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -104,9 +127,12 @@ export interface FileRoutesById {
   '/configuracoes': typeof ConfiguracoesRoute
   '/insights': typeof InsightsRoute
   '/leads': typeof LeadsRoute
+  '/onboarding': typeof OnboardingRoute
   '/pipeline': typeof PipelineRoute
   '/relatorios': typeof RelatoriosRoute
   '/tarefas': typeof TarefasRoute
+  '/t/$tenantSlug': typeof TTenantSlugRouteWithChildren
+  '/t/$tenantSlug/': typeof TTenantSlugIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -118,9 +144,12 @@ export interface FileRouteTypes {
     | '/configuracoes'
     | '/insights'
     | '/leads'
+    | '/onboarding'
     | '/pipeline'
     | '/relatorios'
     | '/tarefas'
+    | '/t/$tenantSlug'
+    | '/t/$tenantSlug/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -130,9 +159,11 @@ export interface FileRouteTypes {
     | '/configuracoes'
     | '/insights'
     | '/leads'
+    | '/onboarding'
     | '/pipeline'
     | '/relatorios'
     | '/tarefas'
+    | '/t/$tenantSlug'
   id:
     | '__root__'
     | '/'
@@ -142,9 +173,12 @@ export interface FileRouteTypes {
     | '/configuracoes'
     | '/insights'
     | '/leads'
+    | '/onboarding'
     | '/pipeline'
     | '/relatorios'
     | '/tarefas'
+    | '/t/$tenantSlug'
+    | '/t/$tenantSlug/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -155,9 +189,11 @@ export interface RootRouteChildren {
   ConfiguracoesRoute: typeof ConfiguracoesRoute
   InsightsRoute: typeof InsightsRoute
   LeadsRoute: typeof LeadsRoute
+  OnboardingRoute: typeof OnboardingRoute
   PipelineRoute: typeof PipelineRoute
   RelatoriosRoute: typeof RelatoriosRoute
   TarefasRoute: typeof TarefasRoute
+  TTenantSlugRoute: typeof TTenantSlugRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -181,6 +217,13 @@ declare module '@tanstack/react-router' {
       path: '/pipeline'
       fullPath: '/pipeline'
       preLoaderRoute: typeof PipelineRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/leads': {
@@ -232,8 +275,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/t/$tenantSlug': {
+      id: '/t/$tenantSlug'
+      path: '/t/$tenantSlug'
+      fullPath: '/t/$tenantSlug'
+      preLoaderRoute: typeof TTenantSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/t/$tenantSlug/': {
+      id: '/t/$tenantSlug/'
+      path: '/'
+      fullPath: '/t/$tenantSlug/'
+      preLoaderRoute: typeof TTenantSlugIndexRouteImport
+      parentRoute: typeof TTenantSlugRoute
+    }
   }
 }
+
+interface TTenantSlugRouteChildren {
+  TTenantSlugIndexRoute: typeof TTenantSlugIndexRoute
+}
+
+const TTenantSlugRouteChildren: TTenantSlugRouteChildren = {
+  TTenantSlugIndexRoute: TTenantSlugIndexRoute,
+}
+
+const TTenantSlugRouteWithChildren = TTenantSlugRoute._addFileChildren(
+  TTenantSlugRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -243,9 +312,11 @@ const rootRouteChildren: RootRouteChildren = {
   ConfiguracoesRoute: ConfiguracoesRoute,
   InsightsRoute: InsightsRoute,
   LeadsRoute: LeadsRoute,
+  OnboardingRoute: OnboardingRoute,
   PipelineRoute: PipelineRoute,
   RelatoriosRoute: RelatoriosRoute,
   TarefasRoute: TarefasRoute,
+  TTenantSlugRoute: TTenantSlugRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

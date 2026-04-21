@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { getActiveTenantId } from "@/contexts/tenant-context";
 import { toast } from "sonner";
 
 export type Priority = "baixa" | "media" | "alta" | "urgente";
@@ -16,10 +17,12 @@ export type InsightRow = {
 };
 
 export function useInsights(prioridade?: Priority | "todas") {
+  const tenantId = getActiveTenantId();
   return useQuery({
-    queryKey: ["ai_insights", prioridade ?? "todas"],
+    queryKey: ["ai_insights", tenantId, prioridade ?? "todas"],
+    enabled: !!tenantId,
     queryFn: async (): Promise<InsightRow[]> => {
-      let q = supabase.from("ai_insights").select("*").order("created_at", { ascending: false });
+      let q = supabase.from("ai_insights").select("*").eq("tenant_id", tenantId!).order("created_at", { ascending: false });
       if (prioridade && prioridade !== "todas") q = q.eq("prioridade", prioridade);
       const { data, error } = await q;
       if (error) throw error;

@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { requireTenantId, getActiveTenantId } from "@/contexts/tenant-context";
 import { toast } from "sonner";
 
 export type TaskPriority = "baixa" | "media" | "alta" | "urgente";
@@ -22,10 +23,12 @@ export type TaskRow = {
 };
 
 export function useTasks(opts?: { leadId?: string }) {
+  const tenantId = getActiveTenantId();
   return useQuery({
-    queryKey: ["tasks", opts?.leadId ?? "all"],
+    queryKey: ["tasks", tenantId, opts?.leadId ?? "all"],
+    enabled: !!tenantId,
     queryFn: async (): Promise<TaskRow[]> => {
-      let q = supabase.from("tasks").select("*").order("prazo", { ascending: true, nullsFirst: false });
+      let q = supabase.from("tasks").select("*").eq("tenant_id", tenantId!).order("prazo", { ascending: true, nullsFirst: false });
       if (opts?.leadId) q = q.eq("lead_id", opts.leadId);
       const { data, error } = await q;
       if (error) throw error;
@@ -43,8 +46,10 @@ export function useCreateTask() {
     }) => {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) throw new Error("Não autenticado");
+      const tenant_id = requireTenantId();
       const { data, error } = await supabase.from("tasks").insert({
         ...input,
+        tenant_id,
         created_by: u.user.id,
         assignee_id: u.user.id,
         prioridade: input.prioridade ?? "media",

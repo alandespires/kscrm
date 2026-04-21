@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { requireTenantId, getActiveTenantId } from "@/contexts/tenant-context";
 import { toast } from "sonner";
 
 export type AutomationTrigger = "lead_criado" | "status_mudou" | "score_alto" | "score_baixou";
@@ -23,12 +24,15 @@ export type AutomationRow = {
 };
 
 export function useAutomations() {
+  const tenantId = getActiveTenantId();
   return useQuery({
-    queryKey: ["automations"],
+    queryKey: ["automations", tenantId],
+    enabled: !!tenantId,
     queryFn: async (): Promise<AutomationRow[]> => {
       const { data, error } = await supabase
         .from("automations")
         .select("*")
+        .eq("tenant_id", tenantId!)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return (data ?? []) as any;
@@ -42,8 +46,10 @@ export function useCreateAutomation() {
     mutationFn: async (input: Omit<AutomationRow, "id" | "execucoes" | "created_by" | "created_at" | "updated_at">) => {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) throw new Error("Não autenticado");
+      const tenant_id = requireTenantId();
       const { error } = await supabase.from("automations").insert({
         ...input,
+        tenant_id,
         acoes: input.acoes as any,
         created_by: u.user.id,
       });

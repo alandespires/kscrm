@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { getActiveTenantId } from "@/contexts/tenant-context";
 
 export type DealRow = {
   id: string;
@@ -22,12 +23,15 @@ export type ActivityRow = {
 };
 
 export function useDeals() {
+  const tenantId = getActiveTenantId();
   return useQuery({
-    queryKey: ["deals"],
+    queryKey: ["deals", tenantId],
+    enabled: !!tenantId,
     queryFn: async (): Promise<DealRow[]> => {
       const { data, error } = await supabase
         .from("deals")
         .select("id,titulo,valor,stage,fechado_em,created_at,lead_id")
+        .eq("tenant_id", tenantId!)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return (data ?? []) as DealRow[];
@@ -36,12 +40,15 @@ export function useDeals() {
 }
 
 export function useActivities(limit = 8) {
+  const tenantId = getActiveTenantId();
   return useQuery({
-    queryKey: ["activities", limit],
+    queryKey: ["activities", tenantId, limit],
+    enabled: !!tenantId,
     queryFn: async (): Promise<(ActivityRow & { profile?: { full_name: string | null } | null })[]> => {
       const { data, error } = await supabase
         .from("activities")
         .select("*")
+        .eq("tenant_id", tenantId!)
         .order("created_at", { ascending: false })
         .limit(limit);
       if (error) throw error;
@@ -51,10 +58,11 @@ export function useActivities(limit = 8) {
 }
 
 export function useRevenueSeries() {
+  const tenantId = getActiveTenantId();
   return useQuery({
-    queryKey: ["revenue_series"],
+    queryKey: ["revenue_series", tenantId],
+    enabled: !!tenantId,
     queryFn: async () => {
-      // Build last 7 months from leads (previsto = valor_estimado) and deals (fechado em fechado_em)
       const months: { key: string; label: string; year: number; month: number }[] = [];
       const now = new Date();
       const labels = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
@@ -71,8 +79,8 @@ export function useRevenueSeries() {
       const since = new Date(now.getFullYear(), now.getMonth() - 6, 1).toISOString();
 
       const [{ data: leads }, { data: deals }] = await Promise.all([
-        supabase.from("leads").select("valor_estimado, created_at").gte("created_at", since),
-        supabase.from("deals").select("valor, fechado_em, stage").gte("created_at", since),
+        supabase.from("leads").select("valor_estimado, created_at").eq("tenant_id", tenantId!).gte("created_at", since),
+        supabase.from("deals").select("valor, fechado_em, stage, created_at").eq("tenant_id", tenantId!).gte("created_at", since),
       ]);
 
       return months.map((m) => {
