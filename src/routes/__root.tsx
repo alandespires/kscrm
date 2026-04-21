@@ -2,6 +2,7 @@ import { Outlet, Link, createRootRouteWithContext, HeadContent, Scripts } from "
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "@/contexts/auth-context";
 import { TenantProvider } from "@/contexts/tenant-context";
+import { ThemeProvider } from "@/contexts/theme-context";
 import { Toaster } from "sonner";
 
 import appCss from "../styles.css?url";
@@ -58,12 +59,14 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <TenantProvider>
-          <Outlet />
-          <Toaster theme="dark" position="top-right" richColors />
-        </TenantProvider>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <TenantProvider>
+            <Outlet />
+            <Toaster position="top-right" richColors />
+          </TenantProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }
