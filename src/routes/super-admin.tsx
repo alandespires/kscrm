@@ -282,7 +282,16 @@ function SuperAdminPage() {
               </thead>
               <tbody className="divide-y divide-border">
                 {tenantsQ.isLoading ? (
-                  <tr><td colSpan={6} className="px-4 py-10 text-center"><Loader2 className="mx-auto h-5 w-5 animate-spin text-primary" /></td></tr>
+                  Array.from({ length: 4 }).map((_, i) => (
+                    <tr key={i} className="border-b border-border last:border-0">
+                      <td className="px-4 py-3"><div className="space-y-2"><Skeleton className="h-3 w-32" /><Skeleton className="h-2.5 w-24" /></div></td>
+                      <td className="px-4 py-3"><div className="space-y-2"><Skeleton className="h-3 w-28" /><Skeleton className="h-2.5 w-36" /></div></td>
+                      <td className="px-4 py-3"><Skeleton className="h-3 w-20" /></td>
+                      <td className="px-4 py-3"><Skeleton className="h-5 w-16 rounded-full" /></td>
+                      <td className="px-4 py-3"><Skeleton className="h-3 w-20" /></td>
+                      <td className="px-4 py-3"><div className="flex justify-end gap-1"><Skeleton className="h-7 w-7 rounded-md" /><Skeleton className="h-7 w-7 rounded-md" /><Skeleton className="h-7 w-7 rounded-md" /></div></td>
+                    </tr>
+                  ))
                 ) : filtered.length === 0 ? (
                   <tr><td colSpan={6} className="px-4 py-10 text-center text-sm text-muted-foreground">Nenhuma empresa encontrada.</td></tr>
                 ) : filtered.map((t) => {
