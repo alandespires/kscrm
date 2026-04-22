@@ -32,9 +32,25 @@ Deno.serve(async (req) => {
     if (!Array.isArray(messages) || messages.length === 0) {
       return jsonResp({ error: "messages required" }, 400);
     }
+    if (!tenant_id || typeof tenant_id !== "string") {
+      return jsonResp({ error: "tenant_id required" }, 400);
+    }
 
     const headers = { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}` };
-    const tenantFilter = tenant_id ? `&tenant_id=eq.${tenant_id}` : "";
+
+    // CRITICAL: Verify the authenticated user is a member of the requested tenant
+    // before using the service role key (which bypasses RLS).
+    const memberRes = await fetch(
+      `${SUPABASE_URL}/rest/v1/tenant_users?user_id=eq.${userId}&tenant_id=eq.${tenant_id}&select=tenant_id&limit=1`,
+      { headers },
+    );
+    if (!memberRes.ok) return jsonResp({ error: "membership_check_failed" }, 500);
+    const memberRows = await memberRes.json();
+    if (!Array.isArray(memberRows) || memberRows.length === 0) {
+      return jsonResp({ error: "forbidden" }, 403);
+    }
+
+    const tenantFilter = `&tenant_id=eq.${tenant_id}`;
     const periodoIni = filters?.periodo?.inicio;
     const periodoFim = filters?.periodo?.fim;
     const estagio = filters?.estagio;
@@ -218,7 +234,8 @@ ${JSON.stringify(ctx, null, 2)}`;
       headers: { ...corsHeaders, "Content-Type": "text/event-stream", "Cache-Control": "no-cache" },
     });
   } catch (err) {
-    return jsonResp({ error: String(err) }, 500);
+    console.error("kassia-chat error:", err);
+    return jsonResp({ error: "internal_error" }, 500);
   }
 });
 
