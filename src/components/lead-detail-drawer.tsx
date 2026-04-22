@@ -228,7 +228,7 @@ export function LeadDetailDrawer({ lead, onClose }: { lead: LeadRow | null; onCl
             <Trash2 className="h-3.5 w-3.5" /> Excluir lead
           </button>
           <button
-            onClick={() => convert.mutate(lead)}
+            onClick={() => setConvertOpen(true)}
             disabled={convert.isPending || lead.status === "fechado"}
             className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-success px-3 text-xs font-semibold text-success-foreground shadow-card transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
             title={lead.status === "fechado" ? "Lead já fechado" : "Cria cliente vinculado e marca como fechado"}
@@ -237,6 +237,78 @@ export function LeadDetailDrawer({ lead, onClose }: { lead: LeadRow | null; onCl
             {lead.status === "fechado" ? "Já convertido" : "Converter em cliente"}
           </button>
         </div>
+
+        {/* Convert dialog */}
+        {convertOpen && (
+          <div className="fixed inset-0 z-[60] grid place-items-center bg-black/70 p-4 backdrop-blur-sm" onClick={() => setConvertOpen(false)}>
+            <div className="w-full max-w-md overflow-hidden rounded-2xl border border-border bg-surface-1 shadow-elevated" onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-center justify-between border-b border-border p-4">
+                <h3 className="text-sm font-semibold">Converter em cliente</h3>
+                <button onClick={() => setConvertOpen(false)} className="grid h-7 w-7 place-items-center rounded text-muted-foreground hover:bg-surface-3"><X className="h-4 w-4" /></button>
+              </div>
+              <div className="space-y-3 p-4">
+                <p className="text-xs text-muted-foreground">
+                  Vamos criar o cliente <strong className="text-foreground">{lead.nome}</strong>
+                  {lead.valor_estimado && Number(lead.valor_estimado) > 0 ? <> e gerar negócio fechado no valor de <strong className="text-foreground">{formatBRL(Number(lead.valor_estimado))}</strong></> : null}.
+                </p>
+
+                <label className="flex cursor-pointer items-start gap-2 rounded-lg border border-border bg-surface-2 p-3">
+                  <input type="checkbox" checked={genFin} onChange={(e) => setGenFin(e.target.checked)} className="mt-0.5 h-4 w-4 accent-primary" />
+                  <div className="flex-1">
+                    <div className="text-sm font-medium">Gerar entrada financeira?</div>
+                    <div className="text-[11px] text-muted-foreground">Cria uma cobrança pendente vinculada ao negócio.</div>
+                  </div>
+                </label>
+
+                {genFin && (
+                  <div className="space-y-2 rounded-lg border border-dashed border-border p-3">
+                    <div className="grid grid-cols-2 gap-2">
+                      <label className="block">
+                        <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Valor</span>
+                        <input type="number" step="0.01" value={finValor} onChange={(e) => setFinValor(e.target.value)} placeholder={String(Number(lead.valor_estimado ?? 0).toFixed(2))} className="mt-1 h-8 w-full rounded-md border border-border bg-surface-1 px-2 text-sm tabular-nums" />
+                      </label>
+                      <label className="block">
+                        <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Categoria</span>
+                        <select value={finCat} onChange={(e) => setFinCat(e.target.value as any)} className="mt-1 h-8 w-full rounded-md border border-border bg-surface-1 px-2 text-sm">
+                          {(["venda", "assinatura", "servico", "consultoria", "outros"] as const).map((c) => <option key={c} value={c}>{c}</option>)}
+                        </select>
+                      </label>
+                    </div>
+                    <label className="block">
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Vencimento</span>
+                      <input type="date" value={finVenc} onChange={(e) => setFinVenc(e.target.value)} className="mt-1 h-8 w-full rounded-md border border-border bg-surface-1 px-2 text-sm" />
+                    </label>
+                  </div>
+                )}
+
+                <div className="flex items-center justify-end gap-2 pt-1">
+                  <button onClick={() => setConvertOpen(false)} className="h-9 rounded-lg border border-border bg-surface-2 px-3 text-xs hover:border-primary/40">Cancelar</button>
+                  <button
+                    onClick={async () => {
+                      if (!lead) return;
+                      await convert.mutateAsync({
+                        lead,
+                        options: genFin ? {
+                          generateFinancial: true,
+                          finCategoria: finCat,
+                          finVencimento: finVenc || null,
+                          finValor: finValor ? Number(finValor) : undefined,
+                        } : undefined,
+                      });
+                      setConvertOpen(false);
+                      onClose();
+                    }}
+                    disabled={convert.isPending}
+                    className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-success px-3 text-xs font-semibold text-success-foreground shadow-card disabled:opacity-50"
+                  >
+                    {convert.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <UserCheck className="h-3.5 w-3.5" />}
+                    Confirmar conversão
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </aside>
     </div>
   );
