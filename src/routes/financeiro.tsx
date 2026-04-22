@@ -312,7 +312,7 @@ function EntradasTab() {
         })}
       />
 
-      {open && <EntryFormModal clients={clients} onClose={() => setOpen(false)} onSubmit={async (v) => { await create.mutateAsync(v); setOpen(false); }} loading={create.isPending} />}
+      {open && <EntryFormModal clients={clients} onClose={() => setOpen(false)} onSubmit={async (v: any) => { await create.mutateAsync(v); setOpen(false); }} loading={create.isPending} />}
     </div>
   );
 }
@@ -622,8 +622,10 @@ function CommFormModal({ onClose, onSubmit, loading }: any) {
   return (
     <Modal title="Nova comissão" onClose={onClose} onSubmit={async (e) => {
       e.preventDefault();
-      const { data: u } = await import("@/integrations/supabase/client").then(m => m.supabase.auth.getUser());
-      onSubmit({ ...f, user_id: f.user_id || u.data.user!.id, competencia: f.competencia || null, valor: Number(f.valor) });
+      const { supabase } = await import("@/integrations/supabase/client");
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) return;
+      onSubmit({ ...f, user_id: f.user_id || u.user.id, competencia: f.competencia || null, valor: Number(f.valor) });
     }} loading={loading}>
       <Field label="Descrição *"><input required value={f.descricao} onChange={(e) => setF({ ...f, descricao: e.target.value })} className={inputCls} placeholder="Ex: Comissão venda Cliente X" /></Field>
       <div className="grid grid-cols-3 gap-3">
