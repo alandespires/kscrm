@@ -113,6 +113,10 @@ export function TenantProvider({ children }: { children: ReactNode }) {
     qc.invalidateQueries({ queryKey: ["activities"] });
     qc.invalidateQueries({ queryKey: ["automations"] });
     qc.invalidateQueries({ queryKey: ["ai_insights"] });
+    qc.invalidateQueries({ queryKey: ["fin-entries"] });
+    qc.invalidateQueries({ queryKey: ["fin-expenses"] });
+    qc.invalidateQueries({ queryKey: ["fin-subs"] });
+    qc.invalidateQueries({ queryKey: ["fin-comm"] });
   }, [current?.tenant.id, qc]);
 
   function setCurrentBySlug(slug: string) {
