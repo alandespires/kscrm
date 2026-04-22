@@ -36,6 +36,16 @@ export function LeadDetailDrawer({ lead, onClose }: { lead: LeadRow | null; onCl
   const [actDesc, setActDesc] = useState("");
   const [taskTitle, setTaskTitle] = useState("");
 
+  // Convert dialog state
+  const [convertOpen, setConvertOpen] = useState(false);
+  const [genFin, setGenFin] = useState(true);
+  const [finCat, setFinCat] = useState<"venda" | "assinatura" | "servico" | "consultoria" | "outros">("venda");
+  const [finVenc, setFinVenc] = useState<string>(() => {
+    const d = new Date(); d.setDate(d.getDate() + 30);
+    return d.toISOString().slice(0, 10);
+  });
+  const [finValor, setFinValor] = useState<string>("");
+
   if (!open || !lead) return null;
 
   const isScoring = score.isPending && score.variables === lead.id;
