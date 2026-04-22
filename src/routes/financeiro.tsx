@@ -12,10 +12,11 @@ import {
   type SubStatus, type CommissionStatus,
 } from "@/hooks/use-finance";
 import { useClients } from "@/hooks/use-clients";
+import { ReconciliationModal } from "@/components/reconciliation-modal";
 import {
   Wallet, TrendingUp, TrendingDown, Repeat, AlertTriangle, Award, FileBarChart,
   Plus, Trash2, X, Loader2, Sparkles, ArrowUpRight, ArrowDownRight, Clock,
-  CheckCircle2, XCircle, CalendarClock, DollarSign, Activity,
+  CheckCircle2, XCircle, CalendarClock, DollarSign, Activity, Receipt,
 } from "lucide-react";
 
 export const Route = createFileRoute("/financeiro")({
@@ -273,12 +274,13 @@ function EntradasTab() {
   const del = useDeleteEntry();
   const [open, setOpen] = useState(false);
   const [filter, setFilter] = useState<FinStatus | "todos">("todos");
+  const [reconciling, setReconciling] = useState<EntryRow | null>(null);
 
   const filtered = filter === "todos" ? entries : entries.filter((e) => e.status === filter);
   const totais = useMemo(() => ({
-    pago: entries.filter((e) => e.status === "pago").reduce((s, e) => s + Number(e.valor), 0),
-    pendente: entries.filter((e) => e.status === "pendente").reduce((s, e) => s + Number(e.valor), 0),
-    atrasado: entries.filter((e) => e.status === "atrasado").reduce((s, e) => s + Number(e.valor), 0),
+    pago: entries.reduce((s, e) => s + Number(e.valor_pago || 0), 0),
+    pendente: entries.filter((e) => e.status === "pendente").reduce((s, e) => s + Math.max(Number(e.valor) - Number(e.valor_pago || 0), 0), 0),
+    atrasado: entries.filter((e) => e.status === "atrasado").reduce((s, e) => s + Math.max(Number(e.valor) - Number(e.valor_pago || 0), 0), 0),
   }), [entries]);
 
   return (
@@ -297,22 +299,39 @@ function EntradasTab() {
       <DataTable
         loading={isLoading}
         empty="Nenhuma entrada registrada."
-        cols={["Descrição", "Cliente", "Categoria", "Vencimento", "Valor", "Status", ""]}
+        cols={["Descrição", "Cliente", "Vencimento", "Valor", "Saldo", "Status", ""]}
         rows={filtered.map((e) => {
           const c = clients.find((x) => x.id === e.client_id);
+          const pago = Number(e.valor_pago || 0);
+          const saldo = Math.max(Number(e.valor) - pago, 0);
+          const parcial = pago > 0 && saldo > 0;
           return [
-            e.descricao,
+            <div>
+              <div className="font-medium">{e.descricao}</div>
+              <div className="text-[10px] uppercase text-muted-foreground">{e.categoria}</div>
+            </div>,
             c ? (c.empresa || c.nome) : "—",
-            e.categoria,
-            e.vencimento ? new Date(e.vencimento).toLocaleDateString("pt-BR") : "—",
+            e.vencimento ? new Date(e.vencimento + "T12:00:00").toLocaleDateString("pt-BR") : "—",
             <span className="font-semibold tabular-nums text-success">{brl(Number(e.valor))}</span>,
-            <StatusSelect value={e.status} onChange={(s) => upd.mutate({ id: e.id, status: s, recebido_em: s === "pago" ? new Date().toISOString().slice(0, 10) : null })} />,
-            <button onClick={() => del.mutate(e.id)} className="text-muted-foreground hover:text-destructive"><Trash2 className="h-3.5 w-3.5" /></button>,
+            <span className={`tabular-nums ${saldo === 0 ? "text-muted-foreground" : parcial ? "text-warning" : "text-foreground"}`}>
+              {saldo === 0 ? "Quitado" : brl(saldo)}
+              {parcial && <span className="ml-1 rounded bg-warning/15 px-1 text-[9px] font-semibold uppercase text-warning">parcial</span>}
+            </span>,
+            <StatusSelect value={e.status} onChange={(s) => upd.mutate({ id: e.id, status: s })} />,
+            <div className="flex items-center gap-1">
+              <button onClick={() => setReconciling(e)} title="Reconciliar pagamentos" className="grid h-7 w-7 place-items-center rounded-md text-muted-foreground hover:bg-primary/10 hover:text-primary">
+                <Receipt className="h-3.5 w-3.5" />
+              </button>
+              <button onClick={() => { if (confirm("Remover entrada?")) del.mutate(e.id); }} className="grid h-7 w-7 place-items-center rounded-md text-muted-foreground hover:bg-destructive/10 hover:text-destructive">
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </div>,
           ];
         })}
       />
 
       {open && <EntryFormModal clients={clients} onClose={() => setOpen(false)} onSubmit={async (v: any) => { await create.mutateAsync(v); setOpen(false); }} loading={create.isPending} />}
+      <ReconciliationModal entry={reconciling} onClose={() => setReconciling(null)} />
     </div>
   );
 }
