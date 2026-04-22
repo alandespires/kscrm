@@ -81,7 +81,8 @@ Deno.serve(async (req) => {
 
     return jsonResp({ ...parsed, context });
   } catch (err) {
-    return jsonResp({ error: String(err) }, 500);
+    console.error("ai-coach error:", err);
+    return jsonResp({ error: "internal_error" }, 500);
   }
 });
 
