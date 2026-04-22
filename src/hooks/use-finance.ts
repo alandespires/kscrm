@@ -12,7 +12,7 @@ export type CommissionStatus = "pendente" | "aprovada" | "paga" | "cancelada";
 
 export type EntryRow = {
   id: string; tenant_id: string; client_id: string | null; lead_id: string | null; deal_id: string | null;
-  descricao: string; valor: number; categoria: EntryCategory; origem: string | null;
+  descricao: string; valor: number; valor_pago: number; categoria: EntryCategory; origem: string | null;
   forma_pagamento: PaymentMethod | null; status: FinStatus;
   vencimento: string | null; recebido_em: string | null; observacoes: string | null;
   created_by: string; created_at: string; updated_at: string;
