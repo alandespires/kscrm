@@ -16,6 +16,7 @@ import { Route as PipelineRouteImport } from './routes/pipeline'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as LeadsRouteImport } from './routes/leads'
 import { Route as InsightsRouteImport } from './routes/insights'
+import { Route as FinanceiroRouteImport } from './routes/financeiro'
 import { Route as ConfiguracoesRouteImport } from './routes/configuracoes'
 import { Route as ClientesRouteImport } from './routes/clientes'
 import { Route as AutomacaoRouteImport } from './routes/automacao'
@@ -57,6 +58,11 @@ const LeadsRoute = LeadsRouteImport.update({
 const InsightsRoute = InsightsRouteImport.update({
   id: '/insights',
   path: '/insights',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FinanceiroRoute = FinanceiroRouteImport.update({
+  id: '/financeiro',
+  path: '/financeiro',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ConfiguracoesRoute = ConfiguracoesRouteImport.update({
@@ -101,6 +107,7 @@ export interface FileRoutesByFullPath {
   '/automacao': typeof AutomacaoRoute
   '/clientes': typeof ClientesRoute
   '/configuracoes': typeof ConfiguracoesRoute
+  '/financeiro': typeof FinanceiroRoute
   '/insights': typeof InsightsRoute
   '/leads': typeof LeadsRoute
   '/onboarding': typeof OnboardingRoute
@@ -117,6 +124,7 @@ export interface FileRoutesByTo {
   '/automacao': typeof AutomacaoRoute
   '/clientes': typeof ClientesRoute
   '/configuracoes': typeof ConfiguracoesRoute
+  '/financeiro': typeof FinanceiroRoute
   '/insights': typeof InsightsRoute
   '/leads': typeof LeadsRoute
   '/onboarding': typeof OnboardingRoute
@@ -133,6 +141,7 @@ export interface FileRoutesById {
   '/automacao': typeof AutomacaoRoute
   '/clientes': typeof ClientesRoute
   '/configuracoes': typeof ConfiguracoesRoute
+  '/financeiro': typeof FinanceiroRoute
   '/insights': typeof InsightsRoute
   '/leads': typeof LeadsRoute
   '/onboarding': typeof OnboardingRoute
@@ -151,6 +160,7 @@ export interface FileRouteTypes {
     | '/automacao'
     | '/clientes'
     | '/configuracoes'
+    | '/financeiro'
     | '/insights'
     | '/leads'
     | '/onboarding'
@@ -167,6 +177,7 @@ export interface FileRouteTypes {
     | '/automacao'
     | '/clientes'
     | '/configuracoes'
+    | '/financeiro'
     | '/insights'
     | '/leads'
     | '/onboarding'
@@ -182,6 +193,7 @@ export interface FileRouteTypes {
     | '/automacao'
     | '/clientes'
     | '/configuracoes'
+    | '/financeiro'
     | '/insights'
     | '/leads'
     | '/onboarding'
@@ -199,6 +211,7 @@ export interface RootRouteChildren {
   AutomacaoRoute: typeof AutomacaoRoute
   ClientesRoute: typeof ClientesRoute
   ConfiguracoesRoute: typeof ConfiguracoesRoute
+  FinanceiroRoute: typeof FinanceiroRoute
   InsightsRoute: typeof InsightsRoute
   LeadsRoute: typeof LeadsRoute
   OnboardingRoute: typeof OnboardingRoute
@@ -258,6 +271,13 @@ declare module '@tanstack/react-router' {
       path: '/insights'
       fullPath: '/insights'
       preLoaderRoute: typeof InsightsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/financeiro': {
+      id: '/financeiro'
+      path: '/financeiro'
+      fullPath: '/financeiro'
+      preLoaderRoute: typeof FinanceiroRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/configuracoes': {
@@ -330,6 +350,7 @@ const rootRouteChildren: RootRouteChildren = {
   AutomacaoRoute: AutomacaoRoute,
   ClientesRoute: ClientesRoute,
   ConfiguracoesRoute: ConfiguracoesRoute,
+  FinanceiroRoute: FinanceiroRoute,
   InsightsRoute: InsightsRoute,
   LeadsRoute: LeadsRoute,
   OnboardingRoute: OnboardingRoute,

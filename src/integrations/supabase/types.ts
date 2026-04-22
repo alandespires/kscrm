@@ -348,6 +348,240 @@ export type Database = {
           },
         ]
       }
+      financial_commissions: {
+        Row: {
+          base_valor: number
+          competencia: string | null
+          created_at: string
+          created_by: string
+          deal_id: string | null
+          descricao: string
+          entry_id: string | null
+          id: string
+          observacoes: string | null
+          paga_em: string | null
+          percentual: number | null
+          status: Database["public"]["Enums"]["commission_status"]
+          tenant_id: string
+          updated_at: string
+          user_id: string
+          valor: number
+        }
+        Insert: {
+          base_valor?: number
+          competencia?: string | null
+          created_at?: string
+          created_by: string
+          deal_id?: string | null
+          descricao: string
+          entry_id?: string | null
+          id?: string
+          observacoes?: string | null
+          paga_em?: string | null
+          percentual?: number | null
+          status?: Database["public"]["Enums"]["commission_status"]
+          tenant_id: string
+          updated_at?: string
+          user_id: string
+          valor?: number
+        }
+        Update: {
+          base_valor?: number
+          competencia?: string | null
+          created_at?: string
+          created_by?: string
+          deal_id?: string | null
+          descricao?: string
+          entry_id?: string | null
+          id?: string
+          observacoes?: string | null
+          paga_em?: string | null
+          percentual?: number | null
+          status?: Database["public"]["Enums"]["commission_status"]
+          tenant_id?: string
+          updated_at?: string
+          user_id?: string
+          valor?: number
+        }
+        Relationships: []
+      }
+      financial_entries: {
+        Row: {
+          categoria: Database["public"]["Enums"]["financial_entry_category"]
+          client_id: string | null
+          created_at: string
+          created_by: string
+          deal_id: string | null
+          descricao: string
+          forma_pagamento:
+            | Database["public"]["Enums"]["financial_payment_method"]
+            | null
+          id: string
+          lead_id: string | null
+          observacoes: string | null
+          origem: string | null
+          recebido_em: string | null
+          status: Database["public"]["Enums"]["financial_status"]
+          tenant_id: string
+          updated_at: string
+          valor: number
+          vencimento: string | null
+        }
+        Insert: {
+          categoria?: Database["public"]["Enums"]["financial_entry_category"]
+          client_id?: string | null
+          created_at?: string
+          created_by: string
+          deal_id?: string | null
+          descricao: string
+          forma_pagamento?:
+            | Database["public"]["Enums"]["financial_payment_method"]
+            | null
+          id?: string
+          lead_id?: string | null
+          observacoes?: string | null
+          origem?: string | null
+          recebido_em?: string | null
+          status?: Database["public"]["Enums"]["financial_status"]
+          tenant_id: string
+          updated_at?: string
+          valor?: number
+          vencimento?: string | null
+        }
+        Update: {
+          categoria?: Database["public"]["Enums"]["financial_entry_category"]
+          client_id?: string | null
+          created_at?: string
+          created_by?: string
+          deal_id?: string | null
+          descricao?: string
+          forma_pagamento?:
+            | Database["public"]["Enums"]["financial_payment_method"]
+            | null
+          id?: string
+          lead_id?: string | null
+          observacoes?: string | null
+          origem?: string | null
+          recebido_em?: string | null
+          status?: Database["public"]["Enums"]["financial_status"]
+          tenant_id?: string
+          updated_at?: string
+          valor?: number
+          vencimento?: string | null
+        }
+        Relationships: []
+      }
+      financial_expenses: {
+        Row: {
+          categoria: Database["public"]["Enums"]["financial_expense_category"]
+          created_at: string
+          created_by: string
+          descricao: string
+          forma_pagamento:
+            | Database["public"]["Enums"]["financial_payment_method"]
+            | null
+          fornecedor: string | null
+          id: string
+          observacoes: string | null
+          pago_em: string | null
+          recorrente: boolean
+          status: Database["public"]["Enums"]["financial_status"]
+          tenant_id: string
+          updated_at: string
+          valor: number
+          vencimento: string | null
+        }
+        Insert: {
+          categoria?: Database["public"]["Enums"]["financial_expense_category"]
+          created_at?: string
+          created_by: string
+          descricao: string
+          forma_pagamento?:
+            | Database["public"]["Enums"]["financial_payment_method"]
+            | null
+          fornecedor?: string | null
+          id?: string
+          observacoes?: string | null
+          pago_em?: string | null
+          recorrente?: boolean
+          status?: Database["public"]["Enums"]["financial_status"]
+          tenant_id: string
+          updated_at?: string
+          valor?: number
+          vencimento?: string | null
+        }
+        Update: {
+          categoria?: Database["public"]["Enums"]["financial_expense_category"]
+          created_at?: string
+          created_by?: string
+          descricao?: string
+          forma_pagamento?:
+            | Database["public"]["Enums"]["financial_payment_method"]
+            | null
+          fornecedor?: string | null
+          id?: string
+          observacoes?: string | null
+          pago_em?: string | null
+          recorrente?: boolean
+          status?: Database["public"]["Enums"]["financial_status"]
+          tenant_id?: string
+          updated_at?: string
+          valor?: number
+          vencimento?: string | null
+        }
+        Relationships: []
+      }
+      financial_subscriptions: {
+        Row: {
+          cancelado_em: string | null
+          client_id: string | null
+          created_at: string
+          created_by: string
+          id: string
+          inicio: string
+          motivo_cancelamento: string | null
+          observacoes: string | null
+          plano: string
+          proximo_vencimento: string | null
+          status: Database["public"]["Enums"]["subscription_status"]
+          tenant_id: string
+          updated_at: string
+          valor_mensal: number
+        }
+        Insert: {
+          cancelado_em?: string | null
+          client_id?: string | null
+          created_at?: string
+          created_by: string
+          id?: string
+          inicio?: string
+          motivo_cancelamento?: string | null
+          observacoes?: string | null
+          plano: string
+          proximo_vencimento?: string | null
+          status?: Database["public"]["Enums"]["subscription_status"]
+          tenant_id: string
+          updated_at?: string
+          valor_mensal?: number
+        }
+        Update: {
+          cancelado_em?: string | null
+          client_id?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          inicio?: string
+          motivo_cancelamento?: string | null
+          observacoes?: string | null
+          plano?: string
+          proximo_vencimento?: string | null
+          status?: Database["public"]["Enums"]["subscription_status"]
+          tenant_id?: string
+          updated_at?: string
+          valor_mensal?: number
+        }
+        Relationships: []
+      }
       leads: {
         Row: {
           ai_resumo: string | null
@@ -804,6 +1038,7 @@ export type Database = {
         Args: { _tenant_id: string; _user_id: string }
         Returns: boolean
       }
+      mark_overdue_financial: { Args: never; Returns: undefined }
       user_tenant_ids: { Args: { _user_id: string }; Returns: string[] }
     }
     Enums: {
@@ -821,6 +1056,31 @@ export type Database = {
         | "status_mudou"
         | "score_alto"
         | "score_baixou"
+      commission_status: "pendente" | "aprovada" | "paga" | "cancelada"
+      financial_entry_category:
+        | "venda"
+        | "assinatura"
+        | "servico"
+        | "consultoria"
+        | "outros"
+      financial_expense_category:
+        | "salario"
+        | "ferramenta"
+        | "marketing"
+        | "operacao"
+        | "imposto"
+        | "fornecedor"
+        | "comissao"
+        | "outros"
+      financial_payment_method:
+        | "pix"
+        | "boleto"
+        | "cartao_credito"
+        | "cartao_debito"
+        | "transferencia"
+        | "dinheiro"
+        | "outros"
+      financial_status: "pendente" | "pago" | "atrasado" | "cancelado"
       lead_status:
         | "novo"
         | "contato_inicial"
@@ -829,6 +1089,12 @@ export type Database = {
         | "negociacao"
         | "fechado"
         | "perdido"
+      subscription_status:
+        | "trial"
+        | "ativo"
+        | "suspenso"
+        | "cancelado"
+        | "inadimplente"
       task_priority: "baixa" | "media" | "alta" | "urgente"
       task_status: "pendente" | "em_andamento" | "concluida" | "cancelada"
       tenant_role: "tenant_admin" | "tenant_user"
@@ -976,6 +1242,34 @@ export const Constants = {
         "score_alto",
         "score_baixou",
       ],
+      commission_status: ["pendente", "aprovada", "paga", "cancelada"],
+      financial_entry_category: [
+        "venda",
+        "assinatura",
+        "servico",
+        "consultoria",
+        "outros",
+      ],
+      financial_expense_category: [
+        "salario",
+        "ferramenta",
+        "marketing",
+        "operacao",
+        "imposto",
+        "fornecedor",
+        "comissao",
+        "outros",
+      ],
+      financial_payment_method: [
+        "pix",
+        "boleto",
+        "cartao_credito",
+        "cartao_debito",
+        "transferencia",
+        "dinheiro",
+        "outros",
+      ],
+      financial_status: ["pendente", "pago", "atrasado", "cancelado"],
       lead_status: [
         "novo",
         "contato_inicial",
@@ -984,6 +1278,13 @@ export const Constants = {
         "negociacao",
         "fechado",
         "perdido",
+      ],
+      subscription_status: [
+        "trial",
+        "ativo",
+        "suspenso",
+        "cancelado",
+        "inadimplente",
       ],
       task_priority: ["baixa", "media", "alta", "urgente"],
       task_status: ["pendente", "em_andamento", "concluida", "cancelada"],
