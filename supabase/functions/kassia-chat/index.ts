@@ -1,8 +1,14 @@
-// KassIA Chat: assistente conversacional com contexto do CRM.
-// Usa Lovable AI Gateway (sem API key do usuário) e suporta streaming.
+// KassIA Chat: assistente conversacional com contexto rico do CRM e tool-calling.
+// Tools disponíveis: gerar_relatorio, criar_tarefa, atualizar_lead_pipeline.
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+type Filters = {
+  periodo?: { inicio?: string; fim?: string };
+  estagio?: string | null;
+  tenant_id?: string;
 };
 
 Deno.serve(async (req) => {
@@ -21,58 +27,76 @@ Deno.serve(async (req) => {
     const user = await userRes.json();
     const userId = user.id;
 
-    const { messages = [] } = await req.json().catch(() => ({ messages: [] }));
+    const body = await req.json().catch(() => ({}));
+    const { messages = [], filters = {} as Filters, tenant_id } = body;
     if (!Array.isArray(messages) || messages.length === 0) {
       return jsonResp({ error: "messages required" }, 400);
     }
 
     const headers = { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}` };
+    const tenantFilter = tenant_id ? `&tenant_id=eq.${tenant_id}` : "";
+    const periodoIni = filters?.periodo?.inicio;
+    const periodoFim = filters?.periodo?.fim;
+    const estagio = filters?.estagio;
 
-    // Coleta contexto amplo do CRM para a KassIA responder dúvidas e gerar relatórios
-    const [leadsR, tasksR, clientsR, entriesR, expensesR, subsR, commR] = await Promise.all([
-      fetch(`${SUPABASE_URL}/rest/v1/leads?or=(owner_id.eq.${userId},created_by.eq.${userId})&order=updated_at.desc&limit=50`, { headers }),
-      fetch(`${SUPABASE_URL}/rest/v1/tasks?status=neq.concluida&assignee_id=eq.${userId}&order=prazo.asc.nullslast&limit=30`, { headers }),
-      fetch(`${SUPABASE_URL}/rest/v1/clients?order=updated_at.desc&limit=30`, { headers }),
-      fetch(`${SUPABASE_URL}/rest/v1/financial_entries?order=created_at.desc&limit=80`, { headers }),
-      fetch(`${SUPABASE_URL}/rest/v1/financial_expenses?order=created_at.desc&limit=50`, { headers }),
-      fetch(`${SUPABASE_URL}/rest/v1/financial_subscriptions?order=created_at.desc&limit=50`, { headers }),
-      fetch(`${SUPABASE_URL}/rest/v1/financial_commissions?order=created_at.desc&limit=50`, { headers }),
+    // Filtros de data
+    const dateFilter = (col: string) => {
+      const parts = [];
+      if (periodoIni) parts.push(`${col}=gte.${periodoIni}`);
+      if (periodoFim) parts.push(`${col}=lte.${periodoFim}`);
+      return parts.length ? `&${parts.join("&")}` : "";
+    };
+    const stageFilter = estagio ? `&status=eq.${estagio}` : "";
+
+    // Coleta contexto amplo
+    const [leadsR, tasksR, clientsR, entriesR, expensesR, subsR, commR, dealsR] = await Promise.all([
+      fetch(`${SUPABASE_URL}/rest/v1/leads?or=(owner_id.eq.${userId},created_by.eq.${userId})${tenantFilter}${stageFilter}${dateFilter("created_at")}&order=updated_at.desc&limit=80`, { headers }),
+      fetch(`${SUPABASE_URL}/rest/v1/tasks?status=neq.concluida&assignee_id=eq.${userId}${tenantFilter}&order=prazo.asc.nullslast&limit=40`, { headers }),
+      fetch(`${SUPABASE_URL}/rest/v1/clients?${tenantFilter.slice(1)}&order=updated_at.desc&limit=40`, { headers }),
+      fetch(`${SUPABASE_URL}/rest/v1/financial_entries?${tenantFilter.slice(1)}${dateFilter("created_at")}&order=created_at.desc&limit=120`, { headers }),
+      fetch(`${SUPABASE_URL}/rest/v1/financial_expenses?${tenantFilter.slice(1)}${dateFilter("created_at")}&order=created_at.desc&limit=80`, { headers }),
+      fetch(`${SUPABASE_URL}/rest/v1/financial_subscriptions?${tenantFilter.slice(1)}&order=created_at.desc&limit=80`, { headers }),
+      fetch(`${SUPABASE_URL}/rest/v1/financial_commissions?${tenantFilter.slice(1)}&order=created_at.desc&limit=80`, { headers }),
+      fetch(`${SUPABASE_URL}/rest/v1/deals?${tenantFilter.slice(1)}${dateFilter("created_at")}&order=created_at.desc&limit=80`, { headers }),
     ]);
-    const [leads, tasks, clients, entries, expenses, subs, commissions] = await Promise.all([
-      leadsR.json(), tasksR.json(), clientsR.json(), entriesR.json(), expensesR.json(), subsR.json(), commR.json(),
+
+    const [leads, tasks, clients, entries, expenses, subs, commissions, deals] = await Promise.all([
+      leadsR.json(), tasksR.json(), clientsR.json(), entriesR.json(),
+      expensesR.json(), subsR.json(), commR.json(), dealsR.json(),
     ]);
 
     const now = new Date();
     const sum = (arr: any[], key: string) => arr.reduce((a, b) => a + Number(b[key] ?? 0), 0);
-    const monthEntries = (entries ?? []).filter((e: any) => {
-      const d = new Date(e.created_at);
-      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-    });
-    const monthExpenses = (expenses ?? []).filter((e: any) => {
-      const d = new Date(e.created_at);
-      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-    });
     const overdueEntries = (entries ?? []).filter((e: any) => e.status === "atrasado" || (e.vencimento && new Date(e.vencimento) < now && e.status === "pendente"));
     const activeSubs = (subs ?? []).filter((s: any) => s.status === "ativo");
     const mrr = sum(activeSubs, "valor_mensal");
+    const funnelByStage = agrupar(leads ?? [], "status");
+    const dealsByStage = agrupar(deals ?? [], "stage");
 
     const ctx = {
       data_atual: now.toISOString().slice(0, 10),
+      filtros_aplicados: { inicio: periodoIni ?? null, fim: periodoFim ?? null, estagio: estagio ?? null },
       leads: {
         total: leads?.length ?? 0,
         quentes: (leads ?? []).filter((l: any) => (l.ai_score ?? 0) >= 70 && !["fechado", "perdido"].includes(l.status)).length,
-        por_status: agrupar(leads ?? [], "status"),
-        amostra: (leads ?? []).slice(0, 10).map((l: any) => ({ nome: l.nome, empresa: l.empresa, status: l.status, score: l.ai_score, valor: l.valor_estimado })),
+        funil: funnelByStage,
+        amostra: (leads ?? []).slice(0, 12).map((l: any) => ({ nome: l.nome, empresa: l.empresa, status: l.status, score: l.ai_score, valor: l.valor_estimado })),
+      },
+      pipeline: {
+        deals_total: deals?.length ?? 0,
+        valor_total: sum(deals ?? [], "valor"),
+        por_stage: dealsByStage,
       },
       tarefas: {
         em_aberto: tasks?.length ?? 0,
         atrasadas: (tasks ?? []).filter((t: any) => t.prazo && new Date(t.prazo) < now).length,
+        proximas: (tasks ?? []).slice(0, 5).map((t: any) => ({ titulo: t.titulo, prazo: t.prazo, prioridade: t.prioridade })),
       },
       clientes: { total: clients?.length ?? 0 },
       financeiro: {
-        receita_mes: sum(monthEntries.filter((e: any) => e.status === "pago"), "valor_pago"),
-        previsto_mes: sum(monthEntries, "valor"),
-        despesas_mes: sum(monthExpenses, "valor"),
+        receita_recebida: sum((entries ?? []).filter((e: any) => e.status === "pago"), "valor_pago"),
+        receita_prevista: sum(entries ?? [], "valor"),
+        despesas: sum(expenses ?? [], "valor"),
         inadimplencia: sum(overdueEntries, "valor"),
         mrr,
         assinaturas_ativas: activeSubs.length,
@@ -82,20 +106,98 @@ Deno.serve(async (req) => {
 
     const systemPrompt = `Você é a KassIA, assistente de IA do KS CRM. Fala português do Brasil de forma direta, profissional e calorosa.
 
-Suas capacidades:
+CAPACIDADES:
 - Responder dúvidas sobre o CRM (leads, pipeline, clientes, tarefas, automação, financeiro).
-- Gerar relatórios sob demanda usando os dados reais abaixo (faturamento, inadimplência, leads quentes, comissões, etc).
-- Dar recomendações estratégicas baseadas no contexto.
-- Explicar conceitos de vendas, gestão e finanças quando perguntado.
+- Gerar relatórios sob demanda usando os dados reais do contexto.
+- Dar recomendações estratégicas.
+- Usar TOOLS para executar ações: 'criar_tarefa', 'gerar_relatorio', 'mover_lead'. Use proativamente quando o usuário pedir.
 
-Regras:
-- Use markdown (negrito, listas, tabelas) para clareza.
-- Quando gerar números financeiros, formate em R$ com separador de milhar.
-- Seja concisa: use listas e seções curtas. Não invente dados — se não souber, diga.
-- Quando pedirem relatório, estruture com título, KPIs principais e insights.
+REGRAS:
+- Markdown sempre (negrito, listas, tabelas) para clareza.
+- Valores em R$ com separador de milhar.
+- Conciso. Não invente dados — se não souber, diga.
+- Para relatórios, estruture: título → KPIs principais → tabela → insights.
+- Quando usuário pedir "criar tarefa", "follow-up", "relatório", "adicionar ao pipeline", chame a tool correspondente.
 
-Contexto atual do usuário (dados reais do CRM):
+CONTEXTO ATUAL (dados reais do CRM, filtrados):
 ${JSON.stringify(ctx, null, 2)}`;
+
+    const tools = [
+      {
+        type: "function",
+        function: {
+          name: "criar_tarefa",
+          description: "Cria uma tarefa/follow-up no CRM. Use quando o usuário pedir agendamento, follow-up ou ação a executar.",
+          parameters: {
+            type: "object",
+            properties: {
+              titulo: { type: "string", description: "Título curto da tarefa" },
+              descricao: { type: "string" },
+              prioridade: { type: "string", enum: ["baixa", "media", "alta", "urgente"] },
+              prazo_dias: { type: "number", description: "Dias a partir de hoje" },
+              lead_nome: { type: "string", description: "Nome do lead para vincular (opcional)" },
+            },
+            required: ["titulo"],
+            additionalProperties: false,
+          },
+        },
+      },
+      {
+        type: "function",
+        function: {
+          name: "mover_lead",
+          description: "Move um lead para outro estágio do pipeline.",
+          parameters: {
+            type: "object",
+            properties: {
+              lead_nome: { type: "string" },
+              novo_status: { type: "string", enum: ["novo", "contato_inicial", "qualificacao", "proposta", "negociacao", "fechado", "perdido"] },
+            },
+            required: ["lead_nome", "novo_status"],
+            additionalProperties: false,
+          },
+        },
+      },
+      {
+        type: "function",
+        function: {
+          name: "gerar_relatorio",
+          description: "Gera um relatório estruturado em PDF (faturamento, funil, inadimplência, pipeline, geral).",
+          parameters: {
+            type: "object",
+            properties: {
+              tipo: { type: "string", enum: ["faturamento", "funil", "inadimplencia", "pipeline", "geral"] },
+              titulo: { type: "string" },
+              resumo: { type: "string", description: "Resumo executivo em 2-3 frases" },
+              kpis: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    label: { type: "string" },
+                    valor: { type: "string" },
+                  },
+                  required: ["label", "valor"],
+                  additionalProperties: false,
+                },
+              },
+              tabela: {
+                type: "object",
+                properties: {
+                  colunas: { type: "array", items: { type: "string" } },
+                  linhas: { type: "array", items: { type: "array", items: { type: "string" } } },
+                },
+                required: ["colunas", "linhas"],
+                additionalProperties: false,
+              },
+              insights: { type: "array", items: { type: "string" } },
+            },
+            required: ["tipo", "titulo", "resumo", "kpis", "insights"],
+            additionalProperties: false,
+          },
+        },
+      },
+    ];
 
     const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -104,6 +206,7 @@ ${JSON.stringify(ctx, null, 2)}`;
         model: "google/gemini-2.5-flash",
         stream: true,
         messages: [{ role: "system", content: systemPrompt }, ...messages],
+        tools,
       }),
     });
 
