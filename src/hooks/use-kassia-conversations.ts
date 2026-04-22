@@ -55,14 +55,14 @@ export function useMessages(conversationId: string | null) {
 
 export function useCreateConversation() {
   const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async (titulo = "Nova conversa") => {
+  return useMutation<ConvRow, Error, string | undefined>({
+    mutationFn: async (titulo) => {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) throw new Error("Não autenticado");
       const tenant_id = requireTenantId();
       const { data, error } = await supabase
         .from("kassia_conversations")
-        .insert({ tenant_id, user_id: u.user.id, titulo })
+        .insert({ tenant_id, user_id: u.user.id, titulo: titulo ?? "Nova conversa" })
         .select()
         .single();
       if (error) throw error;
