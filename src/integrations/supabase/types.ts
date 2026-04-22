@@ -425,6 +425,7 @@ export type Database = {
           tenant_id: string
           updated_at: string
           valor: number
+          valor_pago: number
           vencimento: string | null
         }
         Insert: {
@@ -446,6 +447,7 @@ export type Database = {
           tenant_id: string
           updated_at?: string
           valor?: number
+          valor_pago?: number
           vencimento?: string | null
         }
         Update: {
@@ -467,6 +469,7 @@ export type Database = {
           tenant_id?: string
           updated_at?: string
           valor?: number
+          valor_pago?: number
           vencimento?: string | null
         }
         Relationships: []
@@ -530,6 +533,56 @@ export type Database = {
           vencimento?: string | null
         }
         Relationships: []
+      }
+      financial_payments: {
+        Row: {
+          created_at: string
+          created_by: string
+          entry_id: string
+          forma_pagamento:
+            | Database["public"]["Enums"]["financial_payment_method"]
+            | null
+          id: string
+          observacoes: string | null
+          pago_em: string
+          tenant_id: string
+          valor: number
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          entry_id: string
+          forma_pagamento?:
+            | Database["public"]["Enums"]["financial_payment_method"]
+            | null
+          id?: string
+          observacoes?: string | null
+          pago_em?: string
+          tenant_id: string
+          valor?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          entry_id?: string
+          forma_pagamento?:
+            | Database["public"]["Enums"]["financial_payment_method"]
+            | null
+          id?: string
+          observacoes?: string | null
+          pago_em?: string
+          tenant_id?: string
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_payments_entry_id_fkey"
+            columns: ["entry_id"]
+            isOneToOne: false
+            referencedRelation: "financial_entries"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       financial_subscriptions: {
         Row: {
