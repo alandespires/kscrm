@@ -46,6 +46,18 @@ export function LeadDetailDrawer({ lead, onClose }: { lead: LeadRow | null; onCl
   });
   const [finValor, setFinValor] = useState<string>("");
 
+  // Parcelamento
+  const [parcelMode, setParcelMode] = useState(false);
+  const [splitMode, setSplitMode] = useState<"pct" | "qtd">("pct");
+  const [entradaPct, setEntradaPct] = useState<string>("25");
+  const [parcelas, setParcelas] = useState<string>("4");
+  const [entradaPaga, setEntradaPaga] = useState(true);
+  const [intervaloDias, setIntervaloDias] = useState<string>("30");
+  const [primeiraVenc, setPrimeiraVenc] = useState<string>(() => {
+    const d = new Date(); d.setDate(d.getDate() + 30);
+    return d.toISOString().slice(0, 10);
+  });
+
   if (!open || !lead) return null;
 
   const isScoring = score.isPending && score.variables === lead.id;
