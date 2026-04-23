@@ -253,12 +253,12 @@ export function LeadDetailDrawer({ lead, onClose }: { lead: LeadRow | null; onCl
         {/* Convert dialog */}
         {convertOpen && (
           <div className="fixed inset-0 z-[60] grid place-items-center bg-black/70 p-4 backdrop-blur-sm" onClick={() => setConvertOpen(false)}>
-            <div className="w-full max-w-md overflow-hidden rounded-2xl border border-border bg-surface-1 shadow-elevated" onClick={(e) => e.stopPropagation()}>
+            <div className="max-h-[90vh] w-full max-w-lg overflow-hidden rounded-2xl border border-border bg-surface-1 shadow-elevated" onClick={(e) => e.stopPropagation()}>
               <div className="flex items-center justify-between border-b border-border p-4">
                 <h3 className="text-sm font-semibold">Converter em cliente</h3>
                 <button onClick={() => setConvertOpen(false)} className="grid h-7 w-7 place-items-center rounded text-muted-foreground hover:bg-surface-3"><X className="h-4 w-4" /></button>
               </div>
-              <div className="space-y-3 p-4">
+              <div className="max-h-[calc(90vh-110px)] space-y-3 overflow-y-auto p-4">
                 <p className="text-xs text-muted-foreground">
                   Vamos criar o cliente <strong className="text-foreground">{lead.nome}</strong>
                   {lead.valor_estimado && Number(lead.valor_estimado) > 0 ? <> e gerar negócio fechado no valor de <strong className="text-foreground">{formatBRL(Number(lead.valor_estimado))}</strong></> : null}.
@@ -268,43 +268,145 @@ export function LeadDetailDrawer({ lead, onClose }: { lead: LeadRow | null; onCl
                   <input type="checkbox" checked={genFin} onChange={(e) => setGenFin(e.target.checked)} className="mt-0.5 h-4 w-4 accent-primary" />
                   <div className="flex-1">
                     <div className="text-sm font-medium">Gerar entrada financeira?</div>
-                    <div className="text-[11px] text-muted-foreground">Cria uma cobrança pendente vinculada ao negócio.</div>
+                    <div className="text-[11px] text-muted-foreground">Cria as cobranças vinculadas ao negócio.</div>
                   </div>
                 </label>
 
-                {genFin && (
-                  <div className="space-y-2 rounded-lg border border-dashed border-border p-3">
-                    <div className="grid grid-cols-2 gap-2">
-                      <label className="block">
-                        <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Valor</span>
-                        <input type="number" step="0.01" value={finValor} onChange={(e) => setFinValor(e.target.value)} placeholder={String(Number(lead.valor_estimado ?? 0).toFixed(2))} className="mt-1 h-8 w-full rounded-md border border-border bg-surface-1 px-2 text-sm tabular-nums" />
+                {genFin && (() => {
+                  const totalNum = Number(finValor || lead.valor_estimado || 0);
+                  const pctNum = Math.max(0, Math.min(100, Number(entradaPct) || 0));
+                  const parcNum = Math.max(1, Number(parcelas) || 1);
+                  const entradaVal = parcelMode ? Math.round((totalNum * pctNum) / 100 * 100) / 100 : 0;
+                  const restante = Math.round((totalNum - entradaVal) * 100) / 100;
+                  const parcelaVal = parcelMode ? Math.round((restante / parcNum) * 100) / 100 : 0;
+                  return (
+                    <div className="space-y-3 rounded-lg border border-dashed border-border p-3">
+                      <div className="grid grid-cols-2 gap-2">
+                        <label className="block">
+                          <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Valor total da venda</span>
+                          <input type="number" step="0.01" value={finValor} onChange={(e) => setFinValor(e.target.value)} placeholder={String(Number(lead.valor_estimado ?? 0).toFixed(2))} className="mt-1 h-8 w-full rounded-md border border-border bg-surface-1 px-2 text-sm tabular-nums" />
+                        </label>
+                        <label className="block">
+                          <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Categoria</span>
+                          <select value={finCat} onChange={(e) => setFinCat(e.target.value as any)} className="mt-1 h-8 w-full rounded-md border border-border bg-surface-1 px-2 text-sm">
+                            {(["venda", "assinatura", "servico", "consultoria", "outros"] as const).map((c) => <option key={c} value={c}>{c}</option>)}
+                          </select>
+                        </label>
+                      </div>
+
+                      <label className="flex cursor-pointer items-start gap-2 rounded-lg border border-border bg-surface-1 p-2.5">
+                        <input type="checkbox" checked={parcelMode} onChange={(e) => setParcelMode(e.target.checked)} className="mt-0.5 h-4 w-4 accent-primary" />
+                        <div className="flex-1">
+                          <div className="text-xs font-semibold">Parcelar venda (sinal + parcelas)</div>
+                          <div className="text-[10px] text-muted-foreground">Gera múltiplas cobranças com vencimentos automáticos.</div>
+                        </div>
                       </label>
-                      <label className="block">
-                        <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Categoria</span>
-                        <select value={finCat} onChange={(e) => setFinCat(e.target.value as any)} className="mt-1 h-8 w-full rounded-md border border-border bg-surface-1 px-2 text-sm">
-                          {(["venda", "assinatura", "servico", "consultoria", "outros"] as const).map((c) => <option key={c} value={c}>{c}</option>)}
-                        </select>
-                      </label>
+
+                      {!parcelMode && (
+                        <label className="block">
+                          <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Vencimento</span>
+                          <input type="date" value={finVenc} onChange={(e) => setFinVenc(e.target.value)} className="mt-1 h-8 w-full rounded-md border border-border bg-surface-1 px-2 text-sm" />
+                        </label>
+                      )}
+
+                      {parcelMode && (
+                        <div className="space-y-2.5">
+                          <div className="flex items-center gap-1 rounded-lg border border-border bg-surface-1 p-0.5">
+                            {(["pct", "qtd"] as const).map((m) => (
+                              <button key={m} onClick={() => setSplitMode(m)}
+                                className={["h-7 flex-1 rounded-md text-[11px] font-medium transition",
+                                  splitMode === m ? "bg-primary text-primary-foreground shadow-glow" : "text-muted-foreground hover:text-foreground"].join(" ")}>
+                                {m === "pct" ? "Por % de entrada" : "Por nº de parcelas"}
+                              </button>
+                            ))}
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-2">
+                            {splitMode === "pct" ? (
+                              <label className="block">
+                                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Entrada (%)</span>
+                                <input type="number" min="0" max="100" step="1" value={entradaPct} onChange={(e) => setEntradaPct(e.target.value)} className="mt-1 h-8 w-full rounded-md border border-border bg-surface-1 px-2 text-sm tabular-nums" />
+                              </label>
+                            ) : (
+                              <label className="block">
+                                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Sem entrada</span>
+                                <div className="mt-1 grid h-8 place-items-center rounded-md border border-dashed border-border text-[11px] text-muted-foreground">0%</div>
+                              </label>
+                            )}
+                            <label className="block">
+                              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Nº parcelas (restante)</span>
+                              <input type="number" min="1" step="1" value={parcelas} onChange={(e) => setParcelas(e.target.value)} className="mt-1 h-8 w-full rounded-md border border-border bg-surface-1 px-2 text-sm tabular-nums" />
+                            </label>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-2">
+                            <label className="block">
+                              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">1º vencimento</span>
+                              <input type="date" value={primeiraVenc} onChange={(e) => setPrimeiraVenc(e.target.value)} className="mt-1 h-8 w-full rounded-md border border-border bg-surface-1 px-2 text-sm" />
+                            </label>
+                            <label className="block">
+                              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Intervalo (dias)</span>
+                              <input type="number" min="1" step="1" value={intervaloDias} onChange={(e) => setIntervaloDias(e.target.value)} className="mt-1 h-8 w-full rounded-md border border-border bg-surface-1 px-2 text-sm tabular-nums" />
+                            </label>
+                          </div>
+
+                          {splitMode === "pct" && entradaVal > 0 && (
+                            <label className="flex cursor-pointer items-center gap-2 rounded-md bg-success/10 px-2.5 py-2">
+                              <input type="checkbox" checked={entradaPaga} onChange={(e) => setEntradaPaga(e.target.checked)} className="h-3.5 w-3.5 accent-success" />
+                              <span className="text-[11px] font-medium text-success">Entrada já recebida hoje</span>
+                            </label>
+                          )}
+
+                          {/* Preview */}
+                          <div className="rounded-md border border-border bg-surface-2 p-2.5">
+                            <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Resumo</div>
+                            <div className="grid grid-cols-3 gap-2 text-center">
+                              <div>
+                                <div className="text-[9px] uppercase text-muted-foreground">Total</div>
+                                <div className="text-xs font-bold tabular-nums">{formatBRL(totalNum)}</div>
+                              </div>
+                              <div>
+                                <div className="text-[9px] uppercase text-muted-foreground">Entrada</div>
+                                <div className="text-xs font-bold tabular-nums text-success">{formatBRL(entradaVal)}</div>
+                              </div>
+                              <div>
+                                <div className="text-[9px] uppercase text-muted-foreground">Restante</div>
+                                <div className="text-xs font-bold tabular-nums text-warning">{formatBRL(restante)}</div>
+                              </div>
+                            </div>
+                            <div className="mt-2 border-t border-border pt-1.5 text-center text-[10px] text-muted-foreground">
+                              <strong className="text-foreground">{parcNum}x</strong> de <strong className="text-foreground tabular-nums">{formatBRL(parcelaVal)}</strong> a cada {intervaloDias} dias
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                    <label className="block">
-                      <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Vencimento</span>
-                      <input type="date" value={finVenc} onChange={(e) => setFinVenc(e.target.value)} className="mt-1 h-8 w-full rounded-md border border-border bg-surface-1 px-2 text-sm" />
-                    </label>
-                  </div>
-                )}
+                  );
+                })()}
 
                 <div className="flex items-center justify-end gap-2 pt-1">
                   <button onClick={() => setConvertOpen(false)} className="h-9 rounded-lg border border-border bg-surface-2 px-3 text-xs hover:border-primary/40">Cancelar</button>
                   <button
                     onClick={async () => {
                       if (!lead) return;
+                      const totalNum = Number(finValor || lead.valor_estimado || 0);
                       await convert.mutateAsync({
                         lead,
                         options: genFin ? {
                           generateFinancial: true,
                           finCategoria: finCat,
                           finVencimento: finVenc || null,
-                          finValor: finValor ? Number(finValor) : undefined,
+                          finValor: totalNum || undefined,
+                          installments: parcelMode ? {
+                            enabled: true,
+                            totalValor: totalNum,
+                            entradaPct: splitMode === "pct" ? Number(entradaPct) || 0 : 0,
+                            entradaPaga,
+                            parcelas: Math.max(1, Number(parcelas) || 1),
+                            primeiraVenc: primeiraVenc || null,
+                            intervaloDias: Math.max(1, Number(intervaloDias) || 30),
+                            categoria: finCat,
+                          } : undefined,
                         } : undefined,
                       });
                       setConvertOpen(false);
