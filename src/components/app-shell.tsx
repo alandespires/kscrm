@@ -1,6 +1,6 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import {
-  LayoutDashboard, Users, Kanban, Building2, ListChecks, Activity,
+  LayoutDashboard, Users, Kanban, Building2, ListChecks,
   Zap, Sparkles, BarChart3, Settings, Search, Plus, LogOut, Loader2, Sun, Moon, Shield, Wallet,
 } from "lucide-react";
 import { useEffect, type ReactNode } from "react";
@@ -17,7 +17,6 @@ const NAV = [
   { to: "/pipeline", label: "Pipeline", icon: Kanban },
   { to: "/clientes", label: "Clientes", icon: Building2 },
   { to: "/tarefas", label: "Tarefas", icon: ListChecks },
-  { to: "/atividades", label: "Atividades", icon: Activity },
   { to: "/financeiro", label: "Financeiro", icon: Wallet },
   { to: "/automacao", label: "Automação", icon: Zap },
   { to: "/insights", label: "KassIA", icon: Sparkles },
