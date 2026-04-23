@@ -780,6 +780,59 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          created_at: string
+          descricao: string | null
+          id: string
+          lida: boolean
+          lida_em: string | null
+          link: string | null
+          metadata: Json | null
+          prioridade: Database["public"]["Enums"]["task_priority"]
+          tenant_id: string
+          tipo: Database["public"]["Enums"]["notification_type"]
+          titulo: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          lida?: boolean
+          lida_em?: string | null
+          link?: string | null
+          metadata?: Json | null
+          prioridade?: Database["public"]["Enums"]["task_priority"]
+          tenant_id: string
+          tipo: Database["public"]["Enums"]["notification_type"]
+          titulo: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          descricao?: string | null
+          id?: string
+          lida?: boolean
+          lida_em?: string | null
+          link?: string | null
+          metadata?: Json | null
+          prioridade?: Database["public"]["Enums"]["task_priority"]
+          tenant_id?: string
+          tipo?: Database["public"]["Enums"]["notification_type"]
+          titulo?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       plans: {
         Row: {
           ativo: boolean
@@ -1160,6 +1213,18 @@ export type Database = {
         Returns: boolean
       }
       mark_overdue_financial: { Args: never; Returns: undefined }
+      notify_tenant: {
+        Args: {
+          _descricao?: string
+          _link?: string
+          _metadata?: Json
+          _prioridade?: Database["public"]["Enums"]["task_priority"]
+          _tenant_id: string
+          _tipo: Database["public"]["Enums"]["notification_type"]
+          _titulo: string
+        }
+        Returns: undefined
+      }
       user_tenant_ids: { Args: { _user_id: string }; Returns: string[] }
     }
     Enums: {
@@ -1210,6 +1275,21 @@ export type Database = {
         | "negociacao"
         | "fechado"
         | "perdido"
+      notification_type:
+        | "lead_novo"
+        | "lead_quente"
+        | "lead_frio"
+        | "status_mudou"
+        | "tarefa_criada"
+        | "tarefa_atrasada"
+        | "tarefa_concluida"
+        | "financeiro_vencendo"
+        | "financeiro_atrasado"
+        | "financeiro_recebido"
+        | "cliente_novo"
+        | "automacao_executada"
+        | "insight_ia"
+        | "sistema"
       subscription_status:
         | "trial"
         | "ativo"
@@ -1399,6 +1479,22 @@ export const Constants = {
         "negociacao",
         "fechado",
         "perdido",
+      ],
+      notification_type: [
+        "lead_novo",
+        "lead_quente",
+        "lead_frio",
+        "status_mudou",
+        "tarefa_criada",
+        "tarefa_atrasada",
+        "tarefa_concluida",
+        "financeiro_vencendo",
+        "financeiro_atrasado",
+        "financeiro_recebido",
+        "cliente_novo",
+        "automacao_executada",
+        "insight_ia",
+        "sistema",
       ],
       subscription_status: [
         "trial",
