@@ -21,6 +21,7 @@ import { Route as ConfiguracoesRouteImport } from './routes/configuracoes'
 import { Route as ClientesRouteImport } from './routes/clientes'
 import { Route as AutomacaoRouteImport } from './routes/automacao'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AtividadesRouteImport } from './routes/atividades'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TTenantSlugRouteImport } from './routes/t.$tenantSlug'
 import { Route as TTenantSlugIndexRouteImport } from './routes/t.$tenantSlug.index'
@@ -85,6 +86,11 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AtividadesRoute = AtividadesRouteImport.update({
+  id: '/atividades',
+  path: '/atividades',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -103,6 +109,7 @@ const TTenantSlugIndexRoute = TTenantSlugIndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/atividades': typeof AtividadesRoute
   '/auth': typeof AuthRoute
   '/automacao': typeof AutomacaoRoute
   '/clientes': typeof ClientesRoute
@@ -120,6 +127,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/atividades': typeof AtividadesRoute
   '/auth': typeof AuthRoute
   '/automacao': typeof AutomacaoRoute
   '/clientes': typeof ClientesRoute
@@ -137,6 +145,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/atividades': typeof AtividadesRoute
   '/auth': typeof AuthRoute
   '/automacao': typeof AutomacaoRoute
   '/clientes': typeof ClientesRoute
@@ -156,6 +165,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/atividades'
     | '/auth'
     | '/automacao'
     | '/clientes'
@@ -173,6 +183,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/atividades'
     | '/auth'
     | '/automacao'
     | '/clientes'
@@ -189,6 +200,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/atividades'
     | '/auth'
     | '/automacao'
     | '/clientes'
@@ -207,6 +219,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AtividadesRoute: typeof AtividadesRoute
   AuthRoute: typeof AuthRoute
   AutomacaoRoute: typeof AutomacaoRoute
   ClientesRoute: typeof ClientesRoute
@@ -308,6 +321,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/atividades': {
+      id: '/atividades'
+      path: '/atividades'
+      fullPath: '/atividades'
+      preLoaderRoute: typeof AtividadesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -346,6 +366,7 @@ const TTenantSlugRouteWithChildren = TTenantSlugRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AtividadesRoute: AtividadesRoute,
   AuthRoute: AuthRoute,
   AutomacaoRoute: AutomacaoRoute,
   ClientesRoute: ClientesRoute,
