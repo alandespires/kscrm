@@ -3,14 +3,33 @@ import { supabase } from "@/integrations/supabase/client";
 import { requireTenantId } from "@/contexts/tenant-context";
 import { toast } from "sonner";
 import type { LeadRow } from "@/hooks/use-leads";
-import type { EntryCategory } from "@/hooks/use-finance";
+import type { EntryCategory, PaymentMethod } from "@/hooks/use-finance";
+
+export type InstallmentPlan = {
+  enabled: boolean;
+  totalValor: number;            // valor total da venda
+  entradaPct: number;            // 0..100 — % do total a ser cobrado como entrada (sinal)
+  entradaPaga: boolean;          // marcar entrada como já paga (recebida hoje)
+  parcelas: number;              // nº de parcelas do RESTANTE (>=1)
+  primeiraVenc: string | null;   // YYYY-MM-DD — vencimento da 1ª parcela do restante
+  intervaloDias: number;         // intervalo entre parcelas (default 30)
+  formaPagamento?: PaymentMethod | null;
+  categoria?: EntryCategory;
+};
 
 export type ConvertOptions = {
   generateFinancial?: boolean;
   finCategoria?: EntryCategory;
-  finVencimento?: string | null; // YYYY-MM-DD
-  finValor?: number; // override; defaults to valor_estimado
+  finVencimento?: string | null;
+  finValor?: number;
+  installments?: InstallmentPlan;  // novo
 };
+
+function addDaysISO(iso: string, days: number) {
+  const d = new Date(iso + "T12:00:00");
+  d.setDate(d.getDate() + days);
+  return d.toISOString().slice(0, 10);
+}
 
 export function useConvertLeadToClient() {
   const qc = useQueryClient();
@@ -21,44 +40,39 @@ export function useConvertLeadToClient() {
       const tenant_id = requireTenantId();
 
       const { data: existing } = await supabase
-        .from("clients")
-        .select("id")
-        .eq("lead_id", lead.id)
-        .maybeSingle();
+        .from("clients").select("id").eq("lead_id", lead.id).maybeSingle();
       if (existing) throw new Error("Lead já convertido em cliente");
 
+      const inst = options?.installments;
+      const valorTotal = inst?.enabled
+        ? Number(inst.totalValor || 0)
+        : Number(options?.finValor ?? lead.valor_estimado ?? 0);
+
       const { data: client, error } = await supabase
-        .from("clients")
-        .insert({
+        .from("clients").insert({
           tenant_id,
           nome: lead.nome,
           empresa: lead.empresa,
           email: lead.email,
           whatsapp: lead.whatsapp,
           observacoes: lead.observacoes,
-          contrato_valor: lead.valor_estimado,
+          contrato_valor: valorTotal || lead.valor_estimado,
           contrato_inicio: new Date().toISOString().slice(0, 10),
           lead_id: lead.id,
           owner_id: u.user.id,
-        })
-        .select()
-        .single();
+        }).select().single();
       if (error) throw error;
 
       if (lead.status !== "fechado") {
-        const { error: upErr } = await supabase
-          .from("leads")
-          .update({ status: "fechado" })
-          .eq("id", lead.id);
-        if (upErr) throw upErr;
+        await supabase.from("leads").update({ status: "fechado" }).eq("id", lead.id);
       }
 
       let dealId: string | null = null;
-      if (lead.valor_estimado && Number(lead.valor_estimado) > 0) {
+      if (valorTotal > 0) {
         const { data: deal } = await supabase.from("deals").insert({
           tenant_id,
           titulo: lead.empresa || lead.nome,
-          valor: lead.valor_estimado,
+          valor: valorTotal,
           stage: "fechado",
           fechado_em: new Date().toISOString(),
           lead_id: lead.id,
@@ -68,17 +82,64 @@ export function useConvertLeadToClient() {
         dealId = deal?.id ?? null;
       }
 
-      // Optional: financial entry
-      if (options?.generateFinancial) {
-        const valor = Number(options.finValor ?? lead.valor_estimado ?? 0);
-        if (valor > 0) {
+      // ===== FINANCEIRO =====
+      if (options?.generateFinancial && valorTotal > 0) {
+        // Modo PARCELADO
+        if (inst?.enabled && inst.parcelas >= 1) {
+          const entradaValor = Math.round((valorTotal * (inst.entradaPct || 0)) / 100 * 100) / 100;
+          const restante = Math.round((valorTotal - entradaValor) * 100) / 100;
+          const intervalo = inst.intervaloDias || 30;
+          const baseDate = inst.primeiraVenc || addDaysISO(new Date().toISOString().slice(0, 10), intervalo);
+
+          // distribuir parcelas com ajuste do centavo na última
+          const parcelaBase = Math.floor((restante / inst.parcelas) * 100) / 100;
+          const sobra = Math.round((restante - parcelaBase * inst.parcelas) * 100) / 100;
+
+          const rows: any[] = [];
+
+          // Entrada (sinal)
+          if (entradaValor > 0) {
+            rows.push({
+              tenant_id, client_id: client.id, lead_id: lead.id, deal_id: dealId,
+              descricao: `Entrada (${inst.entradaPct}%) — ${lead.empresa || lead.nome}`,
+              valor: entradaValor,
+              valor_pago: inst.entradaPaga ? entradaValor : 0,
+              categoria: inst.categoria ?? options.finCategoria ?? "venda",
+              status: inst.entradaPaga ? "pago" : "pendente",
+              vencimento: new Date().toISOString().slice(0, 10),
+              recebido_em: inst.entradaPaga ? new Date().toISOString().slice(0, 10) : null,
+              forma_pagamento: inst.formaPagamento ?? null,
+              created_by: u.user.id,
+            });
+          }
+
+          // Parcelas do restante
+          for (let i = 1; i <= inst.parcelas; i++) {
+            const valor = i === inst.parcelas ? Math.round((parcelaBase + sobra) * 100) / 100 : parcelaBase;
+            const venc = addDaysISO(baseDate, (i - 1) * intervalo);
+            rows.push({
+              tenant_id, client_id: client.id, lead_id: lead.id, deal_id: dealId,
+              descricao: `Parcela ${i}/${inst.parcelas} — ${lead.empresa || lead.nome}`,
+              valor,
+              valor_pago: 0,
+              categoria: inst.categoria ?? options.finCategoria ?? "venda",
+              status: "pendente",
+              vencimento: venc,
+              forma_pagamento: inst.formaPagamento ?? null,
+              created_by: u.user.id,
+            });
+          }
+
+          if (rows.length) {
+            const { error: feErr } = await supabase.from("financial_entries").insert(rows);
+            if (feErr) throw feErr;
+          }
+        } else {
+          // Modo entrada única (legado)
           const { error: feErr } = await supabase.from("financial_entries").insert({
-            tenant_id,
-            client_id: client.id,
-            lead_id: lead.id,
-            deal_id: dealId,
+            tenant_id, client_id: client.id, lead_id: lead.id, deal_id: dealId,
             descricao: `Venda — ${lead.empresa || lead.nome}`,
-            valor,
+            valor: valorTotal,
             categoria: options.finCategoria ?? "venda",
             origem: lead.origem ?? null,
             status: "pendente",
@@ -90,13 +151,16 @@ export function useConvertLeadToClient() {
       }
 
       await supabase.from("activities").insert({
-        tenant_id,
-        tipo: "movimentacao",
-        descricao: `Lead convertido em cliente: ${lead.nome}${options?.generateFinancial ? " (entrada financeira gerada)" : ""}`,
-        lead_id: lead.id,
-        client_id: client.id,
+        tenant_id, tipo: "movimentacao",
+        descricao: `Lead convertido em cliente: ${lead.nome}` +
+          (options?.generateFinancial
+            ? inst?.enabled
+              ? ` (parcelado em ${inst.parcelas + (inst.entradaPct > 0 ? 1 : 0)}x)`
+              : " (entrada financeira gerada)"
+            : ""),
+        lead_id: lead.id, client_id: client.id,
         user_id: u.user.id,
-        metadata: { action: "convert_to_client", financial: !!options?.generateFinancial },
+        metadata: { action: "convert_to_client", financial: !!options?.generateFinancial, installments: inst?.enabled ?? false },
       });
 
       return client;
