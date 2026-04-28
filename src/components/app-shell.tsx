@@ -30,7 +30,7 @@ export function AppShell({ children, title, subtitle, action }: {
 }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { user, loading, signOut } = useAuth();
-  const { loading: tenantLoading, memberships, isSuperAdmin } = useTenant();
+  const { loading: tenantLoading, memberships, isSuperAdmin, current } = useTenant();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
