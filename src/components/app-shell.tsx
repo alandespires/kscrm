@@ -70,12 +70,12 @@ export function AppShell({ children, title, subtitle, action }: {
         </div>
 
         <nav className="flex-1 space-y-0.5 px-3 py-4">
-          {NAV.map(({ to, label, icon: Icon }) => {
+          {NAV.filter((item) => !item.clinicOnly || (current?.tenant as any)?.segmento === "clinica").map(({ to, label, icon: Icon }) => {
             const active = to === "/" ? pathname === "/" : pathname.startsWith(to);
             return (
               <Link
                 key={to}
-                to={to}
+                to={to as any}
                 className={[
                   "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all",
                   active
