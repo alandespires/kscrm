@@ -123,6 +123,75 @@ export type Database = {
           },
         ]
       }
+      appointments: {
+        Row: {
+          confirmado_em: string | null
+          convenio: string | null
+          cor: string | null
+          created_at: string
+          created_by: string
+          duracao_min: number | null
+          fim: string
+          id: string
+          inicio: string
+          lembrete_enviado: boolean
+          motivo_cancelamento: string | null
+          observacoes: string | null
+          patient_id: string
+          procedimento: string | null
+          professional_id: string | null
+          realizado_em: string | null
+          status: Database["public"]["Enums"]["appointment_status"]
+          tenant_id: string
+          updated_at: string
+          valor: number | null
+        }
+        Insert: {
+          confirmado_em?: string | null
+          convenio?: string | null
+          cor?: string | null
+          created_at?: string
+          created_by: string
+          duracao_min?: number | null
+          fim: string
+          id?: string
+          inicio: string
+          lembrete_enviado?: boolean
+          motivo_cancelamento?: string | null
+          observacoes?: string | null
+          patient_id: string
+          procedimento?: string | null
+          professional_id?: string | null
+          realizado_em?: string | null
+          status?: Database["public"]["Enums"]["appointment_status"]
+          tenant_id: string
+          updated_at?: string
+          valor?: number | null
+        }
+        Update: {
+          confirmado_em?: string | null
+          convenio?: string | null
+          cor?: string | null
+          created_at?: string
+          created_by?: string
+          duracao_min?: number | null
+          fim?: string
+          id?: string
+          inicio?: string
+          lembrete_enviado?: boolean
+          motivo_cancelamento?: string | null
+          observacoes?: string | null
+          patient_id?: string
+          procedimento?: string | null
+          professional_id?: string | null
+          realizado_em?: string | null
+          status?: Database["public"]["Enums"]["appointment_status"]
+          tenant_id?: string
+          updated_at?: string
+          valor?: number | null
+        }
+        Relationships: []
+      }
       automation_runs: {
         Row: {
           automation_id: string
@@ -288,6 +357,99 @@ export type Database = {
           },
         ]
       }
+      clinical_attachments: {
+        Row: {
+          created_at: string
+          created_by: string
+          descricao: string | null
+          id: string
+          nome: string
+          patient_id: string
+          record_id: string | null
+          tamanho_bytes: number | null
+          tenant_id: string
+          tipo: string | null
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          descricao?: string | null
+          id?: string
+          nome: string
+          patient_id: string
+          record_id?: string | null
+          tamanho_bytes?: number | null
+          tenant_id: string
+          tipo?: string | null
+          url: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          descricao?: string | null
+          id?: string
+          nome?: string
+          patient_id?: string
+          record_id?: string | null
+          tamanho_bytes?: number | null
+          tenant_id?: string
+          tipo?: string | null
+          url?: string
+        }
+        Relationships: []
+      }
+      clinical_records: {
+        Row: {
+          conteudo: string
+          created_at: string
+          created_by: string
+          dente: string | null
+          id: string
+          metadata: Json | null
+          patient_id: string
+          procedimento: string | null
+          professional_id: string | null
+          queixa_principal: string | null
+          tenant_id: string
+          tipo: Database["public"]["Enums"]["clinical_record_type"]
+          titulo: string | null
+          updated_at: string
+        }
+        Insert: {
+          conteudo: string
+          created_at?: string
+          created_by: string
+          dente?: string | null
+          id?: string
+          metadata?: Json | null
+          patient_id: string
+          procedimento?: string | null
+          professional_id?: string | null
+          queixa_principal?: string | null
+          tenant_id: string
+          tipo?: Database["public"]["Enums"]["clinical_record_type"]
+          titulo?: string | null
+          updated_at?: string
+        }
+        Update: {
+          conteudo?: string
+          created_at?: string
+          created_by?: string
+          dente?: string | null
+          id?: string
+          metadata?: Json | null
+          patient_id?: string
+          procedimento?: string | null
+          professional_id?: string | null
+          queixa_principal?: string | null
+          tenant_id?: string
+          tipo?: Database["public"]["Enums"]["clinical_record_type"]
+          titulo?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       deals: {
         Row: {
           created_at: string
@@ -347,6 +509,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      dental_professionals: {
+        Row: {
+          ativo: boolean
+          cor: string | null
+          created_at: string
+          created_by: string
+          cro: string | null
+          especialidade: string | null
+          id: string
+          nome: string
+          tenant_id: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          ativo?: boolean
+          cor?: string | null
+          created_at?: string
+          created_by: string
+          cro?: string | null
+          especialidade?: string | null
+          id?: string
+          nome: string
+          tenant_id: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          ativo?: boolean
+          cor?: string | null
+          created_at?: string
+          created_by?: string
+          cro?: string | null
+          especialidade?: string | null
+          id?: string
+          nome?: string
+          tenant_id?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
       }
       financial_commissions: {
         Row: {
@@ -833,6 +1037,117 @@ export type Database = {
           },
         ]
       }
+      patients: {
+        Row: {
+          alergias: string | null
+          cep: string | null
+          cidade: string | null
+          client_id: string | null
+          convenio: string | null
+          cpf: string | null
+          created_at: string
+          created_by: string
+          data_nascimento: string | null
+          doencas_preexistentes: string | null
+          email: string | null
+          endereco: string | null
+          estado: string | null
+          estado_civil: string | null
+          genero: string | null
+          id: string
+          lead_id: string | null
+          medicamentos_uso: string | null
+          nome: string
+          numero_convenio: string | null
+          observacoes: string | null
+          origem: string | null
+          primeiro_atendimento_em: string | null
+          profissao: string | null
+          responsavel_cpf: string | null
+          responsavel_nome: string | null
+          rg: string | null
+          status: Database["public"]["Enums"]["patient_status"]
+          tags: string[] | null
+          telefone: string | null
+          tenant_id: string
+          ultimo_atendimento_em: string | null
+          updated_at: string
+          whatsapp: string | null
+        }
+        Insert: {
+          alergias?: string | null
+          cep?: string | null
+          cidade?: string | null
+          client_id?: string | null
+          convenio?: string | null
+          cpf?: string | null
+          created_at?: string
+          created_by: string
+          data_nascimento?: string | null
+          doencas_preexistentes?: string | null
+          email?: string | null
+          endereco?: string | null
+          estado?: string | null
+          estado_civil?: string | null
+          genero?: string | null
+          id?: string
+          lead_id?: string | null
+          medicamentos_uso?: string | null
+          nome: string
+          numero_convenio?: string | null
+          observacoes?: string | null
+          origem?: string | null
+          primeiro_atendimento_em?: string | null
+          profissao?: string | null
+          responsavel_cpf?: string | null
+          responsavel_nome?: string | null
+          rg?: string | null
+          status?: Database["public"]["Enums"]["patient_status"]
+          tags?: string[] | null
+          telefone?: string | null
+          tenant_id: string
+          ultimo_atendimento_em?: string | null
+          updated_at?: string
+          whatsapp?: string | null
+        }
+        Update: {
+          alergias?: string | null
+          cep?: string | null
+          cidade?: string | null
+          client_id?: string | null
+          convenio?: string | null
+          cpf?: string | null
+          created_at?: string
+          created_by?: string
+          data_nascimento?: string | null
+          doencas_preexistentes?: string | null
+          email?: string | null
+          endereco?: string | null
+          estado?: string | null
+          estado_civil?: string | null
+          genero?: string | null
+          id?: string
+          lead_id?: string | null
+          medicamentos_uso?: string | null
+          nome?: string
+          numero_convenio?: string | null
+          observacoes?: string | null
+          origem?: string | null
+          primeiro_atendimento_em?: string | null
+          profissao?: string | null
+          responsavel_cpf?: string | null
+          responsavel_nome?: string | null
+          rg?: string | null
+          status?: Database["public"]["Enums"]["patient_status"]
+          tags?: string[] | null
+          telefone?: string | null
+          tenant_id?: string
+          ultimo_atendimento_em?: string | null
+          updated_at?: string
+          whatsapp?: string | null
+        }
+        Relationships: []
+      }
       plans: {
         Row: {
           ativo: boolean
@@ -1082,6 +1397,7 @@ export type Database = {
           plan_id: string | null
           proximo_vencimento: string | null
           responsavel: string | null
+          segmento: Database["public"]["Enums"]["tenant_segmento"]
           slug: string
           status: Database["public"]["Enums"]["tenant_status"]
           trial_ate: string | null
@@ -1099,6 +1415,7 @@ export type Database = {
           plan_id?: string | null
           proximo_vencimento?: string | null
           responsavel?: string | null
+          segmento?: Database["public"]["Enums"]["tenant_segmento"]
           slug: string
           status?: Database["public"]["Enums"]["tenant_status"]
           trial_ate?: string | null
@@ -1116,6 +1433,7 @@ export type Database = {
           plan_id?: string | null
           proximo_vencimento?: string | null
           responsavel?: string | null
+          segmento?: Database["public"]["Enums"]["tenant_segmento"]
           slug?: string
           status?: Database["public"]["Enums"]["tenant_status"]
           trial_ate?: string | null
@@ -1176,6 +1494,7 @@ export type Database = {
           plan_id: string | null
           proximo_vencimento: string | null
           responsavel: string | null
+          segmento: Database["public"]["Enums"]["tenant_segmento"]
           slug: string
           status: Database["public"]["Enums"]["tenant_status"]
           trial_ate: string | null
@@ -1237,11 +1556,25 @@ export type Database = {
         | "movimentacao"
         | "tarefa"
       app_role: "super_admin" | "tenant_admin" | "tenant_user"
+      appointment_status:
+        | "agendado"
+        | "confirmado"
+        | "em_atendimento"
+        | "realizado"
+        | "faltou"
+        | "cancelado"
+        | "remarcado"
       automation_trigger:
         | "lead_criado"
         | "status_mudou"
         | "score_alto"
         | "score_baixou"
+      clinical_record_type:
+        | "anamnese"
+        | "evolucao"
+        | "observacao"
+        | "retorno"
+        | "procedimento"
       commission_status: "pendente" | "aprovada" | "paga" | "cancelada"
       financial_entry_category:
         | "venda"
@@ -1290,6 +1623,7 @@ export type Database = {
         | "automacao_executada"
         | "insight_ia"
         | "sistema"
+      patient_status: "ativo" | "inativo" | "bloqueado"
       subscription_status:
         | "trial"
         | "ativo"
@@ -1299,6 +1633,7 @@ export type Database = {
       task_priority: "baixa" | "media" | "alta" | "urgente"
       task_status: "pendente" | "em_andamento" | "concluida" | "cancelada"
       tenant_role: "tenant_admin" | "tenant_user"
+      tenant_segmento: "geral" | "clinica"
       tenant_status: "trial" | "ativo" | "suspenso" | "cancelado"
     }
     CompositeTypes: {
@@ -1437,11 +1772,27 @@ export const Constants = {
         "tarefa",
       ],
       app_role: ["super_admin", "tenant_admin", "tenant_user"],
+      appointment_status: [
+        "agendado",
+        "confirmado",
+        "em_atendimento",
+        "realizado",
+        "faltou",
+        "cancelado",
+        "remarcado",
+      ],
       automation_trigger: [
         "lead_criado",
         "status_mudou",
         "score_alto",
         "score_baixou",
+      ],
+      clinical_record_type: [
+        "anamnese",
+        "evolucao",
+        "observacao",
+        "retorno",
+        "procedimento",
       ],
       commission_status: ["pendente", "aprovada", "paga", "cancelada"],
       financial_entry_category: [
@@ -1496,6 +1847,7 @@ export const Constants = {
         "insight_ia",
         "sistema",
       ],
+      patient_status: ["ativo", "inativo", "bloqueado"],
       subscription_status: [
         "trial",
         "ativo",
@@ -1506,6 +1858,7 @@ export const Constants = {
       task_priority: ["baixa", "media", "alta", "urgente"],
       task_status: ["pendente", "em_andamento", "concluida", "cancelada"],
       tenant_role: ["tenant_admin", "tenant_user"],
+      tenant_segmento: ["geral", "clinica"],
       tenant_status: ["trial", "ativo", "suspenso", "cancelado"],
     },
   },

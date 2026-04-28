@@ -1,7 +1,7 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import {
   LayoutDashboard, Users, Kanban, Building2, ListChecks,
-  Zap, Sparkles, BarChart3, Settings, Search, Plus, LogOut, Loader2, Sun, Moon, Shield, Wallet,
+  Zap, Sparkles, BarChart3, Settings, Search, Plus, LogOut, Loader2, Sun, Moon, Shield, Wallet, Stethoscope,
 } from "lucide-react";
 import { useEffect, type ReactNode } from "react";
 import { useAuth } from "@/contexts/auth-context";
@@ -11,25 +11,26 @@ import { useLeads } from "@/hooks/use-leads";
 import { AiCoachButton } from "@/components/ai-coach-panel";
 import { NotificationsPopover } from "@/components/notifications-popover";
 
-const NAV = [
+const NAV: Array<{ to: string; label: string; icon: any; clinicOnly?: boolean }> = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
   { to: "/leads", label: "Leads", icon: Users },
   { to: "/pipeline", label: "Pipeline", icon: Kanban },
   { to: "/clientes", label: "Clientes", icon: Building2 },
+  { to: "/clinicas", label: "KS Clínicas", icon: Stethoscope, clinicOnly: true },
   { to: "/tarefas", label: "Tarefas", icon: ListChecks },
   { to: "/financeiro", label: "Financeiro", icon: Wallet },
   { to: "/automacao", label: "Automação", icon: Zap },
   { to: "/insights", label: "KassIA", icon: Sparkles },
   { to: "/relatorios", label: "Relatórios", icon: BarChart3 },
   { to: "/configuracoes", label: "Configurações", icon: Settings },
-] as const;
+];
 
 export function AppShell({ children, title, subtitle, action }: {
   children: ReactNode; title: string; subtitle?: string; action?: ReactNode;
 }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { user, loading, signOut } = useAuth();
-  const { loading: tenantLoading, memberships, isSuperAdmin } = useTenant();
+  const { loading: tenantLoading, memberships, isSuperAdmin, current } = useTenant();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
@@ -69,12 +70,12 @@ export function AppShell({ children, title, subtitle, action }: {
         </div>
 
         <nav className="flex-1 space-y-0.5 px-3 py-4">
-          {NAV.map(({ to, label, icon: Icon }) => {
+          {NAV.filter((item) => !item.clinicOnly || (current?.tenant as any)?.segmento === "clinica").map(({ to, label, icon: Icon }) => {
             const active = to === "/" ? pathname === "/" : pathname.startsWith(to);
             return (
               <Link
                 key={to}
-                to={to}
+                to={to as any}
                 className={[
                   "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all",
                   active
