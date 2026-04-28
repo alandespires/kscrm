@@ -11,18 +11,19 @@ import { useLeads } from "@/hooks/use-leads";
 import { AiCoachButton } from "@/components/ai-coach-panel";
 import { NotificationsPopover } from "@/components/notifications-popover";
 
-const NAV = [
+const NAV: Array<{ to: string; label: string; icon: any; clinicOnly?: boolean }> = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
   { to: "/leads", label: "Leads", icon: Users },
   { to: "/pipeline", label: "Pipeline", icon: Kanban },
   { to: "/clientes", label: "Clientes", icon: Building2 },
+  { to: "/clinicas", label: "KS Clínicas", icon: Stethoscope, clinicOnly: true },
   { to: "/tarefas", label: "Tarefas", icon: ListChecks },
   { to: "/financeiro", label: "Financeiro", icon: Wallet },
   { to: "/automacao", label: "Automação", icon: Zap },
   { to: "/insights", label: "KassIA", icon: Sparkles },
   { to: "/relatorios", label: "Relatórios", icon: BarChart3 },
   { to: "/configuracoes", label: "Configurações", icon: Settings },
-] as const;
+];
 
 export function AppShell({ children, title, subtitle, action }: {
   children: ReactNode; title: string; subtitle?: string; action?: ReactNode;
