@@ -1,4 +1,4 @@
-import { createFileRoute, Link, Outlet, useRouterState, redirect } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { Stethoscope, LayoutDashboard, Users, CalendarDays, FileText, Settings2 } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 
@@ -34,7 +34,7 @@ function ClinicasLayout() {
           return (
             <Link
               key={to}
-              to={to}
+              to={to as any}
               className={[
                 "flex items-center gap-2 rounded-lg px-3.5 py-2 text-sm font-medium transition-all",
                 active
