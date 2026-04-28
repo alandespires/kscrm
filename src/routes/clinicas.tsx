@@ -6,13 +6,13 @@ export const Route = createFileRoute("/clinicas")({
   component: ClinicasLayout,
 });
 
-const SUB = [
+const SUB: Array<{ to: string; label: string; icon: any; exact?: boolean }> = [
   { to: "/clinicas", label: "Visão geral", icon: LayoutDashboard, exact: true },
   { to: "/clinicas/pacientes", label: "Pacientes", icon: Users },
   { to: "/clinicas/agenda", label: "Agenda", icon: CalendarDays },
   { to: "/clinicas/prontuarios", label: "Prontuários", icon: FileText },
   { to: "/clinicas/configuracoes", label: "Configurações", icon: Settings2 },
-] as const;
+];
 
 function ClinicasLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });

@@ -18,11 +18,17 @@ import { Route as LeadsRouteImport } from './routes/leads'
 import { Route as InsightsRouteImport } from './routes/insights'
 import { Route as FinanceiroRouteImport } from './routes/financeiro'
 import { Route as ConfiguracoesRouteImport } from './routes/configuracoes'
+import { Route as ClinicasRouteImport } from './routes/clinicas'
 import { Route as ClientesRouteImport } from './routes/clientes'
 import { Route as AutomacaoRouteImport } from './routes/automacao'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ClinicasIndexRouteImport } from './routes/clinicas.index'
 import { Route as TTenantSlugRouteImport } from './routes/t.$tenantSlug'
+import { Route as ClinicasProntuariosRouteImport } from './routes/clinicas.prontuarios'
+import { Route as ClinicasPacientesRouteImport } from './routes/clinicas.pacientes'
+import { Route as ClinicasConfiguracoesRouteImport } from './routes/clinicas.configuracoes'
+import { Route as ClinicasAgendaRouteImport } from './routes/clinicas.agenda'
 import { Route as TTenantSlugIndexRouteImport } from './routes/t.$tenantSlug.index'
 
 const TarefasRoute = TarefasRouteImport.update({
@@ -70,6 +76,11 @@ const ConfiguracoesRoute = ConfiguracoesRouteImport.update({
   path: '/configuracoes',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ClinicasRoute = ClinicasRouteImport.update({
+  id: '/clinicas',
+  path: '/clinicas',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ClientesRoute = ClientesRouteImport.update({
   id: '/clientes',
   path: '/clientes',
@@ -90,10 +101,35 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ClinicasIndexRoute = ClinicasIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ClinicasRoute,
+} as any)
 const TTenantSlugRoute = TTenantSlugRouteImport.update({
   id: '/t/$tenantSlug',
   path: '/t/$tenantSlug',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ClinicasProntuariosRoute = ClinicasProntuariosRouteImport.update({
+  id: '/prontuarios',
+  path: '/prontuarios',
+  getParentRoute: () => ClinicasRoute,
+} as any)
+const ClinicasPacientesRoute = ClinicasPacientesRouteImport.update({
+  id: '/pacientes',
+  path: '/pacientes',
+  getParentRoute: () => ClinicasRoute,
+} as any)
+const ClinicasConfiguracoesRoute = ClinicasConfiguracoesRouteImport.update({
+  id: '/configuracoes',
+  path: '/configuracoes',
+  getParentRoute: () => ClinicasRoute,
+} as any)
+const ClinicasAgendaRoute = ClinicasAgendaRouteImport.update({
+  id: '/agenda',
+  path: '/agenda',
+  getParentRoute: () => ClinicasRoute,
 } as any)
 const TTenantSlugIndexRoute = TTenantSlugIndexRouteImport.update({
   id: '/',
@@ -106,6 +142,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/automacao': typeof AutomacaoRoute
   '/clientes': typeof ClientesRoute
+  '/clinicas': typeof ClinicasRouteWithChildren
   '/configuracoes': typeof ConfiguracoesRoute
   '/financeiro': typeof FinanceiroRoute
   '/insights': typeof InsightsRoute
@@ -115,7 +152,12 @@ export interface FileRoutesByFullPath {
   '/relatorios': typeof RelatoriosRoute
   '/super-admin': typeof SuperAdminRoute
   '/tarefas': typeof TarefasRoute
+  '/clinicas/agenda': typeof ClinicasAgendaRoute
+  '/clinicas/configuracoes': typeof ClinicasConfiguracoesRoute
+  '/clinicas/pacientes': typeof ClinicasPacientesRoute
+  '/clinicas/prontuarios': typeof ClinicasProntuariosRoute
   '/t/$tenantSlug': typeof TTenantSlugRouteWithChildren
+  '/clinicas/': typeof ClinicasIndexRoute
   '/t/$tenantSlug/': typeof TTenantSlugIndexRoute
 }
 export interface FileRoutesByTo {
@@ -132,6 +174,11 @@ export interface FileRoutesByTo {
   '/relatorios': typeof RelatoriosRoute
   '/super-admin': typeof SuperAdminRoute
   '/tarefas': typeof TarefasRoute
+  '/clinicas/agenda': typeof ClinicasAgendaRoute
+  '/clinicas/configuracoes': typeof ClinicasConfiguracoesRoute
+  '/clinicas/pacientes': typeof ClinicasPacientesRoute
+  '/clinicas/prontuarios': typeof ClinicasProntuariosRoute
+  '/clinicas': typeof ClinicasIndexRoute
   '/t/$tenantSlug': typeof TTenantSlugIndexRoute
 }
 export interface FileRoutesById {
@@ -140,6 +187,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/automacao': typeof AutomacaoRoute
   '/clientes': typeof ClientesRoute
+  '/clinicas': typeof ClinicasRouteWithChildren
   '/configuracoes': typeof ConfiguracoesRoute
   '/financeiro': typeof FinanceiroRoute
   '/insights': typeof InsightsRoute
@@ -149,7 +197,12 @@ export interface FileRoutesById {
   '/relatorios': typeof RelatoriosRoute
   '/super-admin': typeof SuperAdminRoute
   '/tarefas': typeof TarefasRoute
+  '/clinicas/agenda': typeof ClinicasAgendaRoute
+  '/clinicas/configuracoes': typeof ClinicasConfiguracoesRoute
+  '/clinicas/pacientes': typeof ClinicasPacientesRoute
+  '/clinicas/prontuarios': typeof ClinicasProntuariosRoute
   '/t/$tenantSlug': typeof TTenantSlugRouteWithChildren
+  '/clinicas/': typeof ClinicasIndexRoute
   '/t/$tenantSlug/': typeof TTenantSlugIndexRoute
 }
 export interface FileRouteTypes {
@@ -159,6 +212,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/automacao'
     | '/clientes'
+    | '/clinicas'
     | '/configuracoes'
     | '/financeiro'
     | '/insights'
@@ -168,7 +222,12 @@ export interface FileRouteTypes {
     | '/relatorios'
     | '/super-admin'
     | '/tarefas'
+    | '/clinicas/agenda'
+    | '/clinicas/configuracoes'
+    | '/clinicas/pacientes'
+    | '/clinicas/prontuarios'
     | '/t/$tenantSlug'
+    | '/clinicas/'
     | '/t/$tenantSlug/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -185,6 +244,11 @@ export interface FileRouteTypes {
     | '/relatorios'
     | '/super-admin'
     | '/tarefas'
+    | '/clinicas/agenda'
+    | '/clinicas/configuracoes'
+    | '/clinicas/pacientes'
+    | '/clinicas/prontuarios'
+    | '/clinicas'
     | '/t/$tenantSlug'
   id:
     | '__root__'
@@ -192,6 +256,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/automacao'
     | '/clientes'
+    | '/clinicas'
     | '/configuracoes'
     | '/financeiro'
     | '/insights'
@@ -201,7 +266,12 @@ export interface FileRouteTypes {
     | '/relatorios'
     | '/super-admin'
     | '/tarefas'
+    | '/clinicas/agenda'
+    | '/clinicas/configuracoes'
+    | '/clinicas/pacientes'
+    | '/clinicas/prontuarios'
     | '/t/$tenantSlug'
+    | '/clinicas/'
     | '/t/$tenantSlug/'
   fileRoutesById: FileRoutesById
 }
@@ -210,6 +280,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   AutomacaoRoute: typeof AutomacaoRoute
   ClientesRoute: typeof ClientesRoute
+  ClinicasRoute: typeof ClinicasRouteWithChildren
   ConfiguracoesRoute: typeof ConfiguracoesRoute
   FinanceiroRoute: typeof FinanceiroRoute
   InsightsRoute: typeof InsightsRoute
@@ -287,6 +358,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConfiguracoesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/clinicas': {
+      id: '/clinicas'
+      path: '/clinicas'
+      fullPath: '/clinicas'
+      preLoaderRoute: typeof ClinicasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/clientes': {
       id: '/clientes'
       path: '/clientes'
@@ -315,12 +393,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/clinicas/': {
+      id: '/clinicas/'
+      path: '/'
+      fullPath: '/clinicas/'
+      preLoaderRoute: typeof ClinicasIndexRouteImport
+      parentRoute: typeof ClinicasRoute
+    }
     '/t/$tenantSlug': {
       id: '/t/$tenantSlug'
       path: '/t/$tenantSlug'
       fullPath: '/t/$tenantSlug'
       preLoaderRoute: typeof TTenantSlugRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/clinicas/prontuarios': {
+      id: '/clinicas/prontuarios'
+      path: '/prontuarios'
+      fullPath: '/clinicas/prontuarios'
+      preLoaderRoute: typeof ClinicasProntuariosRouteImport
+      parentRoute: typeof ClinicasRoute
+    }
+    '/clinicas/pacientes': {
+      id: '/clinicas/pacientes'
+      path: '/pacientes'
+      fullPath: '/clinicas/pacientes'
+      preLoaderRoute: typeof ClinicasPacientesRouteImport
+      parentRoute: typeof ClinicasRoute
+    }
+    '/clinicas/configuracoes': {
+      id: '/clinicas/configuracoes'
+      path: '/configuracoes'
+      fullPath: '/clinicas/configuracoes'
+      preLoaderRoute: typeof ClinicasConfiguracoesRouteImport
+      parentRoute: typeof ClinicasRoute
+    }
+    '/clinicas/agenda': {
+      id: '/clinicas/agenda'
+      path: '/agenda'
+      fullPath: '/clinicas/agenda'
+      preLoaderRoute: typeof ClinicasAgendaRouteImport
+      parentRoute: typeof ClinicasRoute
     }
     '/t/$tenantSlug/': {
       id: '/t/$tenantSlug/'
@@ -331,6 +444,26 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface ClinicasRouteChildren {
+  ClinicasAgendaRoute: typeof ClinicasAgendaRoute
+  ClinicasConfiguracoesRoute: typeof ClinicasConfiguracoesRoute
+  ClinicasPacientesRoute: typeof ClinicasPacientesRoute
+  ClinicasProntuariosRoute: typeof ClinicasProntuariosRoute
+  ClinicasIndexRoute: typeof ClinicasIndexRoute
+}
+
+const ClinicasRouteChildren: ClinicasRouteChildren = {
+  ClinicasAgendaRoute: ClinicasAgendaRoute,
+  ClinicasConfiguracoesRoute: ClinicasConfiguracoesRoute,
+  ClinicasPacientesRoute: ClinicasPacientesRoute,
+  ClinicasProntuariosRoute: ClinicasProntuariosRoute,
+  ClinicasIndexRoute: ClinicasIndexRoute,
+}
+
+const ClinicasRouteWithChildren = ClinicasRoute._addFileChildren(
+  ClinicasRouteChildren,
+)
 
 interface TTenantSlugRouteChildren {
   TTenantSlugIndexRoute: typeof TTenantSlugIndexRoute
@@ -349,6 +482,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   AutomacaoRoute: AutomacaoRoute,
   ClientesRoute: ClientesRoute,
+  ClinicasRoute: ClinicasRouteWithChildren,
   ConfiguracoesRoute: ConfiguracoesRoute,
   FinanceiroRoute: FinanceiroRoute,
   InsightsRoute: InsightsRoute,
