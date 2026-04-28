@@ -18,6 +18,7 @@ export type TenantRow = {
   email_principal: string | null;
   whatsapp: string | null;
   logo_url: string | null;
+  segmento?: "geral" | "clinica" | null;
 };
 
 export type Membership = {
@@ -69,7 +70,7 @@ export function TenantProvider({ children }: { children: ReactNode }) {
     queryFn: async (): Promise<Membership[]> => {
       const { data, error } = await supabase
         .from("tenant_users")
-        .select("role, tenant:tenants(id, nome, slug, status, plan_id, proximo_vencimento, trial_ate, responsavel, email_principal, whatsapp, logo_url)")
+        .select("role, tenant:tenants(id, nome, slug, status, plan_id, proximo_vencimento, trial_ate, responsavel, email_principal, whatsapp, logo_url, segmento)")
         .eq("user_id", user!.id);
       if (error) throw error;
       return (data ?? [])
