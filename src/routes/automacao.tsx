@@ -293,3 +293,29 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
     </label>
   );
 }
+
+function FlowNode({ kind, label, sublabel, icon: Icon }: { kind: "trigger" | "action"; label: string; sublabel?: string; icon?: any }) {
+  const I = Icon ?? (kind === "trigger" ? Bolt : ListChecks);
+  const styles = kind === "trigger" ? "border-primary/40 bg-primary/10" : "border-success/40 bg-success/10";
+  const iconColor = kind === "trigger" ? "text-primary" : "text-success";
+  return (
+    <div className={`flex min-w-[140px] shrink-0 items-center gap-2 rounded-lg border px-3 py-2 ${styles}`}>
+      <I className={`h-3.5 w-3.5 shrink-0 ${iconColor}`} />
+      <div className="min-w-0 leading-tight">
+        <div className={`text-[10px] font-bold uppercase tracking-widest ${iconColor} opacity-80`}>{kind === "trigger" ? "Quando" : "Então"}</div>
+        <div className="truncate text-xs font-semibold text-foreground">{label}</div>
+        {sublabel && <div className="truncate text-[10px] text-muted-foreground">{sublabel}</div>}
+      </div>
+    </div>
+  );
+}
+
+function FlowConnector() {
+  return (
+    <div className="flex shrink-0 items-center text-muted-foreground/60">
+      <div className="h-px w-3 bg-border" />
+      <ArrowRight className="h-3 w-3" />
+      <div className="h-px w-3 bg-border" />
+    </div>
+  );
+}
