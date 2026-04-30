@@ -233,16 +233,20 @@ export function DashboardPage() {
       }
     >
       {/* KPI grid */}
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <KpiCard label={`Leads ${periodo === "tudo" ? "totais" : `(${PERIODO_LABEL[periodo].toLowerCase()})`}`} value={String(leadsPeriodo.length)} icon={Users} loading={isLoading} />
-        <KpiCard label="Oportunidades abertas" value={String(oportunidadesAbertas)} icon={Target} accent loading={isLoading} />
-        <KpiCard label="Receita prevista" value={formatBRL(totalPipeline)} icon={DollarSign} accent loading={isLoading} />
-        <KpiCard label="Fechado no mês" value={formatBRL(wonMonth)} icon={CheckCircle2} loading={isLoading} />
-      </div>
+      {visible.kpis && (
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <KpiCard label={`Leads ${periodo === "tudo" ? "totais" : `(${PERIODO_LABEL[periodo].toLowerCase()})`}`} value={String(leadsPeriodo.length)} icon={Users} loading={isLoading} />
+          <KpiCard label="Oportunidades abertas" value={String(oportunidadesAbertas)} icon={Target} accent loading={isLoading} />
+          <KpiCard label="Receita prevista" value={formatBRL(totalPipeline)} icon={DollarSign} accent loading={isLoading} />
+          <KpiCard label="Fechado no mês" value={formatBRL(wonMonth)} icon={CheckCircle2} loading={isLoading} />
+        </div>
+      )}
 
       {/* Main grid */}
+      {(visible.receita || visible.insights) && (
       <div className="mt-5 grid gap-5 xl:grid-cols-3">
         {/* Receita */}
+        {visible.receita && (
         <div className="overflow-hidden rounded-2xl border border-border bg-surface-2 shadow-card xl:col-span-2">
           <div className="flex items-center justify-between border-b border-border px-6 py-4">
             <div>
