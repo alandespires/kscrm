@@ -9,17 +9,29 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TicketsRouteImport } from './routes/tickets'
 import { Route as TarefasRouteImport } from './routes/tarefas'
 import { Route as SuperAdminRouteImport } from './routes/super-admin'
 import { Route as RelatoriosRouteImport } from './routes/relatorios'
+import { Route as PropostasRouteImport } from './routes/propostas'
 import { Route as PipelineRouteImport } from './routes/pipeline'
+import { Route as OportunidadesRouteImport } from './routes/oportunidades'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as LeadsRouteImport } from './routes/leads'
+import { Route as LandingPagesRouteImport } from './routes/landing-pages'
+import { Route as InteracoesRouteImport } from './routes/interacoes'
 import { Route as InsightsRouteImport } from './routes/insights'
 import { Route as FinanceiroRouteImport } from './routes/financeiro'
+import { Route as EmpresasRouteImport } from './routes/empresas'
+import { Route as EmailMarketingRouteImport } from './routes/email-marketing'
+import { Route as DashboardsRouteImport } from './routes/dashboards'
+import { Route as ContatosRouteImport } from './routes/contatos'
 import { Route as ConfiguracoesRouteImport } from './routes/configuracoes'
 import { Route as ClinicasRouteImport } from './routes/clinicas'
 import { Route as ClientesRouteImport } from './routes/clientes'
+import { Route as ChatRouteImport } from './routes/chat'
+import { Route as CampanhasRouteImport } from './routes/campanhas'
+import { Route as BaseConhecimentoRouteImport } from './routes/base-conhecimento'
 import { Route as AutomacaoRouteImport } from './routes/automacao'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
@@ -31,6 +43,11 @@ import { Route as ClinicasConfiguracoesRouteImport } from './routes/clinicas.con
 import { Route as ClinicasAgendaRouteImport } from './routes/clinicas.agenda'
 import { Route as TTenantSlugIndexRouteImport } from './routes/t.$tenantSlug.index'
 
+const TicketsRoute = TicketsRouteImport.update({
+  id: '/tickets',
+  path: '/tickets',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TarefasRoute = TarefasRouteImport.update({
   id: '/tarefas',
   path: '/tarefas',
@@ -46,9 +63,19 @@ const RelatoriosRoute = RelatoriosRouteImport.update({
   path: '/relatorios',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PropostasRoute = PropostasRouteImport.update({
+  id: '/propostas',
+  path: '/propostas',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PipelineRoute = PipelineRouteImport.update({
   id: '/pipeline',
   path: '/pipeline',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OportunidadesRoute = OportunidadesRouteImport.update({
+  id: '/oportunidades',
+  path: '/oportunidades',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OnboardingRoute = OnboardingRouteImport.update({
@@ -61,6 +88,16 @@ const LeadsRoute = LeadsRouteImport.update({
   path: '/leads',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LandingPagesRoute = LandingPagesRouteImport.update({
+  id: '/landing-pages',
+  path: '/landing-pages',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InteracoesRoute = InteracoesRouteImport.update({
+  id: '/interacoes',
+  path: '/interacoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const InsightsRoute = InsightsRouteImport.update({
   id: '/insights',
   path: '/insights',
@@ -69,6 +106,26 @@ const InsightsRoute = InsightsRouteImport.update({
 const FinanceiroRoute = FinanceiroRouteImport.update({
   id: '/financeiro',
   path: '/financeiro',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmpresasRoute = EmpresasRouteImport.update({
+  id: '/empresas',
+  path: '/empresas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmailMarketingRoute = EmailMarketingRouteImport.update({
+  id: '/email-marketing',
+  path: '/email-marketing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardsRoute = DashboardsRouteImport.update({
+  id: '/dashboards',
+  path: '/dashboards',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContatosRoute = ContatosRouteImport.update({
+  id: '/contatos',
+  path: '/contatos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ConfiguracoesRoute = ConfiguracoesRouteImport.update({
@@ -84,6 +141,21 @@ const ClinicasRoute = ClinicasRouteImport.update({
 const ClientesRoute = ClientesRouteImport.update({
   id: '/clientes',
   path: '/clientes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChatRoute = ChatRouteImport.update({
+  id: '/chat',
+  path: '/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CampanhasRoute = CampanhasRouteImport.update({
+  id: '/campanhas',
+  path: '/campanhas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BaseConhecimentoRoute = BaseConhecimentoRouteImport.update({
+  id: '/base-conhecimento',
+  path: '/base-conhecimento',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AutomacaoRoute = AutomacaoRouteImport.update({
@@ -141,17 +213,29 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/automacao': typeof AutomacaoRoute
+  '/base-conhecimento': typeof BaseConhecimentoRoute
+  '/campanhas': typeof CampanhasRoute
+  '/chat': typeof ChatRoute
   '/clientes': typeof ClientesRoute
   '/clinicas': typeof ClinicasRouteWithChildren
   '/configuracoes': typeof ConfiguracoesRoute
+  '/contatos': typeof ContatosRoute
+  '/dashboards': typeof DashboardsRoute
+  '/email-marketing': typeof EmailMarketingRoute
+  '/empresas': typeof EmpresasRoute
   '/financeiro': typeof FinanceiroRoute
   '/insights': typeof InsightsRoute
+  '/interacoes': typeof InteracoesRoute
+  '/landing-pages': typeof LandingPagesRoute
   '/leads': typeof LeadsRoute
   '/onboarding': typeof OnboardingRoute
+  '/oportunidades': typeof OportunidadesRoute
   '/pipeline': typeof PipelineRoute
+  '/propostas': typeof PropostasRoute
   '/relatorios': typeof RelatoriosRoute
   '/super-admin': typeof SuperAdminRoute
   '/tarefas': typeof TarefasRoute
+  '/tickets': typeof TicketsRoute
   '/clinicas/agenda': typeof ClinicasAgendaRoute
   '/clinicas/configuracoes': typeof ClinicasConfiguracoesRoute
   '/clinicas/pacientes': typeof ClinicasPacientesRoute
@@ -164,16 +248,28 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/automacao': typeof AutomacaoRoute
+  '/base-conhecimento': typeof BaseConhecimentoRoute
+  '/campanhas': typeof CampanhasRoute
+  '/chat': typeof ChatRoute
   '/clientes': typeof ClientesRoute
   '/configuracoes': typeof ConfiguracoesRoute
+  '/contatos': typeof ContatosRoute
+  '/dashboards': typeof DashboardsRoute
+  '/email-marketing': typeof EmailMarketingRoute
+  '/empresas': typeof EmpresasRoute
   '/financeiro': typeof FinanceiroRoute
   '/insights': typeof InsightsRoute
+  '/interacoes': typeof InteracoesRoute
+  '/landing-pages': typeof LandingPagesRoute
   '/leads': typeof LeadsRoute
   '/onboarding': typeof OnboardingRoute
+  '/oportunidades': typeof OportunidadesRoute
   '/pipeline': typeof PipelineRoute
+  '/propostas': typeof PropostasRoute
   '/relatorios': typeof RelatoriosRoute
   '/super-admin': typeof SuperAdminRoute
   '/tarefas': typeof TarefasRoute
+  '/tickets': typeof TicketsRoute
   '/clinicas/agenda': typeof ClinicasAgendaRoute
   '/clinicas/configuracoes': typeof ClinicasConfiguracoesRoute
   '/clinicas/pacientes': typeof ClinicasPacientesRoute
@@ -186,17 +282,29 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/automacao': typeof AutomacaoRoute
+  '/base-conhecimento': typeof BaseConhecimentoRoute
+  '/campanhas': typeof CampanhasRoute
+  '/chat': typeof ChatRoute
   '/clientes': typeof ClientesRoute
   '/clinicas': typeof ClinicasRouteWithChildren
   '/configuracoes': typeof ConfiguracoesRoute
+  '/contatos': typeof ContatosRoute
+  '/dashboards': typeof DashboardsRoute
+  '/email-marketing': typeof EmailMarketingRoute
+  '/empresas': typeof EmpresasRoute
   '/financeiro': typeof FinanceiroRoute
   '/insights': typeof InsightsRoute
+  '/interacoes': typeof InteracoesRoute
+  '/landing-pages': typeof LandingPagesRoute
   '/leads': typeof LeadsRoute
   '/onboarding': typeof OnboardingRoute
+  '/oportunidades': typeof OportunidadesRoute
   '/pipeline': typeof PipelineRoute
+  '/propostas': typeof PropostasRoute
   '/relatorios': typeof RelatoriosRoute
   '/super-admin': typeof SuperAdminRoute
   '/tarefas': typeof TarefasRoute
+  '/tickets': typeof TicketsRoute
   '/clinicas/agenda': typeof ClinicasAgendaRoute
   '/clinicas/configuracoes': typeof ClinicasConfiguracoesRoute
   '/clinicas/pacientes': typeof ClinicasPacientesRoute
@@ -211,17 +319,29 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/automacao'
+    | '/base-conhecimento'
+    | '/campanhas'
+    | '/chat'
     | '/clientes'
     | '/clinicas'
     | '/configuracoes'
+    | '/contatos'
+    | '/dashboards'
+    | '/email-marketing'
+    | '/empresas'
     | '/financeiro'
     | '/insights'
+    | '/interacoes'
+    | '/landing-pages'
     | '/leads'
     | '/onboarding'
+    | '/oportunidades'
     | '/pipeline'
+    | '/propostas'
     | '/relatorios'
     | '/super-admin'
     | '/tarefas'
+    | '/tickets'
     | '/clinicas/agenda'
     | '/clinicas/configuracoes'
     | '/clinicas/pacientes'
@@ -234,16 +354,28 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/automacao'
+    | '/base-conhecimento'
+    | '/campanhas'
+    | '/chat'
     | '/clientes'
     | '/configuracoes'
+    | '/contatos'
+    | '/dashboards'
+    | '/email-marketing'
+    | '/empresas'
     | '/financeiro'
     | '/insights'
+    | '/interacoes'
+    | '/landing-pages'
     | '/leads'
     | '/onboarding'
+    | '/oportunidades'
     | '/pipeline'
+    | '/propostas'
     | '/relatorios'
     | '/super-admin'
     | '/tarefas'
+    | '/tickets'
     | '/clinicas/agenda'
     | '/clinicas/configuracoes'
     | '/clinicas/pacientes'
@@ -255,17 +387,29 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/automacao'
+    | '/base-conhecimento'
+    | '/campanhas'
+    | '/chat'
     | '/clientes'
     | '/clinicas'
     | '/configuracoes'
+    | '/contatos'
+    | '/dashboards'
+    | '/email-marketing'
+    | '/empresas'
     | '/financeiro'
     | '/insights'
+    | '/interacoes'
+    | '/landing-pages'
     | '/leads'
     | '/onboarding'
+    | '/oportunidades'
     | '/pipeline'
+    | '/propostas'
     | '/relatorios'
     | '/super-admin'
     | '/tarefas'
+    | '/tickets'
     | '/clinicas/agenda'
     | '/clinicas/configuracoes'
     | '/clinicas/pacientes'
@@ -279,22 +423,41 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
   AutomacaoRoute: typeof AutomacaoRoute
+  BaseConhecimentoRoute: typeof BaseConhecimentoRoute
+  CampanhasRoute: typeof CampanhasRoute
+  ChatRoute: typeof ChatRoute
   ClientesRoute: typeof ClientesRoute
   ClinicasRoute: typeof ClinicasRouteWithChildren
   ConfiguracoesRoute: typeof ConfiguracoesRoute
+  ContatosRoute: typeof ContatosRoute
+  DashboardsRoute: typeof DashboardsRoute
+  EmailMarketingRoute: typeof EmailMarketingRoute
+  EmpresasRoute: typeof EmpresasRoute
   FinanceiroRoute: typeof FinanceiroRoute
   InsightsRoute: typeof InsightsRoute
+  InteracoesRoute: typeof InteracoesRoute
+  LandingPagesRoute: typeof LandingPagesRoute
   LeadsRoute: typeof LeadsRoute
   OnboardingRoute: typeof OnboardingRoute
+  OportunidadesRoute: typeof OportunidadesRoute
   PipelineRoute: typeof PipelineRoute
+  PropostasRoute: typeof PropostasRoute
   RelatoriosRoute: typeof RelatoriosRoute
   SuperAdminRoute: typeof SuperAdminRoute
   TarefasRoute: typeof TarefasRoute
+  TicketsRoute: typeof TicketsRoute
   TTenantSlugRoute: typeof TTenantSlugRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/tickets': {
+      id: '/tickets'
+      path: '/tickets'
+      fullPath: '/tickets'
+      preLoaderRoute: typeof TicketsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/tarefas': {
       id: '/tarefas'
       path: '/tarefas'
@@ -316,11 +479,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RelatoriosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/propostas': {
+      id: '/propostas'
+      path: '/propostas'
+      fullPath: '/propostas'
+      preLoaderRoute: typeof PropostasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/pipeline': {
       id: '/pipeline'
       path: '/pipeline'
       fullPath: '/pipeline'
       preLoaderRoute: typeof PipelineRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/oportunidades': {
+      id: '/oportunidades'
+      path: '/oportunidades'
+      fullPath: '/oportunidades'
+      preLoaderRoute: typeof OportunidadesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/onboarding': {
@@ -337,6 +514,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LeadsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/landing-pages': {
+      id: '/landing-pages'
+      path: '/landing-pages'
+      fullPath: '/landing-pages'
+      preLoaderRoute: typeof LandingPagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/interacoes': {
+      id: '/interacoes'
+      path: '/interacoes'
+      fullPath: '/interacoes'
+      preLoaderRoute: typeof InteracoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/insights': {
       id: '/insights'
       path: '/insights'
@@ -349,6 +540,34 @@ declare module '@tanstack/react-router' {
       path: '/financeiro'
       fullPath: '/financeiro'
       preLoaderRoute: typeof FinanceiroRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/empresas': {
+      id: '/empresas'
+      path: '/empresas'
+      fullPath: '/empresas'
+      preLoaderRoute: typeof EmpresasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/email-marketing': {
+      id: '/email-marketing'
+      path: '/email-marketing'
+      fullPath: '/email-marketing'
+      preLoaderRoute: typeof EmailMarketingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboards': {
+      id: '/dashboards'
+      path: '/dashboards'
+      fullPath: '/dashboards'
+      preLoaderRoute: typeof DashboardsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contatos': {
+      id: '/contatos'
+      path: '/contatos'
+      fullPath: '/contatos'
+      preLoaderRoute: typeof ContatosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/configuracoes': {
@@ -370,6 +589,27 @@ declare module '@tanstack/react-router' {
       path: '/clientes'
       fullPath: '/clientes'
       preLoaderRoute: typeof ClientesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/chat': {
+      id: '/chat'
+      path: '/chat'
+      fullPath: '/chat'
+      preLoaderRoute: typeof ChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/campanhas': {
+      id: '/campanhas'
+      path: '/campanhas'
+      fullPath: '/campanhas'
+      preLoaderRoute: typeof CampanhasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/base-conhecimento': {
+      id: '/base-conhecimento'
+      path: '/base-conhecimento'
+      fullPath: '/base-conhecimento'
+      preLoaderRoute: typeof BaseConhecimentoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/automacao': {
@@ -481,17 +721,29 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
   AutomacaoRoute: AutomacaoRoute,
+  BaseConhecimentoRoute: BaseConhecimentoRoute,
+  CampanhasRoute: CampanhasRoute,
+  ChatRoute: ChatRoute,
   ClientesRoute: ClientesRoute,
   ClinicasRoute: ClinicasRouteWithChildren,
   ConfiguracoesRoute: ConfiguracoesRoute,
+  ContatosRoute: ContatosRoute,
+  DashboardsRoute: DashboardsRoute,
+  EmailMarketingRoute: EmailMarketingRoute,
+  EmpresasRoute: EmpresasRoute,
   FinanceiroRoute: FinanceiroRoute,
   InsightsRoute: InsightsRoute,
+  InteracoesRoute: InteracoesRoute,
+  LandingPagesRoute: LandingPagesRoute,
   LeadsRoute: LeadsRoute,
   OnboardingRoute: OnboardingRoute,
+  OportunidadesRoute: OportunidadesRoute,
   PipelineRoute: PipelineRoute,
+  PropostasRoute: PropostasRoute,
   RelatoriosRoute: RelatoriosRoute,
   SuperAdminRoute: SuperAdminRoute,
   TarefasRoute: TarefasRoute,
+  TicketsRoute: TicketsRoute,
   TTenantSlugRoute: TTenantSlugRouteWithChildren,
 }
 export const routeTree = rootRouteImport
