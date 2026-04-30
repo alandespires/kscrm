@@ -68,45 +68,52 @@ function AutomacaoPage() {
       ) : (
         <div className="space-y-3">
           {rules.map((f) => (
-            <div key={f.id} className="group flex items-center gap-4 rounded-2xl border border-border bg-surface-2 p-5 shadow-card transition hover:border-primary/40">
-              <div className={`grid h-11 w-11 place-items-center rounded-xl ${f.ativo ? "bg-primary/15 text-primary" : "bg-surface-3 text-muted-foreground"}`}>
-                <Zap className="h-5 w-5" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <h3 className="text-sm font-semibold">{f.nome}</h3>
-                {f.descricao && <p className="mt-0.5 text-[11px] text-muted-foreground">{f.descricao}</p>}
-                <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                  <span className="rounded-md bg-surface-3 px-2 py-0.5 font-mono text-[10px]">
-                    SE: {TRIGGER_LABEL[f.trigger_tipo]}{f.trigger_valor ? ` = ${f.trigger_valor}` : ""}
-                  </span>
-                  <ArrowRight className="h-3 w-3" />
-                  <div className="flex items-center gap-1">
-                    {(f.acoes ?? []).map((a, i) => {
-                      const A = ACTION_ICON[a.tipo] ?? Zap;
-                      return <div key={i} title={a.tipo} className="grid h-6 w-6 place-items-center rounded-md bg-surface-3"><A className="h-3 w-3" /></div>;
-                    })}
-                  </div>
+            <div key={f.id} className="group rounded-2xl border border-border bg-surface-2 p-5 shadow-card transition hover:border-primary/40">
+              <div className="flex items-center gap-4">
+                <div className={`grid h-11 w-11 place-items-center rounded-xl ${f.ativo ? "bg-primary/15 text-primary" : "bg-surface-3 text-muted-foreground"}`}>
+                  <Zap className="h-5 w-5" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-sm font-semibold">{f.nome}</h3>
+                  {f.descricao && <p className="mt-0.5 text-[11px] text-muted-foreground">{f.descricao}</p>}
+                </div>
+                <div className="text-right">
+                  <div className="text-xs text-muted-foreground">Execuções</div>
+                  <div className="text-sm font-semibold tabular-nums">{f.execucoes}</div>
+                </div>
+                <StatusPill tone={f.ativo ? "success" : "neutral"}>{f.ativo ? "Ativo" : "Pausado"}</StatusPill>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => toggle.mutate({ id: f.id, ativo: !f.ativo })}
+                    title={f.ativo ? "Pausar" : "Ativar"}
+                    className="grid h-8 w-8 place-items-center rounded-md text-muted-foreground transition hover:bg-surface-3 hover:text-foreground"
+                  >
+                    <Power className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => { if (confirm(`Excluir "${f.nome}"?`)) del.mutate(f.id); }}
+                    className="grid h-8 w-8 place-items-center rounded-md text-muted-foreground transition hover:bg-surface-3 hover:text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
                 </div>
               </div>
-              <div className="text-right">
-                <div className="text-xs text-muted-foreground">Execuções</div>
-                <div className="text-sm font-semibold tabular-nums">{f.execucoes}</div>
-              </div>
-              <StatusPill tone={f.ativo ? "success" : "neutral"}>{f.ativo ? "Ativo" : "Pausado"}</StatusPill>
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={() => toggle.mutate({ id: f.id, ativo: !f.ativo })}
-                  title={f.ativo ? "Pausar" : "Ativar"}
-                  className="grid h-8 w-8 place-items-center rounded-md text-muted-foreground transition hover:bg-surface-3 hover:text-foreground"
-                >
-                  <Power className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={() => { if (confirm(`Excluir "${f.nome}"?`)) del.mutate(f.id); }}
-                  className="grid h-8 w-8 place-items-center rounded-md text-muted-foreground transition hover:bg-surface-3 hover:text-destructive"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
+
+              {/* Visualização de fluxo */}
+              <div className="mt-4 flex items-center gap-2 overflow-x-auto rounded-xl border border-dashed border-border bg-surface-1/60 p-3">
+                <FlowNode kind="trigger" label={TRIGGER_LABEL[f.trigger_tipo]} sublabel={f.trigger_valor || undefined} />
+                <FlowConnector />
+                {(f.acoes ?? []).map((a, i) => {
+                  const A = ACTION_ICON[a.tipo] ?? Zap;
+                  const label = a.tipo === "criar_tarefa" ? "Criar tarefa" : "Registrar atividade";
+                  const sub = a.tipo === "criar_tarefa" ? a.titulo : a.descricao;
+                  return (
+                    <div key={i} className="flex items-center gap-2">
+                      <FlowNode kind="action" label={label} sublabel={sub} icon={A} />
+                      {i < (f.acoes?.length ?? 0) - 1 && <FlowConnector />}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           ))}
