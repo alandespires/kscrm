@@ -4,8 +4,9 @@ import { AppShell, StatusPill } from "@/components/app-shell";
 import { LeadFormDialog } from "@/components/lead-form-dialog";
 import {
   ArrowUpRight, TrendingUp, TrendingDown, Users, Target, DollarSign,
-  CheckCircle2, Sparkles, Plus, ArrowRight, Phone, Mail, Zap, ChevronDown,
+  CheckCircle2, Sparkles, Plus, ArrowRight, Phone, Mail, Zap, ChevronDown, LayoutGrid,
 } from "lucide-react";
+import { useDashboardWidgets, WIDGET_LABELS, type WidgetId } from "@/hooks/use-dashboard-widgets";
 import {
   AreaChart, Area, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid,
 } from "recharts";
@@ -108,6 +109,8 @@ export function DashboardPage() {
   ]);
   const [periodo, setPeriodo] = useState<Periodo>("semana");
   const [periodoOpen, setPeriodoOpen] = useState(false);
+  const [widgetsOpen, setWidgetsOpen] = useState(false);
+  const { visible, toggle, reset } = useDashboardWidgets();
 
   const leads = useLeads();
   const deals = useDeals();
@@ -158,6 +161,42 @@ export function DashboardPage() {
       subtitle="Aqui está o panorama da sua operação comercial hoje."
       action={
         <div className="flex gap-2">
+          <div className="relative">
+            <button
+              onClick={() => setWidgetsOpen((v) => !v)}
+              className="inline-flex h-10 items-center gap-1.5 rounded-lg border border-border bg-surface-1 px-3 text-sm text-muted-foreground hover:text-foreground"
+              title="Personalizar widgets"
+            >
+              <LayoutGrid className="h-3.5 w-3.5" /> Personalizar
+            </button>
+            {widgetsOpen && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setWidgetsOpen(false)} />
+                <div className="absolute right-0 top-11 z-20 w-64 overflow-hidden rounded-lg border border-border bg-surface-2 shadow-elevated">
+                  <div className="border-b border-border px-3 py-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                    Widgets visíveis
+                  </div>
+                  {(Object.keys(WIDGET_LABELS) as WidgetId[]).map((id) => (
+                    <label key={id} className="flex cursor-pointer items-center justify-between gap-2 px-3 py-2 text-sm transition hover:bg-surface-3">
+                      <span>{WIDGET_LABELS[id]}</span>
+                      <input
+                        type="checkbox"
+                        checked={visible[id]}
+                        onChange={() => toggle(id)}
+                        className="h-4 w-4 accent-primary"
+                      />
+                    </label>
+                  ))}
+                  <button
+                    onClick={() => { reset(); setWidgetsOpen(false); }}
+                    className="w-full border-t border-border px-3 py-2 text-left text-xs text-muted-foreground transition hover:bg-surface-3 hover:text-foreground"
+                  >
+                    Restaurar padrão
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
           <div className="relative">
             <button
               onClick={() => setPeriodoOpen((v) => !v)}
