@@ -289,8 +289,10 @@ export function DashboardPage() {
             )}
           </div>
         </div>
+        )}
 
         {/* IA Insights */}
+        {visible.insights && (
         <div className="overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-surface-2 to-surface-1 shadow-card">
           <div className="flex items-center justify-between border-b border-border px-6 py-4">
             <div className="flex items-center gap-2">
@@ -339,10 +341,14 @@ export function DashboardPage() {
             })}
           </div>
         </div>
+        )}
       </div>
+      )}
 
       {/* Pipeline resumido + atividades */}
+      {(visible.pipeline || visible.atividade) && (
       <div className="mt-5 grid gap-5 xl:grid-cols-3">
+        {visible.pipeline && (
         <div className="overflow-hidden rounded-2xl border border-border bg-surface-2 shadow-card xl:col-span-2">
           <div className="flex items-center justify-between border-b border-border px-6 py-4">
             <div>
