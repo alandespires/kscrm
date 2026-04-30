@@ -45,8 +45,8 @@ function AutomacaoPage() {
 
   return (
     <AppShell
-      title="Automação"
-      subtitle="Fluxos SE → ENTÃO que rodam automaticamente"
+      title="Automação de Marketing"
+      subtitle="Workflows SE → ENTÃO que reagem em tempo real a eventos do CRM"
       action={
         <div className="flex items-center gap-2">
           <RealtimeBadge />
