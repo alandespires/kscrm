@@ -10,7 +10,7 @@ import { Download, Filter, Trash2, Mail, Phone, Loader2, Inbox, Sparkles } from 
 import { TableRowsSkeleton } from "@/components/skeletons";
 
 export const Route = createFileRoute("/leads")({
-  head: () => ({ meta: [{ title: "Leads — Nexus CRM" }] }),
+  head: () => ({ meta: [{ title: "Leads — KS CRM" }] }),
   component: LeadsPage,
 });
 
