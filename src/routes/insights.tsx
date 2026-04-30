@@ -8,7 +8,7 @@ import { Sparkles, ArrowRight, TrendingUp, TrendingDown, Flame, Check, Loader2, 
 import { FeatureCardsSkeleton } from "@/components/skeletons";
 
 export const Route = createFileRoute("/insights")({
-  head: () => ({ meta: [{ title: "IA Insights — Nexus CRM" }] }),
+  head: () => ({ meta: [{ title: "IA Insights — KS CRM" }] }),
   component: InsightsPage,
 });
 

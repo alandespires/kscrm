@@ -4,8 +4,9 @@ import { AppShell, StatusPill } from "@/components/app-shell";
 import { LeadFormDialog } from "@/components/lead-form-dialog";
 import {
   ArrowUpRight, TrendingUp, TrendingDown, Users, Target, DollarSign,
-  CheckCircle2, Sparkles, Plus, ArrowRight, Phone, Mail, Zap, ChevronDown,
+  CheckCircle2, Sparkles, Plus, ArrowRight, Phone, Mail, Zap, ChevronDown, LayoutGrid,
 } from "lucide-react";
+import { useDashboardWidgets, WIDGET_LABELS, type WidgetId } from "@/hooks/use-dashboard-widgets";
 import {
   AreaChart, Area, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid,
 } from "recharts";
@@ -18,7 +19,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ListSkeleton } from "@/components/skeletons";
 
 export const Route = createFileRoute("/")({
-  head: () => ({ meta: [{ title: "Dashboard — Nexus CRM" }] }),
+  head: () => ({ meta: [{ title: "Dashboard — KS CRM" }] }),
   component: DashboardPage,
 });
 
@@ -108,6 +109,8 @@ export function DashboardPage() {
   ]);
   const [periodo, setPeriodo] = useState<Periodo>("semana");
   const [periodoOpen, setPeriodoOpen] = useState(false);
+  const [widgetsOpen, setWidgetsOpen] = useState(false);
+  const { visible, toggle, reset } = useDashboardWidgets();
 
   const leads = useLeads();
   const deals = useDeals();
@@ -160,6 +163,42 @@ export function DashboardPage() {
         <div className="flex gap-2">
           <div className="relative">
             <button
+              onClick={() => setWidgetsOpen((v) => !v)}
+              className="inline-flex h-10 items-center gap-1.5 rounded-lg border border-border bg-surface-1 px-3 text-sm text-muted-foreground hover:text-foreground"
+              title="Personalizar widgets"
+            >
+              <LayoutGrid className="h-3.5 w-3.5" /> Personalizar
+            </button>
+            {widgetsOpen && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setWidgetsOpen(false)} />
+                <div className="absolute right-0 top-11 z-20 w-64 overflow-hidden rounded-lg border border-border bg-surface-2 shadow-elevated">
+                  <div className="border-b border-border px-3 py-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                    Widgets visíveis
+                  </div>
+                  {(Object.keys(WIDGET_LABELS) as WidgetId[]).map((id) => (
+                    <label key={id} className="flex cursor-pointer items-center justify-between gap-2 px-3 py-2 text-sm transition hover:bg-surface-3">
+                      <span>{WIDGET_LABELS[id]}</span>
+                      <input
+                        type="checkbox"
+                        checked={visible[id]}
+                        onChange={() => toggle(id)}
+                        className="h-4 w-4 accent-primary"
+                      />
+                    </label>
+                  ))}
+                  <button
+                    onClick={() => { reset(); setWidgetsOpen(false); }}
+                    className="w-full border-t border-border px-3 py-2 text-left text-xs text-muted-foreground transition hover:bg-surface-3 hover:text-foreground"
+                  >
+                    Restaurar padrão
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+          <div className="relative">
+            <button
               onClick={() => setPeriodoOpen((v) => !v)}
               className="inline-flex h-10 items-center gap-1.5 rounded-lg border border-border bg-surface-1 px-3 text-sm text-muted-foreground hover:text-foreground"
             >
@@ -194,16 +233,20 @@ export function DashboardPage() {
       }
     >
       {/* KPI grid */}
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <KpiCard label={`Leads ${periodo === "tudo" ? "totais" : `(${PERIODO_LABEL[periodo].toLowerCase()})`}`} value={String(leadsPeriodo.length)} icon={Users} loading={isLoading} />
-        <KpiCard label="Oportunidades abertas" value={String(oportunidadesAbertas)} icon={Target} accent loading={isLoading} />
-        <KpiCard label="Receita prevista" value={formatBRL(totalPipeline)} icon={DollarSign} accent loading={isLoading} />
-        <KpiCard label="Fechado no mês" value={formatBRL(wonMonth)} icon={CheckCircle2} loading={isLoading} />
-      </div>
+      {visible.kpis && (
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <KpiCard label={`Leads ${periodo === "tudo" ? "totais" : `(${PERIODO_LABEL[periodo].toLowerCase()})`}`} value={String(leadsPeriodo.length)} icon={Users} loading={isLoading} />
+          <KpiCard label="Oportunidades abertas" value={String(oportunidadesAbertas)} icon={Target} accent loading={isLoading} />
+          <KpiCard label="Receita prevista" value={formatBRL(totalPipeline)} icon={DollarSign} accent loading={isLoading} />
+          <KpiCard label="Fechado no mês" value={formatBRL(wonMonth)} icon={CheckCircle2} loading={isLoading} />
+        </div>
+      )}
 
       {/* Main grid */}
+      {(visible.receita || visible.insights) && (
       <div className="mt-5 grid gap-5 xl:grid-cols-3">
         {/* Receita */}
+        {visible.receita && (
         <div className="overflow-hidden rounded-2xl border border-border bg-surface-2 shadow-card xl:col-span-2">
           <div className="flex items-center justify-between border-b border-border px-6 py-4">
             <div>
@@ -246,8 +289,10 @@ export function DashboardPage() {
             )}
           </div>
         </div>
+        )}
 
         {/* IA Insights */}
+        {visible.insights && (
         <div className="overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-surface-2 to-surface-1 shadow-card">
           <div className="flex items-center justify-between border-b border-border px-6 py-4">
             <div className="flex items-center gap-2">
@@ -296,10 +341,14 @@ export function DashboardPage() {
             })}
           </div>
         </div>
+        )}
       </div>
+      )}
 
       {/* Pipeline resumido + atividades */}
+      {(visible.pipeline || visible.atividade) && (
       <div className="mt-5 grid gap-5 xl:grid-cols-3">
+        {visible.pipeline && (
         <div className="overflow-hidden rounded-2xl border border-border bg-surface-2 shadow-card xl:col-span-2">
           <div className="flex items-center justify-between border-b border-border px-6 py-4">
             <div>
@@ -332,7 +381,9 @@ export function DashboardPage() {
             ))}
           </div>
         </div>
+        )}
 
+        {visible.atividade && (
         <div className="overflow-hidden rounded-2xl border border-border bg-surface-2 shadow-card">
           <div className="flex items-center justify-between border-b border-border px-6 py-4">
             <h3 className="text-base font-semibold">Atividade recente</h3>
@@ -366,7 +417,9 @@ export function DashboardPage() {
             </ul>
           )}
         </div>
+        )}
       </div>
+      )}
     </AppShell>
   );
 }

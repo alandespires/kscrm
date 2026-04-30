@@ -1,9 +1,13 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import {
-  LayoutDashboard, Users, Kanban, Building2, ListChecks,
-  Zap, Sparkles, BarChart3, Settings, Search, Plus, LogOut, Loader2, Sun, Moon, Shield, Wallet, Stethoscope,
+  LayoutDashboard, Users, Kanban, Building2, ListChecks, Zap, Sparkles,
+  BarChart3, Settings, Search, Plus, LogOut, Loader2, Sun, Moon, Shield, Wallet,
+  Stethoscope, Target, FileText, UserCircle, Building, History, Megaphone, Mail,
+  Globe, LifeBuoy, BookOpen, MessageCircle, LineChart, ChevronDown, ChevronRight,
+  PanelLeftClose, PanelLeftOpen, Home, ShoppingBag, HeartHandshake, BrainCircuit,
+  Briefcase, Cog,
 } from "lucide-react";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { useTenant } from "@/contexts/tenant-context";
 import { useTheme } from "@/contexts/theme-context";
@@ -11,19 +15,73 @@ import { useLeads } from "@/hooks/use-leads";
 import { AiCoachButton } from "@/components/ai-coach-panel";
 import { NotificationsPopover } from "@/components/notifications-popover";
 
-const NAV: Array<{ to: string; label: string; icon: any; clinicOnly?: boolean }> = [
-  { to: "/", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/leads", label: "Leads", icon: Users },
-  { to: "/pipeline", label: "Pipeline", icon: Kanban },
-  { to: "/clientes", label: "Clientes", icon: Building2 },
-  { to: "/clinicas", label: "KS Clínicas", icon: Stethoscope, clinicOnly: true },
-  { to: "/tarefas", label: "Tarefas", icon: ListChecks },
-  { to: "/financeiro", label: "Financeiro", icon: Wallet },
-  { to: "/automacao", label: "Automação", icon: Zap },
-  { to: "/insights", label: "KassIA", icon: Sparkles },
-  { to: "/relatorios", label: "Relatórios", icon: BarChart3 },
-  { to: "/configuracoes", label: "Configurações", icon: Settings },
+type NavItem = { to: string; label: string; icon: any; badge?: string; clinicOnly?: boolean };
+type NavGroup = { id: string; label: string; icon: any; items: NavItem[] };
+
+const NAV_GROUPS: NavGroup[] = [
+  {
+    id: "inicio", label: "Início", icon: Home,
+    items: [{ to: "/", label: "Dashboard", icon: LayoutDashboard }],
+  },
+  {
+    id: "vendas", label: "Vendas", icon: ShoppingBag,
+    items: [
+      { to: "/leads", label: "Leads", icon: Users },
+      { to: "/pipeline", label: "Pipeline", icon: Kanban },
+      { to: "/oportunidades", label: "Oportunidades", icon: Target },
+      { to: "/propostas", label: "Propostas", icon: FileText },
+    ],
+  },
+  {
+    id: "clientes", label: "Clientes", icon: HeartHandshake,
+    items: [
+      { to: "/clientes", label: "Clientes", icon: Building2 },
+      { to: "/contatos", label: "Contatos", icon: UserCircle },
+      { to: "/empresas", label: "Empresas", icon: Building },
+      { to: "/interacoes", label: "Histórico", icon: History },
+      { to: "/clinicas", label: "KS Clínicas", icon: Stethoscope, clinicOnly: true },
+    ],
+  },
+  {
+    id: "marketing", label: "Marketing", icon: Megaphone,
+    items: [
+      { to: "/campanhas", label: "Campanhas", icon: Megaphone },
+      { to: "/email-marketing", label: "E-mail Marketing", icon: Mail },
+      { to: "/landing-pages", label: "Landing Pages", icon: Globe },
+      { to: "/automacao", label: "Automação", icon: Zap },
+    ],
+  },
+  {
+    id: "suporte", label: "Suporte", icon: LifeBuoy,
+    items: [
+      { to: "/tickets", label: "Tickets", icon: LifeBuoy },
+      { to: "/base-conhecimento", label: "Base de Conhecimento", icon: BookOpen },
+      { to: "/chat", label: "Chat ao Vivo", icon: MessageCircle },
+    ],
+  },
+  {
+    id: "inteligencia", label: "Inteligência", icon: BrainCircuit,
+    items: [
+      { to: "/relatorios", label: "Relatórios", icon: BarChart3 },
+      { to: "/insights", label: "KassIA", icon: Sparkles },
+      { to: "/dashboards", label: "Dashboards", icon: LineChart },
+    ],
+  },
+  {
+    id: "gestao", label: "Gestão", icon: Briefcase,
+    items: [
+      { to: "/tarefas", label: "Tarefas", icon: ListChecks },
+      { to: "/financeiro", label: "Financeiro", icon: Wallet },
+    ],
+  },
+  {
+    id: "config", label: "Configurações", icon: Cog,
+    items: [{ to: "/configuracoes", label: "Configurações", icon: Settings }],
+  },
 ];
+
+const COLLAPSED_KEY = "ks-sidebar-collapsed";
+const GROUPS_OPEN_KEY = "ks-sidebar-groups";
 
 export function AppShell({ children, title, subtitle, action }: {
   children: ReactNode; title: string; subtitle?: string; action?: ReactNode;
@@ -34,14 +92,28 @@ export function AppShell({ children, title, subtitle, action }: {
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
+  const [collapsed, setCollapsed] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem(COLLAPSED_KEY) === "1";
+  });
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() => {
+    if (typeof window === "undefined") return {};
+    try { return JSON.parse(localStorage.getItem(GROUPS_OPEN_KEY) || "{}"); } catch { return {}; }
+  });
+
   useEffect(() => {
     if (loading) return;
     if (!user) { navigate({ to: "/auth" }); return; }
     if (tenantLoading) return;
-    if (memberships.length === 0 && !isSuperAdmin) {
-      navigate({ to: "/onboarding" });
-    }
+    if (memberships.length === 0 && !isSuperAdmin) navigate({ to: "/onboarding" });
   }, [user, loading, tenantLoading, memberships, isSuperAdmin, navigate]);
+
+  useEffect(() => {
+    localStorage.setItem(COLLAPSED_KEY, collapsed ? "1" : "0");
+  }, [collapsed]);
+  useEffect(() => {
+    localStorage.setItem(GROUPS_OPEN_KEY, JSON.stringify(openGroups));
+  }, [openGroups]);
 
   if (loading || !user || tenantLoading || (memberships.length === 0 && !isSuperAdmin)) {
     return (
@@ -55,43 +127,114 @@ export function AppShell({ children, title, subtitle, action }: {
     .split(" ").map((s: string) => s[0]).join("").slice(0, 2).toUpperCase();
   const displayName = user.user_metadata?.full_name || user.email?.split("@")[0];
 
+  function toggleGroup(id: string) {
+    setOpenGroups((p) => ({ ...p, [id]: !(p[id] ?? true) }));
+  }
+
+  // Auto-open the group containing active route
+  function isGroupOpen(g: NavGroup) {
+    const hasActive = g.items.some((i) => i.to === "/" ? pathname === "/" : pathname.startsWith(i.to));
+    if (hasActive) return true;
+    return openGroups[g.id] ?? true;
+  }
+
+  const segmento = (current?.tenant as any)?.segmento;
+  const sidebarWidth = collapsed ? "w-16" : "w-64";
+
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Sidebar */}
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-border bg-sidebar md:flex">
-        <div className="flex h-16 items-center gap-2 border-b border-border px-5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-[oklch(0.55_0.16_35)] shadow-glow">
+      <aside className={`fixed inset-y-0 left-0 z-30 hidden flex-col border-r border-border bg-sidebar transition-all duration-200 md:flex ${sidebarWidth}`}>
+        <div className="flex h-16 items-center gap-2 border-b border-border px-4">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-[oklch(0.55_0.16_35)] shadow-glow">
             <Sparkles className="h-4 w-4 text-primary-foreground" />
           </div>
-          <div className="leading-tight">
-            <div className="text-sm font-semibold tracking-tight">KS CRM</div>
-            <div className="text-[10px] uppercase tracking-widest text-muted-foreground">CRM Inteligente com ia</div>
-          </div>
+          {!collapsed && (
+            <div className="leading-tight">
+              <div className="text-sm font-semibold tracking-tight">KS CRM</div>
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Sales · Marketing · IA</div>
+            </div>
+          )}
+          <button
+            onClick={() => setCollapsed((v) => !v)}
+            className="ml-auto grid h-7 w-7 place-items-center rounded-md text-muted-foreground transition hover:bg-surface-3 hover:text-foreground"
+            title={collapsed ? "Expandir" : "Colapsar"}
+          >
+            {collapsed ? <PanelLeftOpen className="h-3.5 w-3.5" /> : <PanelLeftClose className="h-3.5 w-3.5" />}
+          </button>
         </div>
 
-        <nav className="flex-1 space-y-0.5 px-3 py-4">
-          {NAV.filter((item) => !item.clinicOnly || (current?.tenant as any)?.segmento === "clinica").map(({ to, label, icon: Icon }) => {
-            const active = to === "/" ? pathname === "/" : pathname.startsWith(to);
+        <nav className="flex-1 space-y-0.5 overflow-y-auto px-2 py-3">
+          {NAV_GROUPS.map((group) => {
+            const items = group.items.filter((i) => !i.clinicOnly || segmento === "clinica");
+            if (items.length === 0) return null;
+            const open = isGroupOpen(group);
+            const GIcon = group.icon;
+
+            // Single-item groups render as direct link
+            if (items.length === 1 && (group.id === "inicio" || group.id === "config")) {
+              const item = items[0];
+              const Icon = item.icon;
+              const active = item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
+              return (
+                <Link
+                  key={group.id}
+                  to={item.to as any}
+                  title={collapsed ? item.label : undefined}
+                  className={[
+                    "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all",
+                    active ? "bg-surface-3 text-foreground shadow-card" : "text-muted-foreground hover:bg-sidebar-accent hover:text-foreground",
+                  ].join(" ")}
+                >
+                  <Icon className={`h-4 w-4 shrink-0 ${active ? "text-primary" : ""}`} />
+                  {!collapsed && <span className="font-medium">{item.label}</span>}
+                  {active && !collapsed && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_8px_oklch(0.685_0.175_45)]" />}
+                </Link>
+              );
+            }
+
             return (
-              <Link
-                key={to}
-                to={to as any}
-                className={[
-                  "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all",
-                  active
-                    ? "bg-surface-3 text-foreground shadow-card"
-                    : "text-muted-foreground hover:bg-sidebar-accent hover:text-foreground",
-                ].join(" ")}
-              >
-                <Icon className={["h-4 w-4 transition-colors", active ? "text-primary" : ""].join(" ")} />
-                <span className="font-medium">{label}</span>
-                {active && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_8px_oklch(0.685_0.175_45)]" />}
-              </Link>
+              <div key={group.id} className="pt-1">
+                {collapsed ? (
+                  <div className="my-1 h-px bg-border/60" />
+                ) : (
+                  <button
+                    onClick={() => toggleGroup(group.id)}
+                    className="flex w-full items-center gap-2 rounded-md px-3 py-1.5 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/70 transition hover:text-foreground"
+                  >
+                    <GIcon className="h-3 w-3" />
+                    <span className="flex-1 text-left">{group.label}</span>
+                    {open ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+                  </button>
+                )}
+                {(collapsed || open) && (
+                  <div className="space-y-0.5">
+                    {items.map(({ to, label, icon: Icon, badge }) => {
+                      const active = pathname === to || (to !== "/" && pathname.startsWith(to + "/"));
+                      return (
+                        <Link
+                          key={to}
+                          to={to as any}
+                          title={collapsed ? label : undefined}
+                          className={[
+                            "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all",
+                            active ? "bg-surface-3 text-foreground shadow-card" : "text-muted-foreground hover:bg-sidebar-accent hover:text-foreground",
+                          ].join(" ")}
+                        >
+                          <Icon className={`h-4 w-4 shrink-0 ${active ? "text-primary" : ""}`} />
+                          {!collapsed && <span className="font-medium">{label}</span>}
+                          {!collapsed && badge && <span className="ml-auto rounded-full bg-primary/15 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-primary">{badge}</span>}
+                          {active && !collapsed && !badge && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_8px_oklch(0.685_0.175_45)]" />}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             );
           })}
         </nav>
 
-        {isSuperAdmin && (
+        {isSuperAdmin && !collapsed && (
           <Link
             to="/super-admin"
             className="mx-3 mb-2 flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/10 px-3 py-2 text-xs font-semibold text-primary transition hover:bg-primary/15"
@@ -101,11 +244,10 @@ export function AppShell({ children, title, subtitle, action }: {
           </Link>
         )}
 
-        <SidebarCoachCard />
+        {!collapsed && <SidebarCoachCard />}
       </aside>
 
-      {/* Header + content */}
-      <div className="md:pl-64">
+      <div className={collapsed ? "md:pl-16" : "md:pl-64"}>
         <header className="sticky top-0 z-20 flex h-16 items-center gap-4 border-b border-border bg-background/80 px-5 backdrop-blur-xl md:px-8">
           <div className="relative w-full max-w-sm">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
