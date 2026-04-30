@@ -381,7 +381,9 @@ export function DashboardPage() {
             ))}
           </div>
         </div>
+        )}
 
+        {visible.atividade && (
         <div className="overflow-hidden rounded-2xl border border-border bg-surface-2 shadow-card">
           <div className="flex items-center justify-between border-b border-border px-6 py-4">
             <h3 className="text-base font-semibold">Atividade recente</h3>
@@ -415,7 +417,9 @@ export function DashboardPage() {
             </ul>
           )}
         </div>
+        )}
       </div>
+      )}
     </AppShell>
   );
 }
