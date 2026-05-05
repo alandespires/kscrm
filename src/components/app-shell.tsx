@@ -180,7 +180,8 @@ export function AppShell({ children, title, subtitle, action }: {
 
         <nav className="flex-1 space-y-0.5 overflow-y-auto px-2 py-3">
           {NAV_GROUPS.map((group) => {
-            const items = group.items.filter((i) => !i.clinicOnly || segmento === "clinica");
+            if (group.schoolOnly && segmento !== "escolar") return null;
+            const items = group.items.filter((i) => (!i.clinicOnly || segmento === "clinica") && (!i.schoolOnly || segmento === "escolar"));
             if (items.length === 0) return null;
             const open = isGroupOpen(group);
             const GIcon = group.icon;
