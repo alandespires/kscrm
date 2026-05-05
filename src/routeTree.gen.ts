@@ -14,6 +14,7 @@ import { Route as TarefasRouteImport } from './routes/tarefas'
 import { Route as SuperAdminRouteImport } from './routes/super-admin'
 import { Route as RelatoriosRouteImport } from './routes/relatorios'
 import { Route as PropostasRouteImport } from './routes/propostas'
+import { Route as PortalAlunoRouteImport } from './routes/portal-aluno'
 import { Route as PipelineRouteImport } from './routes/pipeline'
 import { Route as OportunidadesRouteImport } from './routes/oportunidades'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
@@ -41,7 +42,12 @@ import { Route as ClinicasIndexRouteImport } from './routes/clinicas.index'
 import { Route as TTenantSlugRouteImport } from './routes/t.$tenantSlug'
 import { Route as EscolarTurmasRouteImport } from './routes/escolar.turmas'
 import { Route as EscolarProfessoresRouteImport } from './routes/escolar.professores'
+import { Route as EscolarFrequenciaRouteImport } from './routes/escolar.frequencia'
+import { Route as EscolarDiarioRouteImport } from './routes/escolar.diario'
 import { Route as EscolarCursosRouteImport } from './routes/escolar.cursos'
+import { Route as EscolarConfiguracoesRouteImport } from './routes/escolar.configuracoes'
+import { Route as EscolarComunicacaoRouteImport } from './routes/escolar.comunicacao'
+import { Route as EscolarAvaliacoesRouteImport } from './routes/escolar.avaliacoes'
 import { Route as EscolarAlunosRouteImport } from './routes/escolar.alunos'
 import { Route as ClinicasProntuariosRouteImport } from './routes/clinicas.prontuarios'
 import { Route as ClinicasPacientesRouteImport } from './routes/clinicas.pacientes'
@@ -72,6 +78,11 @@ const RelatoriosRoute = RelatoriosRouteImport.update({
 const PropostasRoute = PropostasRouteImport.update({
   id: '/propostas',
   path: '/propostas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PortalAlunoRoute = PortalAlunoRouteImport.update({
+  id: '/portal-aluno',
+  path: '/portal-aluno',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PipelineRoute = PipelineRouteImport.update({
@@ -209,9 +220,34 @@ const EscolarProfessoresRoute = EscolarProfessoresRouteImport.update({
   path: '/professores',
   getParentRoute: () => EscolarRoute,
 } as any)
+const EscolarFrequenciaRoute = EscolarFrequenciaRouteImport.update({
+  id: '/frequencia',
+  path: '/frequencia',
+  getParentRoute: () => EscolarRoute,
+} as any)
+const EscolarDiarioRoute = EscolarDiarioRouteImport.update({
+  id: '/diario',
+  path: '/diario',
+  getParentRoute: () => EscolarRoute,
+} as any)
 const EscolarCursosRoute = EscolarCursosRouteImport.update({
   id: '/cursos',
   path: '/cursos',
+  getParentRoute: () => EscolarRoute,
+} as any)
+const EscolarConfiguracoesRoute = EscolarConfiguracoesRouteImport.update({
+  id: '/configuracoes',
+  path: '/configuracoes',
+  getParentRoute: () => EscolarRoute,
+} as any)
+const EscolarComunicacaoRoute = EscolarComunicacaoRouteImport.update({
+  id: '/comunicacao',
+  path: '/comunicacao',
+  getParentRoute: () => EscolarRoute,
+} as any)
+const EscolarAvaliacoesRoute = EscolarAvaliacoesRouteImport.update({
+  id: '/avaliacoes',
+  path: '/avaliacoes',
   getParentRoute: () => EscolarRoute,
 } as any)
 const EscolarAlunosRoute = EscolarAlunosRouteImport.update({
@@ -268,6 +304,7 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof OnboardingRoute
   '/oportunidades': typeof OportunidadesRoute
   '/pipeline': typeof PipelineRoute
+  '/portal-aluno': typeof PortalAlunoRoute
   '/propostas': typeof PropostasRoute
   '/relatorios': typeof RelatoriosRoute
   '/super-admin': typeof SuperAdminRoute
@@ -278,7 +315,12 @@ export interface FileRoutesByFullPath {
   '/clinicas/pacientes': typeof ClinicasPacientesRoute
   '/clinicas/prontuarios': typeof ClinicasProntuariosRoute
   '/escolar/alunos': typeof EscolarAlunosRoute
+  '/escolar/avaliacoes': typeof EscolarAvaliacoesRoute
+  '/escolar/comunicacao': typeof EscolarComunicacaoRoute
+  '/escolar/configuracoes': typeof EscolarConfiguracoesRoute
   '/escolar/cursos': typeof EscolarCursosRoute
+  '/escolar/diario': typeof EscolarDiarioRoute
+  '/escolar/frequencia': typeof EscolarFrequenciaRoute
   '/escolar/professores': typeof EscolarProfessoresRoute
   '/escolar/turmas': typeof EscolarTurmasRoute
   '/t/$tenantSlug': typeof TTenantSlugRouteWithChildren
@@ -307,6 +349,7 @@ export interface FileRoutesByTo {
   '/onboarding': typeof OnboardingRoute
   '/oportunidades': typeof OportunidadesRoute
   '/pipeline': typeof PipelineRoute
+  '/portal-aluno': typeof PortalAlunoRoute
   '/propostas': typeof PropostasRoute
   '/relatorios': typeof RelatoriosRoute
   '/super-admin': typeof SuperAdminRoute
@@ -317,7 +360,12 @@ export interface FileRoutesByTo {
   '/clinicas/pacientes': typeof ClinicasPacientesRoute
   '/clinicas/prontuarios': typeof ClinicasProntuariosRoute
   '/escolar/alunos': typeof EscolarAlunosRoute
+  '/escolar/avaliacoes': typeof EscolarAvaliacoesRoute
+  '/escolar/comunicacao': typeof EscolarComunicacaoRoute
+  '/escolar/configuracoes': typeof EscolarConfiguracoesRoute
   '/escolar/cursos': typeof EscolarCursosRoute
+  '/escolar/diario': typeof EscolarDiarioRoute
+  '/escolar/frequencia': typeof EscolarFrequenciaRoute
   '/escolar/professores': typeof EscolarProfessoresRoute
   '/escolar/turmas': typeof EscolarTurmasRoute
   '/clinicas': typeof ClinicasIndexRoute
@@ -348,6 +396,7 @@ export interface FileRoutesById {
   '/onboarding': typeof OnboardingRoute
   '/oportunidades': typeof OportunidadesRoute
   '/pipeline': typeof PipelineRoute
+  '/portal-aluno': typeof PortalAlunoRoute
   '/propostas': typeof PropostasRoute
   '/relatorios': typeof RelatoriosRoute
   '/super-admin': typeof SuperAdminRoute
@@ -358,7 +407,12 @@ export interface FileRoutesById {
   '/clinicas/pacientes': typeof ClinicasPacientesRoute
   '/clinicas/prontuarios': typeof ClinicasProntuariosRoute
   '/escolar/alunos': typeof EscolarAlunosRoute
+  '/escolar/avaliacoes': typeof EscolarAvaliacoesRoute
+  '/escolar/comunicacao': typeof EscolarComunicacaoRoute
+  '/escolar/configuracoes': typeof EscolarConfiguracoesRoute
   '/escolar/cursos': typeof EscolarCursosRoute
+  '/escolar/diario': typeof EscolarDiarioRoute
+  '/escolar/frequencia': typeof EscolarFrequenciaRoute
   '/escolar/professores': typeof EscolarProfessoresRoute
   '/escolar/turmas': typeof EscolarTurmasRoute
   '/t/$tenantSlug': typeof TTenantSlugRouteWithChildren
@@ -391,6 +445,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/oportunidades'
     | '/pipeline'
+    | '/portal-aluno'
     | '/propostas'
     | '/relatorios'
     | '/super-admin'
@@ -401,7 +456,12 @@ export interface FileRouteTypes {
     | '/clinicas/pacientes'
     | '/clinicas/prontuarios'
     | '/escolar/alunos'
+    | '/escolar/avaliacoes'
+    | '/escolar/comunicacao'
+    | '/escolar/configuracoes'
     | '/escolar/cursos'
+    | '/escolar/diario'
+    | '/escolar/frequencia'
     | '/escolar/professores'
     | '/escolar/turmas'
     | '/t/$tenantSlug'
@@ -430,6 +490,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/oportunidades'
     | '/pipeline'
+    | '/portal-aluno'
     | '/propostas'
     | '/relatorios'
     | '/super-admin'
@@ -440,7 +501,12 @@ export interface FileRouteTypes {
     | '/clinicas/pacientes'
     | '/clinicas/prontuarios'
     | '/escolar/alunos'
+    | '/escolar/avaliacoes'
+    | '/escolar/comunicacao'
+    | '/escolar/configuracoes'
     | '/escolar/cursos'
+    | '/escolar/diario'
+    | '/escolar/frequencia'
     | '/escolar/professores'
     | '/escolar/turmas'
     | '/clinicas'
@@ -470,6 +536,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/oportunidades'
     | '/pipeline'
+    | '/portal-aluno'
     | '/propostas'
     | '/relatorios'
     | '/super-admin'
@@ -480,7 +547,12 @@ export interface FileRouteTypes {
     | '/clinicas/pacientes'
     | '/clinicas/prontuarios'
     | '/escolar/alunos'
+    | '/escolar/avaliacoes'
+    | '/escolar/comunicacao'
+    | '/escolar/configuracoes'
     | '/escolar/cursos'
+    | '/escolar/diario'
+    | '/escolar/frequencia'
     | '/escolar/professores'
     | '/escolar/turmas'
     | '/t/$tenantSlug'
@@ -512,6 +584,7 @@ export interface RootRouteChildren {
   OnboardingRoute: typeof OnboardingRoute
   OportunidadesRoute: typeof OportunidadesRoute
   PipelineRoute: typeof PipelineRoute
+  PortalAlunoRoute: typeof PortalAlunoRoute
   PropostasRoute: typeof PropostasRoute
   RelatoriosRoute: typeof RelatoriosRoute
   SuperAdminRoute: typeof SuperAdminRoute
@@ -555,6 +628,13 @@ declare module '@tanstack/react-router' {
       path: '/propostas'
       fullPath: '/propostas'
       preLoaderRoute: typeof PropostasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/portal-aluno': {
+      id: '/portal-aluno'
+      path: '/portal-aluno'
+      fullPath: '/portal-aluno'
+      preLoaderRoute: typeof PortalAlunoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pipeline': {
@@ -746,11 +826,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EscolarProfessoresRouteImport
       parentRoute: typeof EscolarRoute
     }
+    '/escolar/frequencia': {
+      id: '/escolar/frequencia'
+      path: '/frequencia'
+      fullPath: '/escolar/frequencia'
+      preLoaderRoute: typeof EscolarFrequenciaRouteImport
+      parentRoute: typeof EscolarRoute
+    }
+    '/escolar/diario': {
+      id: '/escolar/diario'
+      path: '/diario'
+      fullPath: '/escolar/diario'
+      preLoaderRoute: typeof EscolarDiarioRouteImport
+      parentRoute: typeof EscolarRoute
+    }
     '/escolar/cursos': {
       id: '/escolar/cursos'
       path: '/cursos'
       fullPath: '/escolar/cursos'
       preLoaderRoute: typeof EscolarCursosRouteImport
+      parentRoute: typeof EscolarRoute
+    }
+    '/escolar/configuracoes': {
+      id: '/escolar/configuracoes'
+      path: '/configuracoes'
+      fullPath: '/escolar/configuracoes'
+      preLoaderRoute: typeof EscolarConfiguracoesRouteImport
+      parentRoute: typeof EscolarRoute
+    }
+    '/escolar/comunicacao': {
+      id: '/escolar/comunicacao'
+      path: '/comunicacao'
+      fullPath: '/escolar/comunicacao'
+      preLoaderRoute: typeof EscolarComunicacaoRouteImport
+      parentRoute: typeof EscolarRoute
+    }
+    '/escolar/avaliacoes': {
+      id: '/escolar/avaliacoes'
+      path: '/avaliacoes'
+      fullPath: '/escolar/avaliacoes'
+      preLoaderRoute: typeof EscolarAvaliacoesRouteImport
       parentRoute: typeof EscolarRoute
     }
     '/escolar/alunos': {
@@ -820,7 +935,12 @@ const ClinicasRouteWithChildren = ClinicasRoute._addFileChildren(
 
 interface EscolarRouteChildren {
   EscolarAlunosRoute: typeof EscolarAlunosRoute
+  EscolarAvaliacoesRoute: typeof EscolarAvaliacoesRoute
+  EscolarComunicacaoRoute: typeof EscolarComunicacaoRoute
+  EscolarConfiguracoesRoute: typeof EscolarConfiguracoesRoute
   EscolarCursosRoute: typeof EscolarCursosRoute
+  EscolarDiarioRoute: typeof EscolarDiarioRoute
+  EscolarFrequenciaRoute: typeof EscolarFrequenciaRoute
   EscolarProfessoresRoute: typeof EscolarProfessoresRoute
   EscolarTurmasRoute: typeof EscolarTurmasRoute
   EscolarIndexRoute: typeof EscolarIndexRoute
@@ -828,7 +948,12 @@ interface EscolarRouteChildren {
 
 const EscolarRouteChildren: EscolarRouteChildren = {
   EscolarAlunosRoute: EscolarAlunosRoute,
+  EscolarAvaliacoesRoute: EscolarAvaliacoesRoute,
+  EscolarComunicacaoRoute: EscolarComunicacaoRoute,
+  EscolarConfiguracoesRoute: EscolarConfiguracoesRoute,
   EscolarCursosRoute: EscolarCursosRoute,
+  EscolarDiarioRoute: EscolarDiarioRoute,
+  EscolarFrequenciaRoute: EscolarFrequenciaRoute,
   EscolarProfessoresRoute: EscolarProfessoresRoute,
   EscolarTurmasRoute: EscolarTurmasRoute,
   EscolarIndexRoute: EscolarIndexRoute,
@@ -872,6 +997,7 @@ const rootRouteChildren: RootRouteChildren = {
   OnboardingRoute: OnboardingRoute,
   OportunidadesRoute: OportunidadesRoute,
   PipelineRoute: PipelineRoute,
+  PortalAlunoRoute: PortalAlunoRoute,
   PropostasRoute: PropostasRoute,
   RelatoriosRoute: RelatoriosRoute,
   SuperAdminRoute: SuperAdminRoute,
