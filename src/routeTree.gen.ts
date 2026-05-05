@@ -22,6 +22,7 @@ import { Route as LandingPagesRouteImport } from './routes/landing-pages'
 import { Route as InteracoesRouteImport } from './routes/interacoes'
 import { Route as InsightsRouteImport } from './routes/insights'
 import { Route as FinanceiroRouteImport } from './routes/financeiro'
+import { Route as EscolarRouteImport } from './routes/escolar'
 import { Route as EmpresasRouteImport } from './routes/empresas'
 import { Route as EmailMarketingRouteImport } from './routes/email-marketing'
 import { Route as DashboardsRouteImport } from './routes/dashboards'
@@ -35,8 +36,13 @@ import { Route as BaseConhecimentoRouteImport } from './routes/base-conhecimento
 import { Route as AutomacaoRouteImport } from './routes/automacao'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as EscolarIndexRouteImport } from './routes/escolar.index'
 import { Route as ClinicasIndexRouteImport } from './routes/clinicas.index'
 import { Route as TTenantSlugRouteImport } from './routes/t.$tenantSlug'
+import { Route as EscolarTurmasRouteImport } from './routes/escolar.turmas'
+import { Route as EscolarProfessoresRouteImport } from './routes/escolar.professores'
+import { Route as EscolarCursosRouteImport } from './routes/escolar.cursos'
+import { Route as EscolarAlunosRouteImport } from './routes/escolar.alunos'
 import { Route as ClinicasProntuariosRouteImport } from './routes/clinicas.prontuarios'
 import { Route as ClinicasPacientesRouteImport } from './routes/clinicas.pacientes'
 import { Route as ClinicasConfiguracoesRouteImport } from './routes/clinicas.configuracoes'
@@ -108,6 +114,11 @@ const FinanceiroRoute = FinanceiroRouteImport.update({
   path: '/financeiro',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EscolarRoute = EscolarRouteImport.update({
+  id: '/escolar',
+  path: '/escolar',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EmpresasRoute = EmpresasRouteImport.update({
   id: '/empresas',
   path: '/empresas',
@@ -173,6 +184,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EscolarIndexRoute = EscolarIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => EscolarRoute,
+} as any)
 const ClinicasIndexRoute = ClinicasIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -182,6 +198,26 @@ const TTenantSlugRoute = TTenantSlugRouteImport.update({
   id: '/t/$tenantSlug',
   path: '/t/$tenantSlug',
   getParentRoute: () => rootRouteImport,
+} as any)
+const EscolarTurmasRoute = EscolarTurmasRouteImport.update({
+  id: '/turmas',
+  path: '/turmas',
+  getParentRoute: () => EscolarRoute,
+} as any)
+const EscolarProfessoresRoute = EscolarProfessoresRouteImport.update({
+  id: '/professores',
+  path: '/professores',
+  getParentRoute: () => EscolarRoute,
+} as any)
+const EscolarCursosRoute = EscolarCursosRouteImport.update({
+  id: '/cursos',
+  path: '/cursos',
+  getParentRoute: () => EscolarRoute,
+} as any)
+const EscolarAlunosRoute = EscolarAlunosRouteImport.update({
+  id: '/alunos',
+  path: '/alunos',
+  getParentRoute: () => EscolarRoute,
 } as any)
 const ClinicasProntuariosRoute = ClinicasProntuariosRouteImport.update({
   id: '/prontuarios',
@@ -223,6 +259,7 @@ export interface FileRoutesByFullPath {
   '/dashboards': typeof DashboardsRoute
   '/email-marketing': typeof EmailMarketingRoute
   '/empresas': typeof EmpresasRoute
+  '/escolar': typeof EscolarRouteWithChildren
   '/financeiro': typeof FinanceiroRoute
   '/insights': typeof InsightsRoute
   '/interacoes': typeof InteracoesRoute
@@ -240,8 +277,13 @@ export interface FileRoutesByFullPath {
   '/clinicas/configuracoes': typeof ClinicasConfiguracoesRoute
   '/clinicas/pacientes': typeof ClinicasPacientesRoute
   '/clinicas/prontuarios': typeof ClinicasProntuariosRoute
+  '/escolar/alunos': typeof EscolarAlunosRoute
+  '/escolar/cursos': typeof EscolarCursosRoute
+  '/escolar/professores': typeof EscolarProfessoresRoute
+  '/escolar/turmas': typeof EscolarTurmasRoute
   '/t/$tenantSlug': typeof TTenantSlugRouteWithChildren
   '/clinicas/': typeof ClinicasIndexRoute
+  '/escolar/': typeof EscolarIndexRoute
   '/t/$tenantSlug/': typeof TTenantSlugIndexRoute
 }
 export interface FileRoutesByTo {
@@ -274,7 +316,12 @@ export interface FileRoutesByTo {
   '/clinicas/configuracoes': typeof ClinicasConfiguracoesRoute
   '/clinicas/pacientes': typeof ClinicasPacientesRoute
   '/clinicas/prontuarios': typeof ClinicasProntuariosRoute
+  '/escolar/alunos': typeof EscolarAlunosRoute
+  '/escolar/cursos': typeof EscolarCursosRoute
+  '/escolar/professores': typeof EscolarProfessoresRoute
+  '/escolar/turmas': typeof EscolarTurmasRoute
   '/clinicas': typeof ClinicasIndexRoute
+  '/escolar': typeof EscolarIndexRoute
   '/t/$tenantSlug': typeof TTenantSlugIndexRoute
 }
 export interface FileRoutesById {
@@ -292,6 +339,7 @@ export interface FileRoutesById {
   '/dashboards': typeof DashboardsRoute
   '/email-marketing': typeof EmailMarketingRoute
   '/empresas': typeof EmpresasRoute
+  '/escolar': typeof EscolarRouteWithChildren
   '/financeiro': typeof FinanceiroRoute
   '/insights': typeof InsightsRoute
   '/interacoes': typeof InteracoesRoute
@@ -309,8 +357,13 @@ export interface FileRoutesById {
   '/clinicas/configuracoes': typeof ClinicasConfiguracoesRoute
   '/clinicas/pacientes': typeof ClinicasPacientesRoute
   '/clinicas/prontuarios': typeof ClinicasProntuariosRoute
+  '/escolar/alunos': typeof EscolarAlunosRoute
+  '/escolar/cursos': typeof EscolarCursosRoute
+  '/escolar/professores': typeof EscolarProfessoresRoute
+  '/escolar/turmas': typeof EscolarTurmasRoute
   '/t/$tenantSlug': typeof TTenantSlugRouteWithChildren
   '/clinicas/': typeof ClinicasIndexRoute
+  '/escolar/': typeof EscolarIndexRoute
   '/t/$tenantSlug/': typeof TTenantSlugIndexRoute
 }
 export interface FileRouteTypes {
@@ -329,6 +382,7 @@ export interface FileRouteTypes {
     | '/dashboards'
     | '/email-marketing'
     | '/empresas'
+    | '/escolar'
     | '/financeiro'
     | '/insights'
     | '/interacoes'
@@ -346,8 +400,13 @@ export interface FileRouteTypes {
     | '/clinicas/configuracoes'
     | '/clinicas/pacientes'
     | '/clinicas/prontuarios'
+    | '/escolar/alunos'
+    | '/escolar/cursos'
+    | '/escolar/professores'
+    | '/escolar/turmas'
     | '/t/$tenantSlug'
     | '/clinicas/'
+    | '/escolar/'
     | '/t/$tenantSlug/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -380,7 +439,12 @@ export interface FileRouteTypes {
     | '/clinicas/configuracoes'
     | '/clinicas/pacientes'
     | '/clinicas/prontuarios'
+    | '/escolar/alunos'
+    | '/escolar/cursos'
+    | '/escolar/professores'
+    | '/escolar/turmas'
     | '/clinicas'
+    | '/escolar'
     | '/t/$tenantSlug'
   id:
     | '__root__'
@@ -397,6 +461,7 @@ export interface FileRouteTypes {
     | '/dashboards'
     | '/email-marketing'
     | '/empresas'
+    | '/escolar'
     | '/financeiro'
     | '/insights'
     | '/interacoes'
@@ -414,8 +479,13 @@ export interface FileRouteTypes {
     | '/clinicas/configuracoes'
     | '/clinicas/pacientes'
     | '/clinicas/prontuarios'
+    | '/escolar/alunos'
+    | '/escolar/cursos'
+    | '/escolar/professores'
+    | '/escolar/turmas'
     | '/t/$tenantSlug'
     | '/clinicas/'
+    | '/escolar/'
     | '/t/$tenantSlug/'
   fileRoutesById: FileRoutesById
 }
@@ -433,6 +503,7 @@ export interface RootRouteChildren {
   DashboardsRoute: typeof DashboardsRoute
   EmailMarketingRoute: typeof EmailMarketingRoute
   EmpresasRoute: typeof EmpresasRoute
+  EscolarRoute: typeof EscolarRouteWithChildren
   FinanceiroRoute: typeof FinanceiroRoute
   InsightsRoute: typeof InsightsRoute
   InteracoesRoute: typeof InteracoesRoute
@@ -542,6 +613,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FinanceiroRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/escolar': {
+      id: '/escolar'
+      path: '/escolar'
+      fullPath: '/escolar'
+      preLoaderRoute: typeof EscolarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/empresas': {
       id: '/empresas'
       path: '/empresas'
@@ -633,6 +711,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/escolar/': {
+      id: '/escolar/'
+      path: '/'
+      fullPath: '/escolar/'
+      preLoaderRoute: typeof EscolarIndexRouteImport
+      parentRoute: typeof EscolarRoute
+    }
     '/clinicas/': {
       id: '/clinicas/'
       path: '/'
@@ -646,6 +731,34 @@ declare module '@tanstack/react-router' {
       fullPath: '/t/$tenantSlug'
       preLoaderRoute: typeof TTenantSlugRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/escolar/turmas': {
+      id: '/escolar/turmas'
+      path: '/turmas'
+      fullPath: '/escolar/turmas'
+      preLoaderRoute: typeof EscolarTurmasRouteImport
+      parentRoute: typeof EscolarRoute
+    }
+    '/escolar/professores': {
+      id: '/escolar/professores'
+      path: '/professores'
+      fullPath: '/escolar/professores'
+      preLoaderRoute: typeof EscolarProfessoresRouteImport
+      parentRoute: typeof EscolarRoute
+    }
+    '/escolar/cursos': {
+      id: '/escolar/cursos'
+      path: '/cursos'
+      fullPath: '/escolar/cursos'
+      preLoaderRoute: typeof EscolarCursosRouteImport
+      parentRoute: typeof EscolarRoute
+    }
+    '/escolar/alunos': {
+      id: '/escolar/alunos'
+      path: '/alunos'
+      fullPath: '/escolar/alunos'
+      preLoaderRoute: typeof EscolarAlunosRouteImport
+      parentRoute: typeof EscolarRoute
     }
     '/clinicas/prontuarios': {
       id: '/clinicas/prontuarios'
@@ -705,6 +818,25 @@ const ClinicasRouteWithChildren = ClinicasRoute._addFileChildren(
   ClinicasRouteChildren,
 )
 
+interface EscolarRouteChildren {
+  EscolarAlunosRoute: typeof EscolarAlunosRoute
+  EscolarCursosRoute: typeof EscolarCursosRoute
+  EscolarProfessoresRoute: typeof EscolarProfessoresRoute
+  EscolarTurmasRoute: typeof EscolarTurmasRoute
+  EscolarIndexRoute: typeof EscolarIndexRoute
+}
+
+const EscolarRouteChildren: EscolarRouteChildren = {
+  EscolarAlunosRoute: EscolarAlunosRoute,
+  EscolarCursosRoute: EscolarCursosRoute,
+  EscolarProfessoresRoute: EscolarProfessoresRoute,
+  EscolarTurmasRoute: EscolarTurmasRoute,
+  EscolarIndexRoute: EscolarIndexRoute,
+}
+
+const EscolarRouteWithChildren =
+  EscolarRoute._addFileChildren(EscolarRouteChildren)
+
 interface TTenantSlugRouteChildren {
   TTenantSlugIndexRoute: typeof TTenantSlugIndexRoute
 }
@@ -731,6 +863,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardsRoute: DashboardsRoute,
   EmailMarketingRoute: EmailMarketingRoute,
   EmpresasRoute: EmpresasRoute,
+  EscolarRoute: EscolarRouteWithChildren,
   FinanceiroRoute: FinanceiroRoute,
   InsightsRoute: InsightsRoute,
   InteracoesRoute: InteracoesRoute,
