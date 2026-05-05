@@ -5,7 +5,7 @@ import {
   Stethoscope, Target, FileText, UserCircle, Building, History, Megaphone, Mail,
   Globe, LifeBuoy, BookOpen, MessageCircle, LineChart, ChevronDown, ChevronRight,
   PanelLeftClose, PanelLeftOpen, Home, ShoppingBag, HeartHandshake, BrainCircuit,
-  Briefcase, Cog,
+  Briefcase, Cog, GraduationCap, BookMarked, ClipboardList, CalendarCheck, Bell, IdCard,
 } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import { useAuth } from "@/contexts/auth-context";
@@ -15,8 +15,8 @@ import { useLeads } from "@/hooks/use-leads";
 import { AiCoachButton } from "@/components/ai-coach-panel";
 import { NotificationsPopover } from "@/components/notifications-popover";
 
-type NavItem = { to: string; label: string; icon: any; badge?: string; clinicOnly?: boolean };
-type NavGroup = { id: string; label: string; icon: any; items: NavItem[] };
+type NavItem = { to: string; label: string; icon: any; badge?: string; clinicOnly?: boolean; schoolOnly?: boolean };
+type NavGroup = { id: string; label: string; icon: any; items: NavItem[]; schoolOnly?: boolean };
 
 const NAV_GROUPS: NavGroup[] = [
   {
