@@ -75,7 +75,20 @@ const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
-    id: "config", label: "Configurações", icon: Cog,
+    id: "escolar", label: "KS Escolar", icon: GraduationCap, schoolOnly: true,
+    items: [
+      { to: "/escolar", label: "Visão geral", icon: LayoutDashboard, schoolOnly: true },
+      { to: "/escolar/cursos", label: "Cursos", icon: BookMarked, schoolOnly: true },
+      { to: "/escolar/turmas", label: "Turmas", icon: Users, schoolOnly: true },
+      { to: "/escolar/alunos", label: "Alunos", icon: GraduationCap, schoolOnly: true },
+      { to: "/escolar/professores", label: "Professores", icon: IdCard, schoolOnly: true },
+      { to: "/escolar/diario", label: "Diário de Classe", icon: ClipboardList, schoolOnly: true },
+      { to: "/escolar/avaliacoes", label: "Avaliações", icon: FileText, schoolOnly: true },
+      { to: "/escolar/frequencia", label: "Frequência", icon: CalendarCheck, schoolOnly: true },
+      { to: "/escolar/comunicacao", label: "Comunicação", icon: Bell, schoolOnly: true },
+      { to: "/escolar/configuracoes", label: "Configurações", icon: Cog, schoolOnly: true },
+    ],
+  },
     items: [{ to: "/configuracoes", label: "Configurações", icon: Settings }],
   },
 ];
