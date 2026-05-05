@@ -907,6 +907,106 @@ export type Database = {
           },
         ]
       }
+      knowledge_articles: {
+        Row: {
+          categoria: string | null
+          conteudo: string | null
+          created_at: string
+          created_by: string
+          id: string
+          publico: boolean | null
+          slug: string
+          tenant_id: string
+          titulo: string
+          updated_at: string
+          visualizacoes: number | null
+        }
+        Insert: {
+          categoria?: string | null
+          conteudo?: string | null
+          created_at?: string
+          created_by: string
+          id?: string
+          publico?: boolean | null
+          slug: string
+          tenant_id: string
+          titulo: string
+          updated_at?: string
+          visualizacoes?: number | null
+        }
+        Update: {
+          categoria?: string | null
+          conteudo?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          publico?: boolean | null
+          slug?: string
+          tenant_id?: string
+          titulo?: string
+          updated_at?: string
+          visualizacoes?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_articles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      landing_pages: {
+        Row: {
+          config: Json | null
+          conversoes: number | null
+          created_at: string
+          created_by: string
+          id: string
+          slug: string
+          status: string
+          tenant_id: string
+          titulo: string
+          updated_at: string
+          visitas: number | null
+        }
+        Insert: {
+          config?: Json | null
+          conversoes?: number | null
+          created_at?: string
+          created_by: string
+          id?: string
+          slug: string
+          status?: string
+          tenant_id: string
+          titulo: string
+          updated_at?: string
+          visitas?: number | null
+        }
+        Update: {
+          config?: Json | null
+          conversoes?: number | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          slug?: string
+          status?: string
+          tenant_id?: string
+          titulo?: string
+          updated_at?: string
+          visitas?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "landing_pages_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leads: {
         Row: {
           ai_resumo: string | null
@@ -977,6 +1077,122 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "leads_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketing_campaigns: {
+        Row: {
+          created_at: string
+          created_by: string
+          fim: string | null
+          id: string
+          inicio: string | null
+          metadata: Json | null
+          nome: string
+          orcamento: number | null
+          status: string
+          tenant_id: string
+          tipo: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          fim?: string | null
+          id?: string
+          inicio?: string | null
+          metadata?: Json | null
+          nome: string
+          orcamento?: number | null
+          status?: string
+          tenant_id: string
+          tipo: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          fim?: string | null
+          id?: string
+          inicio?: string | null
+          metadata?: Json | null
+          nome?: string
+          orcamento?: number | null
+          status?: string
+          tenant_id?: string
+          tipo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_campaigns_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketing_emails: {
+        Row: {
+          agendado_para: string | null
+          assunto: string
+          campaign_id: string | null
+          corpo_html: string | null
+          created_at: string
+          created_by: string
+          enviado_em: string | null
+          id: string
+          status: string
+          tenant_id: string
+          total_abertos: number | null
+          total_cliques: number | null
+          total_enviados: number | null
+        }
+        Insert: {
+          agendado_para?: string | null
+          assunto: string
+          campaign_id?: string | null
+          corpo_html?: string | null
+          created_at?: string
+          created_by: string
+          enviado_em?: string | null
+          id?: string
+          status?: string
+          tenant_id: string
+          total_abertos?: number | null
+          total_cliques?: number | null
+          total_enviados?: number | null
+        }
+        Update: {
+          agendado_para?: string | null
+          assunto?: string
+          campaign_id?: string | null
+          corpo_html?: string | null
+          created_at?: string
+          created_by?: string
+          enviado_em?: string | null
+          id?: string
+          status?: string
+          tenant_id?: string
+          total_abertos?: number | null
+          total_cliques?: number | null
+          total_enviados?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_emails_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketing_emails_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -1220,6 +1436,85 @@ export type Database = {
         }
         Relationships: []
       }
+      proposals: {
+        Row: {
+          aceita_em: string | null
+          client_id: string | null
+          conteudo: Json | null
+          created_at: string
+          created_by: string
+          id: string
+          lead_id: string | null
+          status: string
+          tenant_id: string
+          titulo: string
+          token_aceite: string | null
+          updated_at: string
+          url_pdf: string | null
+          validade: string | null
+          valor: number | null
+          visualizada_em: string | null
+        }
+        Insert: {
+          aceita_em?: string | null
+          client_id?: string | null
+          conteudo?: Json | null
+          created_at?: string
+          created_by: string
+          id?: string
+          lead_id?: string | null
+          status?: string
+          tenant_id: string
+          titulo: string
+          token_aceite?: string | null
+          updated_at?: string
+          url_pdf?: string | null
+          validade?: string | null
+          valor?: number | null
+          visualizada_em?: string | null
+        }
+        Update: {
+          aceita_em?: string | null
+          client_id?: string | null
+          conteudo?: Json | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          lead_id?: string | null
+          status?: string
+          tenant_id?: string
+          titulo?: string
+          token_aceite?: string | null
+          updated_at?: string
+          url_pdf?: string | null
+          validade?: string | null
+          valor?: number | null
+          visualizada_em?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposals_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proposals_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proposals_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscriptions: {
         Row: {
           cancelada_em: string | null
@@ -1273,6 +1568,66 @@ export type Database = {
           },
           {
             foreignKeyName: "subscriptions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_tickets: {
+        Row: {
+          assignee_id: string | null
+          assunto: string
+          categoria: string | null
+          client_id: string | null
+          created_at: string
+          created_by: string
+          descricao: string | null
+          id: string
+          prioridade: string
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          assignee_id?: string | null
+          assunto: string
+          categoria?: string | null
+          client_id?: string | null
+          created_at?: string
+          created_by: string
+          descricao?: string | null
+          id?: string
+          prioridade?: string
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          assignee_id?: string | null
+          assunto?: string
+          categoria?: string | null
+          client_id?: string | null
+          created_at?: string
+          created_by?: string
+          descricao?: string | null
+          id?: string
+          prioridade?: string
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_tickets_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_tickets_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
