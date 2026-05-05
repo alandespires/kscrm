@@ -1549,7 +1549,22 @@ export type Database = {
           tipo?: string | null
           titulo?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "school_announcements_class_fk"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "school_classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "school_announcements_student_fk"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "school_students"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       school_assessments: {
         Row: {
@@ -1594,7 +1609,15 @@ export type Database = {
           titulo?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "school_assessments_class_fk"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "school_classes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       school_attendance: {
         Row: {
@@ -1627,7 +1650,22 @@ export type Database = {
           student_id?: string
           tenant_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "school_attendance_lesson_fk"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "school_lessons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "school_attendance_student_fk"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "school_students"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       school_classes: {
         Row: {
@@ -1675,7 +1713,22 @@ export type Database = {
           tenant_id?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "school_classes_course_fk"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "school_courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "school_classes_teacher_fk"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "school_teachers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       school_courses: {
         Row: {
@@ -1747,7 +1800,22 @@ export type Database = {
           student_id?: string
           tenant_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "school_enrollments_class_fk"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "school_classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "school_enrollments_student_fk"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "school_students"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       school_grades: {
         Row: {
@@ -1783,7 +1851,22 @@ export type Database = {
           tenant_id?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "school_grades_assessment_fk"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "school_assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "school_grades_student_fk"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "school_students"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       school_lessons: {
         Row: {
@@ -1825,7 +1908,22 @@ export type Database = {
           titulo?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "school_lessons_class_fk"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "school_classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "school_lessons_teacher_fk"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "school_teachers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       school_students: {
         Row: {
