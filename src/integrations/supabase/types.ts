@@ -1515,6 +1515,527 @@ export type Database = {
           },
         ]
       }
+      school_announcements: {
+        Row: {
+          class_id: string | null
+          created_at: string
+          created_by: string
+          id: string
+          mensagem: string
+          student_id: string | null
+          tenant_id: string
+          tipo: string | null
+          titulo: string
+        }
+        Insert: {
+          class_id?: string | null
+          created_at?: string
+          created_by: string
+          id?: string
+          mensagem: string
+          student_id?: string | null
+          tenant_id: string
+          tipo?: string | null
+          titulo: string
+        }
+        Update: {
+          class_id?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          mensagem?: string
+          student_id?: string | null
+          tenant_id?: string
+          tipo?: string | null
+          titulo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "school_announcements_class_fk"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "school_classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "school_announcements_student_fk"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "school_students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      school_assessments: {
+        Row: {
+          class_id: string
+          created_at: string
+          created_by: string
+          data: string | null
+          descricao: string | null
+          id: string
+          nota_maxima: number
+          peso: number
+          tenant_id: string
+          tipo: Database["public"]["Enums"]["school_assessment_type"]
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          class_id: string
+          created_at?: string
+          created_by: string
+          data?: string | null
+          descricao?: string | null
+          id?: string
+          nota_maxima?: number
+          peso?: number
+          tenant_id: string
+          tipo?: Database["public"]["Enums"]["school_assessment_type"]
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          class_id?: string
+          created_at?: string
+          created_by?: string
+          data?: string | null
+          descricao?: string | null
+          id?: string
+          nota_maxima?: number
+          peso?: number
+          tenant_id?: string
+          tipo?: Database["public"]["Enums"]["school_assessment_type"]
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "school_assessments_class_fk"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "school_classes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      school_attendance: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          lesson_id: string
+          observacao: string | null
+          status: Database["public"]["Enums"]["school_attendance_status"]
+          student_id: string
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          lesson_id: string
+          observacao?: string | null
+          status?: Database["public"]["Enums"]["school_attendance_status"]
+          student_id: string
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          lesson_id?: string
+          observacao?: string | null
+          status?: Database["public"]["Enums"]["school_attendance_status"]
+          student_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "school_attendance_lesson_fk"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "school_lessons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "school_attendance_student_fk"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "school_students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      school_classes: {
+        Row: {
+          ano: number | null
+          course_id: string
+          created_at: string
+          created_by: string
+          horario: string | null
+          id: string
+          nome: string
+          periodo: string | null
+          sala: string | null
+          status: Database["public"]["Enums"]["school_course_status"]
+          teacher_id: string | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          ano?: number | null
+          course_id: string
+          created_at?: string
+          created_by: string
+          horario?: string | null
+          id?: string
+          nome: string
+          periodo?: string | null
+          sala?: string | null
+          status?: Database["public"]["Enums"]["school_course_status"]
+          teacher_id?: string | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          ano?: number | null
+          course_id?: string
+          created_at?: string
+          created_by?: string
+          horario?: string | null
+          id?: string
+          nome?: string
+          periodo?: string | null
+          sala?: string | null
+          status?: Database["public"]["Enums"]["school_course_status"]
+          teacher_id?: string | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "school_classes_course_fk"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "school_courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "school_classes_teacher_fk"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "school_teachers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      school_courses: {
+        Row: {
+          carga_horaria: number | null
+          cor: string | null
+          created_at: string
+          created_by: string
+          descricao: string | null
+          id: string
+          nome: string
+          status: Database["public"]["Enums"]["school_course_status"]
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          carga_horaria?: number | null
+          cor?: string | null
+          created_at?: string
+          created_by: string
+          descricao?: string | null
+          id?: string
+          nome: string
+          status?: Database["public"]["Enums"]["school_course_status"]
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          carga_horaria?: number | null
+          cor?: string | null
+          created_at?: string
+          created_by?: string
+          descricao?: string | null
+          id?: string
+          nome?: string
+          status?: Database["public"]["Enums"]["school_course_status"]
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      school_enrollments: {
+        Row: {
+          class_id: string
+          created_at: string
+          fim: string | null
+          id: string
+          inicio: string
+          status: string
+          student_id: string
+          tenant_id: string
+        }
+        Insert: {
+          class_id: string
+          created_at?: string
+          fim?: string | null
+          id?: string
+          inicio?: string
+          status?: string
+          student_id: string
+          tenant_id: string
+        }
+        Update: {
+          class_id?: string
+          created_at?: string
+          fim?: string | null
+          id?: string
+          inicio?: string
+          status?: string
+          student_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "school_enrollments_class_fk"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "school_classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "school_enrollments_student_fk"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "school_students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      school_grades: {
+        Row: {
+          assessment_id: string
+          comentario: string | null
+          created_at: string
+          created_by: string
+          id: string
+          nota: number | null
+          student_id: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          assessment_id: string
+          comentario?: string | null
+          created_at?: string
+          created_by: string
+          id?: string
+          nota?: number | null
+          student_id: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          assessment_id?: string
+          comentario?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          nota?: number | null
+          student_id?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "school_grades_assessment_fk"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "school_assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "school_grades_student_fk"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "school_students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      school_lessons: {
+        Row: {
+          class_id: string
+          conteudo: string | null
+          created_at: string
+          created_by: string
+          data: string
+          id: string
+          observacoes: string | null
+          teacher_id: string | null
+          tenant_id: string
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          class_id: string
+          conteudo?: string | null
+          created_at?: string
+          created_by: string
+          data?: string
+          id?: string
+          observacoes?: string | null
+          teacher_id?: string | null
+          tenant_id: string
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          class_id?: string
+          conteudo?: string | null
+          created_at?: string
+          created_by?: string
+          data?: string
+          id?: string
+          observacoes?: string | null
+          teacher_id?: string | null
+          tenant_id?: string
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "school_lessons_class_fk"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "school_classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "school_lessons_teacher_fk"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "school_teachers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      school_students: {
+        Row: {
+          client_id: string | null
+          cpf: string | null
+          created_at: string
+          created_by: string
+          data_nascimento: string | null
+          email: string | null
+          endereco: string | null
+          id: string
+          matricula: string | null
+          nome: string
+          observacoes: string | null
+          responsavel_email: string | null
+          responsavel_nome: string | null
+          responsavel_telefone: string | null
+          status: string
+          telefone: string | null
+          tenant_id: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          client_id?: string | null
+          cpf?: string | null
+          created_at?: string
+          created_by: string
+          data_nascimento?: string | null
+          email?: string | null
+          endereco?: string | null
+          id?: string
+          matricula?: string | null
+          nome: string
+          observacoes?: string | null
+          responsavel_email?: string | null
+          responsavel_nome?: string | null
+          responsavel_telefone?: string | null
+          status?: string
+          telefone?: string | null
+          tenant_id: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          client_id?: string | null
+          cpf?: string | null
+          created_at?: string
+          created_by?: string
+          data_nascimento?: string | null
+          email?: string | null
+          endereco?: string | null
+          id?: string
+          matricula?: string | null
+          nome?: string
+          observacoes?: string | null
+          responsavel_email?: string | null
+          responsavel_nome?: string | null
+          responsavel_telefone?: string | null
+          status?: string
+          telefone?: string | null
+          tenant_id?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      school_teachers: {
+        Row: {
+          ativo: boolean
+          bio: string | null
+          created_at: string
+          created_by: string
+          disciplinas: string[] | null
+          email: string | null
+          id: string
+          nome: string
+          telefone: string | null
+          tenant_id: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          ativo?: boolean
+          bio?: string | null
+          created_at?: string
+          created_by: string
+          disciplinas?: string[] | null
+          email?: string | null
+          id?: string
+          nome: string
+          telefone?: string | null
+          tenant_id: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          ativo?: boolean
+          bio?: string | null
+          created_at?: string
+          created_by?: string
+          disciplinas?: string[] | null
+          email?: string | null
+          id?: string
+          nome?: string
+          telefone?: string | null
+          tenant_id?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       subscriptions: {
         Row: {
           cancelada_em: string | null
@@ -1877,6 +2398,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_school_student: {
+        Args: { _student_id: string; _user_id: string }
+        Returns: boolean
+      }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }
       is_tenant_admin: {
         Args: { _tenant_id: string; _user_id: string }
@@ -1979,6 +2504,18 @@ export type Database = {
         | "insight_ia"
         | "sistema"
       patient_status: "ativo" | "inativo" | "bloqueado"
+      school_assessment_type:
+        | "prova"
+        | "trabalho"
+        | "atividade"
+        | "participacao"
+        | "outro"
+      school_attendance_status:
+        | "presente"
+        | "falta"
+        | "justificada"
+        | "atrasado"
+      school_course_status: "ativo" | "inativo" | "arquivado"
       subscription_status:
         | "trial"
         | "ativo"
@@ -1988,7 +2525,7 @@ export type Database = {
       task_priority: "baixa" | "media" | "alta" | "urgente"
       task_status: "pendente" | "em_andamento" | "concluida" | "cancelada"
       tenant_role: "tenant_admin" | "tenant_user"
-      tenant_segmento: "geral" | "clinica"
+      tenant_segmento: "geral" | "clinica" | "escolar"
       tenant_status: "trial" | "ativo" | "suspenso" | "cancelado"
     }
     CompositeTypes: {
@@ -2203,6 +2740,20 @@ export const Constants = {
         "sistema",
       ],
       patient_status: ["ativo", "inativo", "bloqueado"],
+      school_assessment_type: [
+        "prova",
+        "trabalho",
+        "atividade",
+        "participacao",
+        "outro",
+      ],
+      school_attendance_status: [
+        "presente",
+        "falta",
+        "justificada",
+        "atrasado",
+      ],
+      school_course_status: ["ativo", "inativo", "arquivado"],
       subscription_status: [
         "trial",
         "ativo",
@@ -2213,7 +2764,7 @@ export const Constants = {
       task_priority: ["baixa", "media", "alta", "urgente"],
       task_status: ["pendente", "em_andamento", "concluida", "cancelada"],
       tenant_role: ["tenant_admin", "tenant_user"],
-      tenant_segmento: ["geral", "clinica"],
+      tenant_segmento: ["geral", "clinica", "escolar"],
       tenant_status: ["trial", "ativo", "suspenso", "cancelado"],
     },
   },

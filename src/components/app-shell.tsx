@@ -5,7 +5,7 @@ import {
   Stethoscope, Target, FileText, UserCircle, Building, History, Megaphone, Mail,
   Globe, LifeBuoy, BookOpen, MessageCircle, LineChart, ChevronDown, ChevronRight,
   PanelLeftClose, PanelLeftOpen, Home, ShoppingBag, HeartHandshake, BrainCircuit,
-  Briefcase, Cog,
+  Briefcase, Cog, GraduationCap, BookMarked, ClipboardList, CalendarCheck, Bell, IdCard,
 } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import { useAuth } from "@/contexts/auth-context";
@@ -15,8 +15,8 @@ import { useLeads } from "@/hooks/use-leads";
 import { AiCoachButton } from "@/components/ai-coach-panel";
 import { NotificationsPopover } from "@/components/notifications-popover";
 
-type NavItem = { to: string; label: string; icon: any; badge?: string; clinicOnly?: boolean };
-type NavGroup = { id: string; label: string; icon: any; items: NavItem[] };
+type NavItem = { to: string; label: string; icon: any; badge?: string; clinicOnly?: boolean; schoolOnly?: boolean };
+type NavGroup = { id: string; label: string; icon: any; items: NavItem[]; schoolOnly?: boolean };
 
 const NAV_GROUPS: NavGroup[] = [
   {
@@ -72,6 +72,21 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { to: "/tarefas", label: "Tarefas", icon: ListChecks },
       { to: "/financeiro", label: "Financeiro", icon: Wallet },
+    ],
+  },
+  {
+    id: "escolar", label: "KS Escolar", icon: GraduationCap, schoolOnly: true,
+    items: [
+      { to: "/escolar", label: "Visão geral", icon: LayoutDashboard, schoolOnly: true },
+      { to: "/escolar/cursos", label: "Cursos", icon: BookMarked, schoolOnly: true },
+      { to: "/escolar/turmas", label: "Turmas", icon: Users, schoolOnly: true },
+      { to: "/escolar/alunos", label: "Alunos", icon: GraduationCap, schoolOnly: true },
+      { to: "/escolar/professores", label: "Professores", icon: IdCard, schoolOnly: true },
+      { to: "/escolar/diario", label: "Diário de Classe", icon: ClipboardList, schoolOnly: true },
+      { to: "/escolar/avaliacoes", label: "Avaliações", icon: FileText, schoolOnly: true },
+      { to: "/escolar/frequencia", label: "Frequência", icon: CalendarCheck, schoolOnly: true },
+      { to: "/escolar/comunicacao", label: "Comunicação", icon: Bell, schoolOnly: true },
+      { to: "/escolar/configuracoes", label: "Configurações", icon: Cog, schoolOnly: true },
     ],
   },
   {
@@ -165,7 +180,8 @@ export function AppShell({ children, title, subtitle, action }: {
 
         <nav className="flex-1 space-y-0.5 overflow-y-auto px-2 py-3">
           {NAV_GROUPS.map((group) => {
-            const items = group.items.filter((i) => !i.clinicOnly || segmento === "clinica");
+            if (group.schoolOnly && segmento !== "escolar") return null;
+            const items = group.items.filter((i) => (!i.clinicOnly || segmento === "clinica") && (!i.schoolOnly || segmento === "escolar"));
             if (items.length === 0) return null;
             const open = isGroupOpen(group);
             const GIcon = group.icon;
