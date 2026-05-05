@@ -89,6 +89,8 @@ const NAV_GROUPS: NavGroup[] = [
       { to: "/escolar/configuracoes", label: "Configurações", icon: Cog, schoolOnly: true },
     ],
   },
+  {
+    id: "config", label: "Configurações", icon: Cog,
     items: [{ to: "/configuracoes", label: "Configurações", icon: Settings }],
   },
 ];
