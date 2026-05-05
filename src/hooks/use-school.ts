@@ -117,7 +117,7 @@ export function useClasses() {
         .eq("tenant_id", requireTenantId())
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return (data ?? []) as Klass[];
+      return (data ?? []) as unknown as Klass[];
     },
   });
 }
@@ -214,7 +214,7 @@ export function useEnrollments(classId: string | null) {
         .eq("class_id", classId!)
         .order("created_at");
       if (error) throw error;
-      return (data ?? []) as Enrollment[];
+      return (data ?? []) as unknown as Enrollment[];
     },
   });
 }
