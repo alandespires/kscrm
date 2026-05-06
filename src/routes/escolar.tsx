@@ -1,27 +1,12 @@
-import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
-import { GraduationCap, LayoutDashboard, CalendarRange, BookMarked, Users, IdCard, ClipboardList, FileText, CalendarCheck, Bell, Cog } from "lucide-react";
+import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { GraduationCap } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 
 export const Route = createFileRoute("/escolar")({
   component: EscolarLayout,
 });
 
-const SUB = [
-  { to: "/escolar", label: "Hoje", icon: LayoutDashboard, exact: true },
-  { to: "/escolar/mapa", label: "Mapa semanal", icon: CalendarRange },
-  { to: "/escolar/turmas", label: "Turmas", icon: Users },
-  { to: "/escolar/alunos", label: "Alunos", icon: GraduationCap },
-  { to: "/escolar/cursos", label: "Cursos", icon: BookMarked },
-  { to: "/escolar/professores", label: "Professores", icon: IdCard },
-  { to: "/escolar/diario", label: "Diário", icon: ClipboardList },
-  { to: "/escolar/avaliacoes", label: "Avaliações", icon: FileText },
-  { to: "/escolar/frequencia", label: "Frequência", icon: CalendarCheck },
-  { to: "/escolar/comunicacao", label: "Comunicação", icon: Bell },
-  { to: "/escolar/configuracoes", label: "Configurações", icon: Cog },
-];
-
 function EscolarLayout() {
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
   return (
     <AppShell
       title="KS Escolar"
@@ -33,25 +18,32 @@ function EscolarLayout() {
         </div>
       }
     >
-      <div className="mb-6 flex flex-wrap gap-1.5 rounded-xl border border-border bg-surface-1 p-1.5">
-        {SUB.map(({ to, label, icon: Icon, exact }) => {
-          const active = exact ? pathname === to : pathname.startsWith(to);
-          return (
-            <Link
-              key={to}
-              to={to as any}
-              className={[
-                "flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all",
-                active ? "bg-surface-3 text-foreground shadow-card" : "text-muted-foreground hover:bg-surface-2 hover:text-foreground",
-              ].join(" ")}
-            >
-              <Icon className={["h-4 w-4", active ? "text-primary" : ""].join(" ")} />
-              {label}
-            </Link>
-          );
-        })}
+      <div className="relative">
+        {/* Decoração de fundo do módulo — ambient gradient */}
+        <div
+          aria-hidden
+          className="pointer-events-none fixed inset-0 -z-10 overflow-hidden"
+        >
+          <div className="absolute -top-32 right-[-10%] h-[420px] w-[420px] rounded-full bg-primary/[0.07] blur-3xl" />
+          <div className="absolute top-1/3 left-[-15%] h-[380px] w-[380px] rounded-full bg-[oklch(0.62_0.18_280)]/[0.06] blur-3xl" />
+          <div
+            className="absolute inset-0 opacity-[0.025]"
+            style={{
+              backgroundImage:
+                "radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)",
+              backgroundSize: "24px 24px",
+            }}
+          />
+        </div>
+
+        {/* Container do módulo com borda/acento sutil */}
+        <div className="relative rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/[0.04] via-transparent to-[oklch(0.62_0.18_280)]/[0.04] p-1 shadow-card">
+          <div className="absolute inset-x-6 -top-px h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+          <div className="rounded-[1.4rem] bg-background/40 p-4 backdrop-blur-sm md:p-6">
+            <Outlet />
+          </div>
+        </div>
       </div>
-      <Outlet />
     </AppShell>
   );
 }
