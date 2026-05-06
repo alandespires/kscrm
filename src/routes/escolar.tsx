@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
-import { GraduationCap, LayoutDashboard, BookMarked, Users, IdCard, ClipboardList, FileText, CalendarCheck, Bell, Cog } from "lucide-react";
+import { GraduationCap, LayoutDashboard, CalendarRange, BookMarked, Users, IdCard, ClipboardList, FileText, CalendarCheck, Bell, Cog } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 
 export const Route = createFileRoute("/escolar")({
@@ -7,10 +7,11 @@ export const Route = createFileRoute("/escolar")({
 });
 
 const SUB = [
-  { to: "/escolar", label: "Visão geral", icon: LayoutDashboard, exact: true },
-  { to: "/escolar/cursos", label: "Cursos", icon: BookMarked },
+  { to: "/escolar", label: "Hoje", icon: LayoutDashboard, exact: true },
+  { to: "/escolar/mapa", label: "Mapa semanal", icon: CalendarRange },
   { to: "/escolar/turmas", label: "Turmas", icon: Users },
   { to: "/escolar/alunos", label: "Alunos", icon: GraduationCap },
+  { to: "/escolar/cursos", label: "Cursos", icon: BookMarked },
   { to: "/escolar/professores", label: "Professores", icon: IdCard },
   { to: "/escolar/diario", label: "Diário", icon: ClipboardList },
   { to: "/escolar/avaliacoes", label: "Avaliações", icon: FileText },
