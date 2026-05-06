@@ -462,6 +462,93 @@ export function useSchoolDashboard() {
   });
 }
 
+// ============== TEACHER DAY / ALERTS ==============
+const DAY_MAP: Record<number, string> = { 0: "dom", 1: "seg", 2: "ter", 3: "qua", 4: "qui", 5: "sex", 6: "sab" };
+const DAY_LABELS = ["dom", "seg", "ter", "qua", "qui", "sex", "sab"];
+
+function classMatchesDay(horario: string | null | undefined, dayIdx: number) {
+  if (!horario) return false;
+  const h = horario.toLowerCase();
+  const target = DAY_MAP[dayIdx];
+  // matches "seg", "segunda", "seg/qua", "seg, qua 19h" etc
+  return h.includes(target);
+}
+
+export function useTodayClasses() {
+  const { data: classes = [] } = useClasses();
+  const today = new Date().getDay();
+  return classes.filter((c) => classMatchesDay(c.horario, today));
+}
+
+export function useWeekMap() {
+  const { data: classes = [] } = useClasses();
+  return DAY_LABELS.map((label, idx) => ({
+    label,
+    idx,
+    classes: classes.filter((c) => classMatchesDay(c.horario, idx)),
+  }));
+}
+
+export function useTeacherAlerts() {
+  return useQuery({
+    queryKey: ["school-alerts", tid()],
+    enabled: !!tid(),
+    queryFn: async () => {
+      const tenantId = requireTenantId();
+      // Faltas por aluno (últimas 200)
+      const { data: att } = await supabase.from("school_attendance")
+        .select("student_id,status,lesson:school_lessons(class_id)")
+        .eq("tenant_id", tenantId).limit(500);
+      const counts = new Map<string, { faltas: number; total: number }>();
+      (att ?? []).forEach((r: any) => {
+        const cur = counts.get(r.student_id) ?? { faltas: 0, total: 0 };
+        cur.total++;
+        if (r.status === "falta") cur.faltas++;
+        counts.set(r.student_id, cur);
+      });
+      const riskIds = [...counts.entries()].filter(([, v]) => v.total >= 3 && v.faltas / v.total >= 0.25).map(([id]) => id);
+      let alunosRisco: any[] = [];
+      if (riskIds.length) {
+        const { data } = await supabase.from("school_students").select("id,nome").in("id", riskIds.slice(0, 10));
+        alunosRisco = (data ?? []).map((s: any) => ({ ...s, ...counts.get(s.id) }));
+      }
+      // Notas pendentes: avaliações com data passada e sem todas as notas
+      const { data: assess } = await supabase.from("school_assessments")
+        .select("id,titulo,class_id,data").eq("tenant_id", tenantId).lt("data", new Date().toISOString().slice(0,10)).limit(20);
+      const pendentes: any[] = [];
+      for (const a of assess ?? []) {
+        const [{ count: enrollC }, { count: gradeC }] = await Promise.all([
+          supabase.from("school_enrollments").select("id", { count: "exact", head: true }).eq("class_id", (a as any).class_id),
+          supabase.from("school_grades").select("id", { count: "exact", head: true }).eq("assessment_id", (a as any).id),
+        ]);
+        if ((enrollC ?? 0) > (gradeC ?? 0)) pendentes.push({ ...a, faltam: (enrollC ?? 0) - (gradeC ?? 0) });
+      }
+      return { alunosRisco, avaliacoesPendentes: pendentes.slice(0, 8) };
+    },
+  });
+}
+
+export function useClassStats(classId: string | null) {
+  return useQuery({
+    queryKey: ["school-class-stats", classId],
+    enabled: !!classId,
+    queryFn: async () => {
+      const [{ count: enrollC }, attRes, gradesRes] = await Promise.all([
+        supabase.from("school_enrollments").select("id", { count: "exact", head: true }).eq("class_id", classId!),
+        supabase.from("school_attendance").select("status,lesson:school_lessons!inner(class_id)").eq("lesson.class_id", classId!),
+        supabase.from("school_grades").select("nota,assessment:school_assessments!inner(class_id,nota_maxima)").eq("assessment.class_id", classId!),
+      ]);
+      const att = (attRes.data ?? []) as any[];
+      const presentes = att.filter((a) => a.status === "presente" || a.status === "atrasado").length;
+      const presencaPct = att.length ? Math.round((presentes / att.length) * 100) : null;
+      const grades = (gradesRes.data ?? []) as any[];
+      const notasNorm = grades.filter((g) => g.nota != null).map((g) => Number(g.nota) / Number(g.assessment?.nota_maxima ?? 10) * 10);
+      const media = notasNorm.length ? +(notasNorm.reduce((a, b) => a + b, 0) / notasNorm.length).toFixed(1) : null;
+      return { alunos: enrollC ?? 0, presencaPct, media };
+    },
+  });
+}
+
 // ============== STUDENT PORTAL ==============
 export function useMyStudentProfile() {
   const { user } = useAuth();
