@@ -42,6 +42,7 @@ import { Route as ClinicasIndexRouteImport } from './routes/clinicas.index'
 import { Route as TTenantSlugRouteImport } from './routes/t.$tenantSlug'
 import { Route as EscolarTurmasRouteImport } from './routes/escolar.turmas'
 import { Route as EscolarProfessoresRouteImport } from './routes/escolar.professores'
+import { Route as EscolarMapaRouteImport } from './routes/escolar.mapa'
 import { Route as EscolarFrequenciaRouteImport } from './routes/escolar.frequencia'
 import { Route as EscolarDiarioRouteImport } from './routes/escolar.diario'
 import { Route as EscolarCursosRouteImport } from './routes/escolar.cursos'
@@ -54,6 +55,7 @@ import { Route as ClinicasPacientesRouteImport } from './routes/clinicas.pacient
 import { Route as ClinicasConfiguracoesRouteImport } from './routes/clinicas.configuracoes'
 import { Route as ClinicasAgendaRouteImport } from './routes/clinicas.agenda'
 import { Route as TTenantSlugIndexRouteImport } from './routes/t.$tenantSlug.index'
+import { Route as EscolarTurmaClassIdRouteImport } from './routes/escolar.turma.$classId'
 
 const TicketsRoute = TicketsRouteImport.update({
   id: '/tickets',
@@ -220,6 +222,11 @@ const EscolarProfessoresRoute = EscolarProfessoresRouteImport.update({
   path: '/professores',
   getParentRoute: () => EscolarRoute,
 } as any)
+const EscolarMapaRoute = EscolarMapaRouteImport.update({
+  id: '/mapa',
+  path: '/mapa',
+  getParentRoute: () => EscolarRoute,
+} as any)
 const EscolarFrequenciaRoute = EscolarFrequenciaRouteImport.update({
   id: '/frequencia',
   path: '/frequencia',
@@ -280,6 +287,11 @@ const TTenantSlugIndexRoute = TTenantSlugIndexRouteImport.update({
   path: '/',
   getParentRoute: () => TTenantSlugRoute,
 } as any)
+const EscolarTurmaClassIdRoute = EscolarTurmaClassIdRouteImport.update({
+  id: '/turma/$classId',
+  path: '/turma/$classId',
+  getParentRoute: () => EscolarRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -321,11 +333,13 @@ export interface FileRoutesByFullPath {
   '/escolar/cursos': typeof EscolarCursosRoute
   '/escolar/diario': typeof EscolarDiarioRoute
   '/escolar/frequencia': typeof EscolarFrequenciaRoute
+  '/escolar/mapa': typeof EscolarMapaRoute
   '/escolar/professores': typeof EscolarProfessoresRoute
   '/escolar/turmas': typeof EscolarTurmasRoute
   '/t/$tenantSlug': typeof TTenantSlugRouteWithChildren
   '/clinicas/': typeof ClinicasIndexRoute
   '/escolar/': typeof EscolarIndexRoute
+  '/escolar/turma/$classId': typeof EscolarTurmaClassIdRoute
   '/t/$tenantSlug/': typeof TTenantSlugIndexRoute
 }
 export interface FileRoutesByTo {
@@ -366,10 +380,12 @@ export interface FileRoutesByTo {
   '/escolar/cursos': typeof EscolarCursosRoute
   '/escolar/diario': typeof EscolarDiarioRoute
   '/escolar/frequencia': typeof EscolarFrequenciaRoute
+  '/escolar/mapa': typeof EscolarMapaRoute
   '/escolar/professores': typeof EscolarProfessoresRoute
   '/escolar/turmas': typeof EscolarTurmasRoute
   '/clinicas': typeof ClinicasIndexRoute
   '/escolar': typeof EscolarIndexRoute
+  '/escolar/turma/$classId': typeof EscolarTurmaClassIdRoute
   '/t/$tenantSlug': typeof TTenantSlugIndexRoute
 }
 export interface FileRoutesById {
@@ -413,11 +429,13 @@ export interface FileRoutesById {
   '/escolar/cursos': typeof EscolarCursosRoute
   '/escolar/diario': typeof EscolarDiarioRoute
   '/escolar/frequencia': typeof EscolarFrequenciaRoute
+  '/escolar/mapa': typeof EscolarMapaRoute
   '/escolar/professores': typeof EscolarProfessoresRoute
   '/escolar/turmas': typeof EscolarTurmasRoute
   '/t/$tenantSlug': typeof TTenantSlugRouteWithChildren
   '/clinicas/': typeof ClinicasIndexRoute
   '/escolar/': typeof EscolarIndexRoute
+  '/escolar/turma/$classId': typeof EscolarTurmaClassIdRoute
   '/t/$tenantSlug/': typeof TTenantSlugIndexRoute
 }
 export interface FileRouteTypes {
@@ -462,11 +480,13 @@ export interface FileRouteTypes {
     | '/escolar/cursos'
     | '/escolar/diario'
     | '/escolar/frequencia'
+    | '/escolar/mapa'
     | '/escolar/professores'
     | '/escolar/turmas'
     | '/t/$tenantSlug'
     | '/clinicas/'
     | '/escolar/'
+    | '/escolar/turma/$classId'
     | '/t/$tenantSlug/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -507,10 +527,12 @@ export interface FileRouteTypes {
     | '/escolar/cursos'
     | '/escolar/diario'
     | '/escolar/frequencia'
+    | '/escolar/mapa'
     | '/escolar/professores'
     | '/escolar/turmas'
     | '/clinicas'
     | '/escolar'
+    | '/escolar/turma/$classId'
     | '/t/$tenantSlug'
   id:
     | '__root__'
@@ -553,11 +575,13 @@ export interface FileRouteTypes {
     | '/escolar/cursos'
     | '/escolar/diario'
     | '/escolar/frequencia'
+    | '/escolar/mapa'
     | '/escolar/professores'
     | '/escolar/turmas'
     | '/t/$tenantSlug'
     | '/clinicas/'
     | '/escolar/'
+    | '/escolar/turma/$classId'
     | '/t/$tenantSlug/'
   fileRoutesById: FileRoutesById
 }
@@ -826,6 +850,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EscolarProfessoresRouteImport
       parentRoute: typeof EscolarRoute
     }
+    '/escolar/mapa': {
+      id: '/escolar/mapa'
+      path: '/mapa'
+      fullPath: '/escolar/mapa'
+      preLoaderRoute: typeof EscolarMapaRouteImport
+      parentRoute: typeof EscolarRoute
+    }
     '/escolar/frequencia': {
       id: '/escolar/frequencia'
       path: '/frequencia'
@@ -910,6 +941,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TTenantSlugIndexRouteImport
       parentRoute: typeof TTenantSlugRoute
     }
+    '/escolar/turma/$classId': {
+      id: '/escolar/turma/$classId'
+      path: '/turma/$classId'
+      fullPath: '/escolar/turma/$classId'
+      preLoaderRoute: typeof EscolarTurmaClassIdRouteImport
+      parentRoute: typeof EscolarRoute
+    }
   }
 }
 
@@ -941,9 +979,11 @@ interface EscolarRouteChildren {
   EscolarCursosRoute: typeof EscolarCursosRoute
   EscolarDiarioRoute: typeof EscolarDiarioRoute
   EscolarFrequenciaRoute: typeof EscolarFrequenciaRoute
+  EscolarMapaRoute: typeof EscolarMapaRoute
   EscolarProfessoresRoute: typeof EscolarProfessoresRoute
   EscolarTurmasRoute: typeof EscolarTurmasRoute
   EscolarIndexRoute: typeof EscolarIndexRoute
+  EscolarTurmaClassIdRoute: typeof EscolarTurmaClassIdRoute
 }
 
 const EscolarRouteChildren: EscolarRouteChildren = {
@@ -954,9 +994,11 @@ const EscolarRouteChildren: EscolarRouteChildren = {
   EscolarCursosRoute: EscolarCursosRoute,
   EscolarDiarioRoute: EscolarDiarioRoute,
   EscolarFrequenciaRoute: EscolarFrequenciaRoute,
+  EscolarMapaRoute: EscolarMapaRoute,
   EscolarProfessoresRoute: EscolarProfessoresRoute,
   EscolarTurmasRoute: EscolarTurmasRoute,
   EscolarIndexRoute: EscolarIndexRoute,
+  EscolarTurmaClassIdRoute: EscolarTurmaClassIdRoute,
 }
 
 const EscolarRouteWithChildren =
