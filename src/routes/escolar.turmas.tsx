@@ -145,7 +145,7 @@ function Page() {
         setEditing={setEditing}
         courses={courses}
         teachers={teachers}
-        onSave={(payload) => upsert.mutateAsync(payload).then(() => setOpen(false))}
+        onSave={(payload: any) => upsert.mutateAsync(payload).then(() => setOpen(false))}
       />
 
       <EnrollDialog classId={enrollClassId} onClose={() => setEnrollClassId(null)} />
