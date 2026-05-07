@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
-import { useMyStudentProfile, useStudentGrades, useStudentAttendance, useAnnouncements, useClasses, useEnrollments } from "@/hooks/use-school";
+import { useMyStudentProfile, useStudentGrades, useStudentAttendance, useAnnouncements } from "@/hooks/use-school";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { AppShell } from "@/components/app-shell";
-import { GraduationCap, BookOpen, CalendarCheck, Bell, CalendarDays, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
+import { GraduationCap, BookOpen, CalendarCheck, Bell, CalendarDays, CheckCircle2, XCircle } from "lucide-react";
 
 export const Route = createFileRoute("/portal-aluno")({ component: Portal });
 
