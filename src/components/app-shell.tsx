@@ -215,10 +215,16 @@ export function AppShell({ children, title, subtitle, action }: {
                 ) : (
                   <button
                     onClick={() => toggleGroup(group.id)}
-                    className="flex w-full items-center gap-2 rounded-md px-3 py-1.5 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/70 transition hover:text-foreground"
+                    className={[
+                      "flex w-full items-center gap-2 rounded-md px-3 py-1.5 text-[10px] font-semibold uppercase tracking-widest transition",
+                      group.schoolOnly
+                        ? "text-primary hover:text-primary"
+                        : "text-muted-foreground/70 hover:text-foreground",
+                    ].join(" ")}
                   >
-                    <GIcon className="h-3 w-3" />
+                    <GIcon className={`h-3 w-3 ${group.schoolOnly ? "text-primary" : ""}`} />
                     <span className="flex-1 text-left">{group.label}</span>
+                    {group.schoolOnly && <span className="rounded-full bg-primary/15 px-1.5 py-0.5 text-[8px] font-bold text-primary">EDU</span>}
                     {open ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
                   </button>
                 )}
