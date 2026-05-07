@@ -286,3 +286,33 @@
     border-bottom: 1px solid oklch(0.22 0 0);
   }
 }
+
+/* =========================================================
+ * KS ESCOLAR — Tema escopado (não afeta o restante do CRM)
+ * Aplicado via .ks-escolar-theme no wrapper do módulo.
+ * ========================================================= */
+.ks-escolar-theme {
+  --background: oklch(0.14 0.008 50);
+  --surface-1: oklch(0.18 0.008 50);
+  --surface-2: oklch(0.215 0.009 50);
+  --surface-3: oklch(0.26 0.01 50);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.2 0.008 50);
+  --card-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.72 0.2 50);             /* laranja KS mais vibrante */
+  --primary-foreground: oklch(0.12 0 0);
+  --accent: oklch(0.78 0.16 80);             /* âmbar */
+  --accent-foreground: oklch(0.12 0 0);
+  --border: oklch(0.32 0.012 50);
+  --input: oklch(0.26 0.01 50);
+  --ring: oklch(0.72 0.2 50);
+  --muted: oklch(0.24 0.009 50);
+  --muted-foreground: oklch(0.74 0.01 50);
+  --shadow-card: 0 1px 0 0 oklch(1 0 0 / 0.05) inset, 0 12px 32px -16px oklch(0 0 0 / 0.7);
+  --shadow-glow: 0 0 0 1px oklch(0.72 0.2 50 / 0.35), 0 8px 32px -8px oklch(0.72 0.2 50 / 0.5);
+}
+.ks-escolar-theme {
+  background-color: var(--background);
+  color: var(--foreground);
+  border-radius: 1.5rem;
+}
