@@ -514,6 +514,7 @@ function prioCls(p?: string) {
     case "baixa": return "bg-muted text-muted-foreground";
     default: return "bg-primary/15 text-primary";
   }
+}
 
 function NewAssessmentButton({ classId, onCreated }: { classId: string; onCreated: (id: string) => void }) {
   const [open, setOpen] = useState(false);
