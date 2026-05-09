@@ -10,12 +10,17 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Check, X, Clock, FileWarning, ArrowLeft, Plus, CheckCheck, Save,
   CalendarDays, ListChecks, Layers, GraduationCap, ChevronRight, Lock, CircleDot,
+  Search, Filter, Download, Sparkles, Loader2, AlertTriangle,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useSchoolSettings } from "@/hooks/use-school-settings";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/escolar/turma/$classId")({ component: ClassConsole });
@@ -106,8 +111,8 @@ function Stat({ label, value, accent = "text-foreground" }: { label: string; val
 function RollCallBoard({ classId, enrollments, lessons }: any) {
   const upsertLesson = useUpsertLesson();
   const today = new Date().toISOString().slice(0, 10);
+  const { settings } = useSchoolSettings();
 
-  // Aula ativa: hoje, ou a mais recente, ou cria automaticamente uma rascunho ao salvar
   const initialLesson = useMemo(() => lessons.find((l: any) => l.data === today) ?? lessons[0], [lessons, today]);
   const [lessonId, setLessonId] = useState<string | null>(initialLesson?.id ?? null);
   useEffect(() => { if (!lessonId && initialLesson) setLessonId(initialLesson.id); }, [initialLesson, lessonId]);
@@ -123,15 +128,18 @@ function RollCallBoard({ classId, enrollments, lessons }: any) {
   const setAtt = useSetAttendance();
   const map = useMemo(() => new Map(attendance.map((a: any) => [a.student_id, a.status])), [attendance]);
 
-  // Avaliações para input rápido de nota
   const { data: assessments = [] } = useAssessments(classId);
-  const upsertA = useUpsertAssessment();
   const [assessmentId, setAssessmentId] = useState<string>("");
   useEffect(() => { if (!assessmentId && assessments[0]) setAssessmentId(assessments[0].id); }, [assessments, assessmentId]);
   const { data: grades = [] } = useGrades(assessmentId || null);
   const setGrade = useSetGrade();
   const gMap = useMemo(() => new Map(grades.map((g: any) => [g.student_id, g.nota])), [grades]);
   const currentA = assessments.find((a) => a.id === assessmentId);
+
+  // Busca + filtros
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"todos" | "presente" | "atrasado" | "falta" | "justificada" | "sem_marcar">("todos");
+  const [notaFilter, setNotaFilter] = useState<"todos" | "sem_nota" | "abaixo" | "ok">("todos");
 
   const ensureLesson = async () => {
     if (lessonId) return lessonId;
@@ -159,15 +167,80 @@ function RollCallBoard({ classId, enrollments, lessons }: any) {
     toast.success("Aula finalizada — registros salvos");
   };
 
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    const limiteNota = (currentA?.nota_maxima ?? 10) * (settings.mediaMinima / 10);
+    return enrollments.filter((e: any) => {
+      if (q && !(e.student?.nome ?? "").toLowerCase().includes(q) && !(e.student?.matricula ?? "").toLowerCase().includes(q)) return false;
+      const cur = map.get(e.student_id);
+      if (statusFilter === "sem_marcar" && cur) return false;
+      if (statusFilter !== "todos" && statusFilter !== "sem_marcar" && cur !== statusFilter) return false;
+      const note = gMap.get(e.student_id);
+      if (notaFilter === "sem_nota" && note != null) return false;
+      if (notaFilter === "abaixo" && (note == null || Number(note) >= limiteNota)) return false;
+      if (notaFilter === "ok" && (note == null || Number(note) < limiteNota)) return false;
+      return true;
+    });
+  }, [enrollments, search, statusFilter, notaFilter, map, gMap, currentA, settings.mediaMinima]);
+
   const counts = useMemo(() => {
     const c: Record<string, number> = { presente: 0, atrasado: 0, falta: 0, justificada: 0 };
     map.forEach((v) => { if (v && c[v as string] != null) c[v as string]++; });
     return c;
   }, [map]);
 
+  // Exportações
+  function exportCSV() {
+    const lessonInfo = lessons.find((l: any) => l.id === lessonId);
+    const rows: string[] = [];
+    rows.push(["Matricula", "Aluno", "Presenca", currentA ? `Nota (${currentA.titulo})` : "Nota"].join(";"));
+    for (const e of filtered) {
+      rows.push([
+        e.student?.matricula ?? "",
+        `"${(e.student?.nome ?? "").replace(/"/g, '""')}"`,
+        map.get(e.student_id) ?? "",
+        gMap.get(e.student_id) ?? "",
+      ].join(";"));
+    }
+    const blob = new Blob(["\ufeff" + rows.join("\n")], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `chamada_${lessonInfo?.data ?? today}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function exportPDF() {
+    const lessonInfo = lessons.find((l: any) => l.id === lessonId);
+    const rowsHtml = filtered.map((e: any) => `
+      <tr>
+        <td>${e.student?.matricula ?? ""}</td>
+        <td>${escapeHtml(e.student?.nome ?? "")}</td>
+        <td>${escapeHtml(STATUSES.find((s) => s.v === map.get(e.student_id))?.title ?? "—")}</td>
+        <td>${gMap.get(e.student_id) ?? "—"}${currentA ? ` / ${currentA.nota_maxima}` : ""}</td>
+      </tr>`).join("");
+    const html = `<!doctype html><html><head><meta charset="utf-8"><title>Chamada</title>
+      <style>
+        body{font-family:Arial,sans-serif;padding:24px;color:#111}
+        h1{font-size:20px;margin:0 0 4px} .meta{color:#555;margin-bottom:16px;font-size:12px}
+        table{width:100%;border-collapse:collapse} th,td{border:1px solid #ddd;padding:8px;font-size:12px;text-align:left}
+        th{background:#f5f5f5}
+      </style></head><body>
+      <h1>Chamada — ${escapeHtml(lessonInfo?.titulo ?? "Aula")}</h1>
+      <div class="meta">Data: ${lessonInfo?.data ?? today} · Avaliação: ${escapeHtml(currentA?.titulo ?? "—")}</div>
+      <table><thead><tr><th>Mat.</th><th>Aluno</th><th>Presença</th><th>Nota</th></tr></thead>
+      <tbody>${rowsHtml}</tbody></table>
+      <script>window.onload=()=>window.print()</script>
+      </body></html>`;
+    const w = window.open("", "_blank");
+    if (!w) return toast.error("Permita pop-ups para exportar PDF");
+    w.document.write(html); w.document.close();
+  }
+
   return (
     <section className="space-y-4">
-      {/* Toolbar */}
+      {/* Toolbar superior */}
       <div className="ks-card flex flex-wrap items-center gap-3 p-3">
         <div className="flex items-center gap-2">
           <Label className="text-[11px] font-semibold uppercase text-muted-foreground">Aula</Label>
@@ -194,6 +267,17 @@ function RollCallBoard({ classId, enrollments, lessons }: any) {
 
         <div className="ml-auto flex items-center gap-2">
           <Button size="sm" variant="outline" onClick={markAllPresent}><CheckCheck className="h-4 w-4" /> Todos presentes</Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button size="sm" variant="outline"><Download className="h-4 w-4" /> Exportar</Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Chamada da aula</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={exportCSV}><Download className="h-4 w-4" /> CSV (planilha)</DropdownMenuItem>
+              <DropdownMenuItem onClick={exportPDF}><Download className="h-4 w-4" /> PDF (impressão)</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <Button size="sm" onClick={finalizar} disabled={finalizado}>
             {finalizado ? <><Lock className="h-4 w-4" /> Finalizada</> : <><Save className="h-4 w-4" /> Finalizar aula</>}
           </Button>
@@ -217,6 +301,40 @@ function RollCallBoard({ classId, enrollments, lessons }: any) {
         {currentA && <div className="text-xs text-muted-foreground">Tipo: <strong>{currentA.tipo}</strong> · Peso {currentA.peso}</div>}
       </div>
 
+      {/* Sugestões IA */}
+      <AISuggestionsPanel classId={classId} faltaPctLimite={settings.faltaPctLimite} mediaMinima={settings.mediaMinima} />
+
+      {/* Busca + filtros */}
+      <div className="ks-card flex flex-wrap items-center gap-2 p-3">
+        <div className="relative min-w-[220px] flex-1">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar aluno por nome ou matrícula..." className="pl-9" />
+        </div>
+        <div className="flex items-center gap-2">
+          <Filter className="h-4 w-4 text-muted-foreground" />
+          <select className="h-9 rounded-md border border-input bg-input px-2 text-sm" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as any)}>
+            <option value="todos">Todos os status</option>
+            <option value="sem_marcar">Sem marcação</option>
+            <option value="presente">Presentes</option>
+            <option value="atrasado">Atrasados</option>
+            <option value="falta">Faltosos</option>
+            <option value="justificada">Justificadas</option>
+          </select>
+          <select className="h-9 rounded-md border border-input bg-input px-2 text-sm" value={notaFilter} onChange={(e) => setNotaFilter(e.target.value as any)}>
+            <option value="todos">Todas as notas</option>
+            <option value="sem_nota">Sem nota</option>
+            <option value="abaixo">Abaixo da média ({settings.mediaMinima})</option>
+            <option value="ok">No alvo ou acima</option>
+          </select>
+          {(search || statusFilter !== "todos" || notaFilter !== "todos") && (
+            <Button size="sm" variant="ghost" onClick={() => { setSearch(""); setStatusFilter("todos"); setNotaFilter("todos"); }}>
+              Limpar
+            </Button>
+          )}
+        </div>
+        <div className="ml-auto text-xs text-muted-foreground">{filtered.length} de {enrollments.length} aluno(s)</div>
+      </div>
+
       {/* Lista de alunos */}
       <div className="ks-card overflow-hidden">
         <div className="grid grid-cols-[1fr_auto_auto] gap-3 border-b border-border bg-surface-1 px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -225,8 +343,8 @@ function RollCallBoard({ classId, enrollments, lessons }: any) {
           <span className="text-right">Nota</span>
         </div>
         <ul className="divide-y divide-border">
-          {enrollments.length === 0 && <li className="p-6 text-center text-sm text-muted-foreground">Sem alunos matriculados nesta turma.</li>}
-          {enrollments.map((e: any, idx: number) => {
+          {filtered.length === 0 && <li className="p-6 text-center text-sm text-muted-foreground">{enrollments.length === 0 ? "Sem alunos matriculados nesta turma." : "Nenhum aluno corresponde aos filtros."}</li>}
+          {filtered.map((e: any) => {
             const cur = map.get(e.student_id);
             const note = gMap.get(e.student_id);
             return (
@@ -296,6 +414,106 @@ function RollCallBoard({ classId, enrollments, lessons }: any) {
       </Dialog>
     </section>
   );
+}
+
+function escapeHtml(s: string) {
+  return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
+}
+
+/* ============ SUGESTÕES IA (coordenadora pedagógica) ============ */
+function AISuggestionsPanel({ classId, faltaPctLimite, mediaMinima }: { classId: string; faltaPctLimite: number; mediaMinima: number }) {
+  const [open, setOpen] = useState(false);
+  const [data, setData] = useState<any | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  async function run() {
+    setLoading(true);
+    try {
+      const { data: res, error } = await supabase.functions.invoke("school-ai-suggestions", {
+        body: { class_id: classId, faltaPctLimite, mediaMinima },
+      });
+      if (error) throw error;
+      if ((res as any)?.error) {
+        if ((res as any).error === "rate_limited") toast.error("Muitas chamadas — aguarde alguns segundos.");
+        else if ((res as any).error === "credits_exhausted") toast.error("Sem créditos de IA disponíveis.");
+        else toast.error("A IA não conseguiu responder agora.");
+        return;
+      }
+      setData(res);
+      setOpen(true);
+    } catch (e: any) {
+      toast.error(e.message ?? "Erro ao consultar IA");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="ks-card flex flex-wrap items-center gap-3 border-primary/30 bg-gradient-to-r from-primary/[0.07] via-transparent to-accent/[0.06] p-3">
+      <div className="grid h-9 w-9 place-items-center rounded-lg bg-primary/15 text-primary">
+        <Sparkles className="h-4 w-4" />
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="text-sm font-semibold">Sugestões da IA</div>
+        <div className="text-xs text-muted-foreground">Identifique alunos em risco e receba próximos passos pedagógicos.</div>
+      </div>
+      <Button size="sm" onClick={run} disabled={loading}>
+        {loading ? <><Loader2 className="h-4 w-4 animate-spin" /> Analisando...</> : <><Sparkles className="h-4 w-4" /> Analisar turma</>}
+      </Button>
+
+      {open && data && (
+        <div className="mt-2 w-full space-y-3 border-t border-border pt-3">
+          {data.resumo && (
+            <p className="rounded-lg bg-surface-1 p-3 text-sm">{data.resumo}</p>
+          )}
+          {Array.isArray(data.alunos_risco) && data.alunos_risco.length > 0 && (
+            <div>
+              <div className="mb-2 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-warning">
+                <AlertTriangle className="h-3.5 w-3.5" /> Alunos em risco
+              </div>
+              <ul className="space-y-2">
+                {data.alunos_risco.map((a: any, i: number) => (
+                  <li key={i} className="rounded-lg border border-border bg-surface-1 p-3 text-sm">
+                    <div className="font-semibold">{a.nome}</div>
+                    {a.motivo && <div className="text-xs text-muted-foreground">{a.motivo}</div>}
+                    {a.acao && <div className="mt-1 text-xs"><strong>Próximo passo:</strong> {a.acao}</div>}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {Array.isArray(data.recomendacoes) && data.recomendacoes.length > 0 && (
+            <div>
+              <div className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-primary">Recomendações pedagógicas</div>
+              <ul className="grid gap-2 sm:grid-cols-2">
+                {data.recomendacoes.map((r: any, i: number) => (
+                  <li key={i} className="rounded-lg border border-border bg-surface-1 p-3 text-sm">
+                    <div className="flex items-center gap-2">
+                      <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide ${prioCls(r.prioridade)}`}>{r.prioridade ?? "media"}</span>
+                      <span className="font-semibold">{r.titulo}</span>
+                    </div>
+                    {r.descricao && <p className="mt-1 text-xs text-muted-foreground">{r.descricao}</p>}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          <div className="text-right">
+            <Button size="sm" variant="ghost" onClick={() => setOpen(false)}>Fechar análise</Button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function prioCls(p?: string) {
+  switch (p) {
+    case "urgente": return "bg-destructive/15 text-destructive";
+    case "alta": return "bg-warning/15 text-warning";
+    case "baixa": return "bg-muted text-muted-foreground";
+    default: return "bg-primary/15 text-primary";
+  }
 }
 
 function NewAssessmentButton({ classId, onCreated }: { classId: string; onCreated: (id: string) => void }) {

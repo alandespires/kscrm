@@ -495,7 +495,14 @@ export function useTeacherAlerts() {
     enabled: !!tid(),
     queryFn: async () => {
       const tenantId = requireTenantId();
-      // Faltas por aluno (últimas 200)
+      // Lê configurações de alertas (localStorage)
+      let cfg = { faltaPctLimite: 25, minAulasParaRisco: 3, diasParaNotaPendente: 0 };
+      try {
+        const raw = typeof window !== "undefined" ? localStorage.getItem("ks-escolar-settings") : null;
+        if (raw) cfg = { ...cfg, ...JSON.parse(raw) };
+      } catch {}
+      const limite = cfg.faltaPctLimite / 100;
+      // Faltas por aluno (últimas 500)
       const { data: att } = await supabase.from("school_attendance")
         .select("student_id,status,lesson:school_lessons(class_id)")
         .eq("tenant_id", tenantId).limit(500);
@@ -506,15 +513,16 @@ export function useTeacherAlerts() {
         if (r.status === "falta") cur.faltas++;
         counts.set(r.student_id, cur);
       });
-      const riskIds = [...counts.entries()].filter(([, v]) => v.total >= 3 && v.faltas / v.total >= 0.25).map(([id]) => id);
+      const riskIds = [...counts.entries()].filter(([, v]) => v.total >= cfg.minAulasParaRisco && v.faltas / v.total >= limite).map(([id]) => id);
       let alunosRisco: any[] = [];
       if (riskIds.length) {
         const { data } = await supabase.from("school_students").select("id,nome").in("id", riskIds.slice(0, 10));
         alunosRisco = (data ?? []).map((s: any) => ({ ...s, ...counts.get(s.id) }));
       }
-      // Notas pendentes: avaliações com data passada e sem todas as notas
+      // Notas pendentes: avaliações com data passada (+ N dias de tolerância) e sem todas as notas
+      const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - cfg.diasParaNotaPendente);
       const { data: assess } = await supabase.from("school_assessments")
-        .select("id,titulo,class_id,data").eq("tenant_id", tenantId).lt("data", new Date().toISOString().slice(0,10)).limit(20);
+        .select("id,titulo,class_id,data").eq("tenant_id", tenantId).lt("data", cutoff.toISOString().slice(0,10)).limit(20);
       const pendentes: any[] = [];
       for (const a of assess ?? []) {
         const [{ count: enrollC }, { count: gradeC }] = await Promise.all([
