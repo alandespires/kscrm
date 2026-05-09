@@ -514,7 +514,8 @@ function prioCls(p?: string) {
     case "baixa": return "bg-muted text-muted-foreground";
     default: return "bg-primary/15 text-primary";
   }
-}
+
+function NewAssessmentButton({ classId, onCreated }: { classId: string; onCreated: (id: string) => void }) {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ titulo: "", tipo: "prova", peso: 1, nota_maxima: 10, data: new Date().toISOString().slice(0,10) });
   const upsertA = useUpsertAssessment();
