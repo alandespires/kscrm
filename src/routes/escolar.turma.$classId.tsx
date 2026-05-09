@@ -10,12 +10,17 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Check, X, Clock, FileWarning, ArrowLeft, Plus, CheckCheck, Save,
   CalendarDays, ListChecks, Layers, GraduationCap, ChevronRight, Lock, CircleDot,
+  Search, Filter, Download, Sparkles, Loader2, AlertTriangle,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useSchoolSettings } from "@/hooks/use-school-settings";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/escolar/turma/$classId")({ component: ClassConsole });
